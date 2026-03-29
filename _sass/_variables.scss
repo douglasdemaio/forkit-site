@@ -1,0 +1,25 @@
+// ── Design Tokens ──────────────────────────────────────────────
+$bg:       #0a0a0a;
+$surface:  #111111;
+$surface2: #1a1a1a;
+$border:   #222222;
+$dim:      #333333;
+$muted:    #666666;
+
+$accent:   #ff6b35;   // orange
+$accent2:  #14f195;   // solana green
+$sol:      #9945ff;   // solana purple
+$text:     #f0ede8;
+
+// ── Typography ──────────────────────────────────────────────────
+$font-display: 'Syne', sans-serif;
+$font-mono:    'DM Mono', monospace;
+$font-body:    'DM Sans', sans-serif;
+
+// ── Spacing ─────────────────────────────────────────────────────
+$section-pad-v: 100px;
+$section-pad-h: 48px;
+
+// ── Breakpoints ──────────────────────────────────────────────────
+$bp-md: 900px;
+$bp-sm: 600px;

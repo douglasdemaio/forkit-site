@@ -1,0 +1,65 @@
+// ── Responsive ───────────────────────────────────────────────────
+@media (max-width: $bp-md) {
+  nav {
+    padding: 16px 24px;
+
+    ul { display: none; }
+
+    .nav-mobile-toggle {
+      display: flex;
+    }
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 100px 24px 60px;
+  }
+
+  .hero-right { display: none; }
+
+  .hero-stats { gap: 24px; }
+
+  section { padding: 64px 24px; }
+
+  .how-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .roles-grid { grid-template-columns: 1fr; }
+
+  .split-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .arch-diagram { grid-template-columns: 1fr; }
+
+  .tokens-grid { grid-template-columns: 1fr; }
+
+  footer {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 32px 24px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .programs-table {
+    font-size: 0.75rem;
+
+    .prog-id { font-size: 0.62rem; }
+  }
+}
+
+@media (max-width: $bp-sm) {
+  h1 { font-size: 2.8rem; }
+
+  .hero-stats { flex-direction: column; gap: 20px; }
+
+  .cta-section { padding: 80px 24px; }
+}
