@@ -51,8 +51,23 @@ nav ul {
     color: $muted;
     text-decoration: none;
     transition: color 0.2s;
+    position: relative;
 
-    &:hover { color: $text; }
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: $accent;
+      transition: width 0.25s ease;
+    }
+
+    &:hover {
+      color: $text;
+      &::after { width: 100%; }
+    }
   }
 }
 
@@ -62,9 +77,13 @@ nav ul {
   padding: 8px 20px;
   border-radius: 2px;
   font-weight: 500;
-  transition: background 0.2s !important;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s !important;
 
-  &:hover { background: lighten($accent, 10%) !important; }
+  &:hover {
+    background: lighten($accent, 10%) !important;
+    box-shadow: 0 0 20px rgba($accent, 0.4);
+    transform: translateY(-1px);
+  }
 }
 
 // Mobile toggle button

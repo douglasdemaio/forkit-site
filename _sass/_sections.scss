@@ -3,6 +3,17 @@
   background: $surface;
   border-top: 1px solid $border;
   border-bottom: 1px solid $border;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba($accent, 0.3), rgba($sol, 0.2), transparent);
+  }
 }
 
 .how-inner {
@@ -34,10 +45,17 @@
   padding: 24px 0;
   position: relative;
   cursor: none;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, transform 0.3s;
 
-  &:hover { opacity: 0.85; }
-  &:hover .step-num { border-color: $accent; color: $accent; }
+  &:hover {
+    opacity: 0.85;
+    transform: translateX(4px);
+  }
+  &:hover .step-num {
+    border-color: $accent;
+    color: $accent;
+    box-shadow: 0 0 16px rgba($accent, 0.3);
+  }
 }
 
 .step-num {
@@ -54,7 +72,7 @@
   color: $muted;
   position: relative;
   z-index: 1;
-  transition: border-color 0.3s, color 0.3s;
+  transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
 }
 
 .step-title {
@@ -82,6 +100,12 @@
   color: #555;
   position: relative;
   overflow: hidden;
+  transition: border-color 0.4s, box-shadow 0.4s;
+
+  &:hover {
+    border-color: rgba($sol, 0.3);
+    box-shadow: 0 0 40px rgba($sol, 0.06);
+  }
 
   &::before {
     content: '// live escrow model';
@@ -89,6 +113,17 @@
     top: 12px; right: 16px;
     font-size: 0.65rem;
     color: $dim;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba($sol, 0.03), transparent);
+    animation: shimmer 8s ease-in-out infinite;
   }
 }
 
@@ -110,10 +145,13 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, $accent 0%, $accent2 100%);
+  background: linear-gradient(90deg, $accent 0%, $sol 50%, $accent2 100%);
+  background-size: 200% 100%;
   border-radius: 2px;
   width: 0%;
   transition: width 1.5s ease;
+  animation: gradientShift 3s ease infinite;
+  box-shadow: 0 0 8px rgba($accent, 0.4);
 }
 
 // ── Roles ─────────────────────────────────────────────────────────
@@ -129,7 +167,7 @@
 .role-card {
   background: $bg;
   padding: 40px 32px;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.3s;
   cursor: none;
   position: relative;
   overflow: hidden;
@@ -140,17 +178,25 @@
     inset: 0;
     background: radial-gradient(ellipse at 50% 0%, var(--card-color, rgba(255,107,53,0.06)) 0%, transparent 60%);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.4s;
   }
 
   &:hover::before { opacity: 1; }
-  &:hover { background: #0f0f0f; }
+  &:hover {
+    background: #0f0f0f;
+    transform: translateY(-4px);
+  }
 }
 
 .role-emoji {
   font-size: 2.4rem;
   margin-bottom: 16px;
   display: block;
+  transition: transform 0.3s;
+
+  .role-card:hover & {
+    transform: scale(1.15) rotate(-5deg);
+  }
 }
 
 .role-name {
@@ -210,6 +256,12 @@
   padding: 28px;
   font-family: $font-mono;
   font-size: 0.78rem;
+  transition: border-color 0.4s, box-shadow 0.4s;
+
+  &:hover {
+    border-color: rgba($accent2, 0.25);
+    box-shadow: 0 0 40px rgba($accent2, 0.06);
+  }
 }
 
 .split-title {
@@ -323,6 +375,7 @@
     border-radius: 50%;
     background: var(--dot-color, #{$accent});
     animation: pulse 2s infinite;
+    box-shadow: 0 0 12px var(--dot-color, #{$accent});
   }
 }
 
@@ -332,6 +385,13 @@
   border-radius: 3px;
   padding: 12px 14px;
   margin-bottom: 8px;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    border-color: rgba(255,255,255,0.08);
+    transform: translateX(3px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
 }
 
 .arch-item-name {
@@ -370,6 +430,10 @@
 
   thead tr { border-bottom: 1px solid $border; }
 
+  tbody tr {
+    transition: background 0.2s;
+    &:hover { background: rgba(255,255,255,0.015); }
+
   th {
     font-family: $font-mono;
     font-size: 0.68rem;
@@ -389,10 +453,16 @@
   tr:last-child td { border: none; }
 }
 
+
 .prog-name {
   font-family: $font-mono;
   font-size: 0.82rem;
   color: $accent;
+  transition: text-shadow 0.3s;
+
+  tr:hover & {
+    text-shadow: 0 0 8px rgba($accent, 0.4);
+  }
 }
 
 .prog-id {
@@ -430,10 +500,14 @@
   align-items: flex-start;
   gap: 16px;
   background: $bg;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
   cursor: none;
 
-  &:hover { border-color: $muted; }
+  &:hover {
+    border-color: $muted;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
 }
 
 .token-logo {
@@ -446,9 +520,22 @@
   flex-shrink: 0;
   font-weight: 700;
   font-family: $font-display;
+  transition: transform 0.3s, box-shadow 0.3s;
 
-  &.usdc { background: rgba(39,117,202,0.15); color: #2775CA; }
-  &.eurc { background: rgba(0,82,175,0.15); color: #0052af; }
+  .token-card:hover & {
+    transform: scale(1.1);
+  }
+
+  &.usdc {
+    background: rgba(39,117,202,0.15);
+    color: #2775CA;
+    .token-card:hover & { box-shadow: 0 0 20px rgba(39,117,202,0.25); }
+  }
+  &.eurc {
+    background: rgba(0,82,175,0.15);
+    color: #0052af;
+    .token-card:hover & { box-shadow: 0 0 20px rgba(0,82,175,0.25); }
+  }
 }
 
 .token-name {
@@ -484,8 +571,13 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba($sol, 0.07) 0%, transparent 60%);
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 50%, rgba($sol, 0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 30% 70%, rgba($accent, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 70% 30%, rgba($accent2, 0.05) 0%, transparent 50%);
     pointer-events: none;
+    animation: gradientShift 10s ease infinite;
+    background-size: 200% 200%;
   }
 
   h2 { margin-bottom: 20px; }
@@ -508,6 +600,17 @@ footer {
   align-items: center;
   font-size: 0.82rem;
   color: $muted;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba($sol, 0.2), rgba($accent2, 0.2), transparent);
+  }
 }
 
 .footer-links {
@@ -539,4 +642,10 @@ footer {
   border: 1px solid rgba($sol, 0.25);
   padding: 4px 10px;
   border-radius: 2px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    border-color: rgba($sol, 0.5);
+    box-shadow: 0 0 16px rgba($sol, 0.15);
+  }
 }

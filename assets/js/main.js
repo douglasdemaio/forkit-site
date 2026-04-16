@@ -103,6 +103,47 @@
   }
 })();
 
+// ── Stat count-up animation ───────────────────────────────────────
+(function initStatCountUp() {
+  const stats = document.querySelectorAll('.stat-num');
+  if (!stats.length) return;
+
+  let animated = false;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !animated) {
+        animated = true;
+        stats.forEach(stat => {
+          const text = stat.textContent;
+          const match = text.match(/([\d.]+)/);
+          if (!match) return;
+          const target = parseFloat(match[1]);
+          const suffix = stat.querySelector('span');
+          const suffixText = suffix ? suffix.textContent : '';
+          const isDecimal = text.includes('.');
+          const duration = 1500;
+          const start = performance.now();
+
+          function tick(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = eased * target;
+            const display = isDecimal ? current.toFixed(2) : Math.round(current);
+            stat.innerHTML = display + '<span>' + suffixText + '</span>';
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        });
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+
+  const statsContainer = document.querySelector('.hero-stats');
+  if (statsContainer) observer.observe(statsContainer);
+})();
+
 // ── Contributor bars ─────────────────────────────────────────────
 (function initContribs() {
   const container = document.getElementById('contribs');
