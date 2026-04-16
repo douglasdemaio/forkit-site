@@ -1,7 +1,7 @@
 title: ForkIt
 description: Decentralized Food Delivery Protocol on Solana
-url: "https://forkit.sol"
-baseurl: ""
+url: "https://douglasdemaio.github.io"
+baseurl: "/forkit-site"
 
 # Build settings
 theme: null
