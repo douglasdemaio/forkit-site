@@ -1,0 +1,13 @@
+# Zola configuration
+base_url = "https://douglasdemaio.github.io/forkit-site"
+title = "ForkIt"
+description = "Decentralized Food Delivery Protocol on Solana"
+compile_sass = true
+build_search_index = false
+generate_feeds = false
+
+[markdown]
+highlight_code = false
+
+[extra]
+author = "douglasdemaio"

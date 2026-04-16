@@ -1,4 +1,4 @@
-name: Build & Deploy Jekyll Site
+name: Build & Deploy Zola Site
 
 on:
   push:
@@ -19,15 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - uses: taiki-e/install-action@v2
         with:
-          ruby-version: "3.2"
-          bundler-cache: true
-      - uses: actions/configure-pages@v4
-      - run: bundle exec jekyll build
+          tool: zola@0.19.2
+      - run: zola build
         env:
-          JEKYLL_ENV: production
+          ZOLA_ENV: production
       - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
 
   deploy:
     environment:
