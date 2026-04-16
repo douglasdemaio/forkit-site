@@ -118,10 +118,13 @@ section {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba($accent, 0.35);
+    box-shadow: 0 8px 32px rgba($accent, 0.35), 0 0 60px rgba($accent, 0.15);
   }
 
-  &.sol { background: $sol; }
+  &.sol {
+    background: $sol;
+    &:hover { box-shadow: 0 8px 32px rgba($sol, 0.35), 0 0 60px rgba($sol, 0.15); }
+  }
 }
 
 .btn-ghost {
@@ -134,10 +137,14 @@ section {
   border-radius: 2px;
   text-decoration: none;
   border: 1px solid $border;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
   cursor: none;
 
-  &:hover { border-color: $muted; }
+  &:hover {
+    border-color: $muted;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(255,255,255,0.04);
+  }
 }
 
 // ── Reveal animation ─────────────────────────────────────────────
@@ -166,4 +173,25 @@ section {
 @keyframes floatBadge {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-6px); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: rgba($accent, 0.15); }
+  50%       { border-color: rgba($accent, 0.4); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
