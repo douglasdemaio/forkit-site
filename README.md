@@ -1,16 +1,17 @@
-# forkit-sol
+# ForkIt — Decentralized Food Delivery on Solana
 
-Landing site for [ForkIt](https://github.com/douglasdemaio/forkit) — the decentralized food delivery protocol on Solana. Built with [Jekyll](https://jekyllrb.com/) and deployed via GitHub Pages.
+Landing site for [ForkIt](https://github.com/douglasdemaio/forkit) — the decentralized food delivery protocol on Solana. Built with [Zola](https://www.getzola.org/) and deployed via GitHub Pages.
 
-**Live:** https://forkit.sol
+**Live:** [douglasdemaio.github.io/forkit-site](https://douglasdemaio.github.io/forkit-site/)
 
 ---
 
 ## Stack
 
-- **Jekyll 4** — static site generator
-- **Sass** — compiled via Jekyll's built-in pipeline (split into `_sass/` partials)
-- **Vanilla JS** — cursor, scroll reveal, animated escrow progress bar
+- **Zola** — fast Rust-based static site generator
+- **Sass** — compiled natively by Zola (split into `sass/` partials)
+- **Tera Templates** — Zola's template engine
+- **Vanilla JS** — cursor, scroll reveal, animated escrow progress bar, stat count-ups
 - **GitHub Actions** — automatic build + deploy to GitHub Pages on every push to `main`
 
 ---
@@ -19,30 +20,28 @@ Landing site for [ForkIt](https://github.com/douglasdemaio/forkit) — the decen
 
 ### Prerequisites
 
-- Ruby ≥ 3.0 ([rbenv](https://github.com/rbenv/rbenv) recommended)
-- Bundler (`gem install bundler`)
+- [Zola](https://www.getzola.org/documentation/getting-started/installation/) ≥ 0.19
 
 ### Setup
 
 ```bash
-git clone https://github.com/douglasdemaio/forkit-sol.git
-cd forkit-sol
-bundle install
+git clone https://github.com/douglasdemaio/forkit-site.git
+cd forkit-site
 ```
 
 ### Run dev server
 
 ```bash
-bundle exec jekyll serve --livereload
+zola serve
 ```
 
-Open http://localhost:4000 in your browser. The site auto-reloads on any file change.
+Open http://127.0.0.1:1111 in your browser. The site auto-reloads on any file change.
 
 ### Build for production
 
 ```bash
-JEKYLL_ENV=production bundle exec jekyll build
-# Output is in _site/
+zola build
+# Output is in public/
 ```
 
 ---
@@ -50,19 +49,20 @@ JEKYLL_ENV=production bundle exec jekyll build
 ## Project Structure
 
 ```
-forkit-sol/
-├── _config.yml             # Jekyll config (title, plugins, etc.)
-├── Gemfile                 # Ruby dependencies
-├── index.html              # Main page (Jekyll front matter + HTML)
+forkit-site/
+├── config.toml             # Zola config (base_url, title, sass, etc.)
+├── content/
+│   └── _index.md           # Main page content entry point
 │
-├── _layouts/
-│   └── default.html        # Base HTML shell (head, nav, footer)
+├── templates/
+│   ├── base.html           # Base HTML shell (head, nav, footer)
+│   ├── index.html          # Main page template (extends base)
+│   └── partials/
+│       ├── nav.html        # Navigation bar
+│       └── footer.html     # Site footer
 │
-├── _includes/
-│   ├── nav.html            # Navigation bar
-│   └── footer.html         # Site footer
-│
-├── _sass/                  # Sass partials (compiled → assets/css/main.css)
+├── sass/                   # Sass partials (compiled → public/main.css)
+│   ├── main.scss           # Sass entry point
 │   ├── _variables.scss     # Design tokens, breakpoints
 │   ├── _base.scss          # Reset, typography, keyframes
 │   ├── _nav.scss           # Navigation styles
@@ -71,15 +71,13 @@ forkit-sol/
 │   ├── _components.scss    # Reusable utilities
 │   └── _responsive.scss    # Mobile breakpoints
 │
-├── assets/
-│   ├── css/
-│   │   └── main.scss       # Sass entry point (Jekyll processes this)
+├── static/
 │   └── js/
 │       └── main.js         # Cursor, nav scroll, reveal, progress bar, contrib bars
 │
 └── .github/
     └── workflows/
-        └── deploy.yml      # GitHub Actions: build Jekyll → deploy to Pages
+        └── deploy.yml      # GitHub Actions: build Zola → deploy to Pages
 ```
 
 ---
@@ -89,8 +87,8 @@ forkit-sol/
 The included GitHub Actions workflow handles everything automatically:
 
 1. Push to `main`
-2. Action installs Ruby + Bundler, runs `bundle exec jekyll build`
-3. Built `_site/` is deployed to GitHub Pages
+2. Action installs Zola 0.19.2, runs `zola build`
+3. Built `public/` is deployed to GitHub Pages
 
 To enable GitHub Pages for the repo:
 
