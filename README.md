@@ -1,18 +1,66 @@
-# ForkIt — Decentralized Food Delivery on Solana
+# ForkIt Site — Restaurant Builder + Ordering Platform on Solana
 
-Landing site for [ForkIt](https://github.com/douglasdemaio/forkit) — the decentralized food delivery protocol on Solana. Built with [Zola](https://www.getzola.org/) and deployed via GitHub Pages.
+A **Weebly-style restaurant website builder** with integrated ordering and **Solana payments**. Restaurant owners build beautiful pages in minutes. Customers order food and pay with USDC/EURC through on-chain escrow — with built-in bill splitting.
 
-**Live:** [douglasdemaio.github.io/forkit-site](https://douglasdemaio.github.io/forkit-site/)
+**Part of the ForkIt Protocol** — decentralized food delivery on Solana.
 
 ---
 
-## Stack
+## What Is This?
 
-- **Zola** — fast Rust-based static site generator
-- **Sass** — compiled natively by Zola (split into `sass/` partials)
-- **Tera Templates** — Zola's template engine
-- **Vanilla JS** — cursor, scroll reveal, animated escrow progress bar, stat count-ups
-- **GitHub Actions** — automatic build + deploy to GitHub Pages on every push to `main`
+ForkIt Site lets anyone create a professional restaurant page and start accepting crypto orders:
+
+### For Restaurant Owners
+
+1. **Connect** your Solana wallet (Phantom, Solflare)
+2. **Choose a template** — Classic Bistro, Modern Minimal, Street Food, or Fine Dining
+3. **Upload** food photos, set menu items with names, descriptions, and prices (USDC/EURC)
+4. **Publish** your page — it's live and accepting orders instantly
+
+### For Customers
+
+1. **Browse** restaurant pages
+2. **Add items** to your shopping cart
+3. **Checkout** via the ForkIt smart contract (escrow-based payment on Solana)
+4. **Split orders** with friends — share a link and up to 10 people can contribute
+5. **Track** your order status in real-time
+
+---
+
+## Tech Stack
+
+| Layer | Tech |
+|-------|------|
+| Framework | **Next.js 14** (App Router) |
+| Language | **TypeScript** |
+| Styling | **Tailwind CSS** |
+| Database | **Prisma + SQLite** (easy local dev; swap to Postgres for production) |
+| Blockchain | **Solana** (devnet) via `@solana/web3.js` |
+| Wallet | **Solana Wallet Adapter** (Phantom, Solflare) |
+| Auth | Nonce-signing → **JWT** (wallet-based, no passwords) |
+| State | **Zustand** (cart) |
+| Deployment | **Vercel** |
+
+---
+
+## Smart Contract Details
+
+ForkIt uses three on-chain programs:
+
+| Program | ID |
+|---------|----|
+| Escrow | `FNZXjjq2oceq15jVsnHT8gYJQUZ9NLCXCpYak2pXsqGB` |
+| Registry | `2riHMdVB6eFgeQjqvnqq2Mrpqea7hrMv5ZNRh7gZgB9S` |
+| Loyalty | `6DaFmi7haz2Ci9sXaHRviz3biwbmTwipvwc9L9cdeugR` |
+
+- **Protocol fee:** 0.02% (2 basis points)
+- **Customer deposit:** 2% (refundable on delivery)
+- **Max contributors per order:** 10
+- **Treasury:** `BiP5PJuUiXPYCFx98RMCGCnRhdUVrkxSke9C6y2ZohQ9`
+
+Token mints (devnet):
+- USDC: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
+- EURC: `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM`
 
 ---
 
@@ -20,28 +68,63 @@ Landing site for [ForkIt](https://github.com/douglasdemaio/forkit) — the decen
 
 ### Prerequisites
 
-- [Zola](https://www.getzola.org/documentation/getting-started/installation/) ≥ 0.19
+- Node.js ≥ 18
+- npm
 
 ### Setup
 
 ```bash
 git clone https://github.com/douglasdemaio/forkit-site.git
 cd forkit-site
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+
+# Initialize database
+npx prisma db push
+
+# Start dev server
+npm run dev
 ```
 
-### Run dev server
+Open http://localhost:3000
 
-```bash
-zola serve
+### Environment Variables
+
+```env
+# Solana RPC
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_SOLANA_NETWORK=devnet
+
+# JWT secret for wallet auth
+JWT_SECRET=your-jwt-secret-change-me
+
+# Upload directory
+UPLOAD_DIR=./public/uploads
+
+# Base URL
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Database
+DATABASE_URL=file:./dev.db
 ```
 
-Open http://127.0.0.1:1111 in your browser. The site auto-reloads on any file change.
+### Database
 
-### Build for production
+Using Prisma with SQLite for zero-config local development. For production, update `prisma/schema.prisma` to use PostgreSQL and set `DATABASE_URL` accordingly.
 
 ```bash
-zola build
-# Output is in public/
+# Push schema changes
+npx prisma db push
+
+# Open Prisma Studio (visual DB browser)
+npx prisma studio
+
+# Generate client after schema changes
+npx prisma generate
 ```
 
 ---
@@ -50,51 +133,49 @@ zola build
 
 ```
 forkit-site/
-├── config.toml             # Zola config (base_url, title, sass, etc.)
-├── content/
-│   └── _index.md           # Main page content entry point
-│
-├── templates/
-│   ├── base.html           # Base HTML shell (head, nav, footer)
-│   ├── index.html          # Main page template (extends base)
-│   └── partials/
-│       ├── nav.html        # Navigation bar
-│       └── footer.html     # Site footer
-│
-├── sass/                   # Sass partials (compiled → public/main.css)
-│   ├── main.scss           # Sass entry point
-│   ├── _variables.scss     # Design tokens, breakpoints
-│   ├── _base.scss          # Reset, typography, keyframes
-│   ├── _nav.scss           # Navigation styles
-│   ├── _hero.scss          # Hero + phone mockup
-│   ├── _sections.scss      # How It Works, Roles, Split Pay, Architecture, etc.
-│   ├── _components.scss    # Reusable utilities
-│   └── _responsive.scss    # Mobile breakpoints
-│
-├── static/
-│   └── js/
-│       └── main.js         # Cursor, nav scroll, reveal, progress bar, contrib bars
-│
-└── .github/
-    └── workflows/
-        └── deploy.yml      # GitHub Actions: build Zola → deploy to Pages
+├── app/                          # Next.js App Router pages
+│   ├── page.tsx                  # Landing page
+│   ├── api/                      # API routes
+│   │   ├── auth/                 # Wallet auth (nonce + verify)
+│   │   ├── restaurants/          # CRUD restaurants + menus
+│   │   ├── orders/               # Create orders + contributions
+│   │   └── upload/               # Image upload
+│   ├── restaurants/              # Public restaurant browsing
+│   ├── dashboard/                # Owner dashboard (menu, template, orders)
+│   ├── order/                    # Cart + order tracking
+│   └── connect/                  # Wallet connection page
+├── components/                   # React components
+├── hooks/                        # Custom hooks (wallet, escrow, cart, orders)
+├── lib/                          # Utilities (constants, db, auth, types, templates)
+├── store/                        # Zustand state management
+├── prisma/                       # Database schema
+└── public/                       # Static assets + uploads
 ```
 
 ---
 
-## Deployment (GitHub Pages)
+## Deployment (Vercel)
 
-The included GitHub Actions workflow handles everything automatically:
+1. Push to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Set environment variables in Vercel dashboard
+4. For production, use a hosted PostgreSQL (e.g., Vercel Postgres, Neon, Supabase)
+5. Update `DATABASE_URL` and Prisma provider accordingly
 
-1. Push to `main`
-2. Action installs Zola 0.19.2, runs `zola build`
-3. Built `public/` is deployed to GitHub Pages
+The included GitHub Actions workflow automates deployment on push to `main`.
 
-To enable GitHub Pages for the repo:
+---
 
-1. Go to **Settings → Pages**
-2. Set **Source** to **GitHub Actions**
-3. That's it — the workflow takes over on the next push
+## Templates
+
+Four built-in templates, each providing a different CSS theme/layout:
+
+| Template | Vibe |
+|----------|------|
+| **Classic Bistro** | Warm, earthy tones. Family restaurants, trattorias |
+| **Modern Minimal** | Clean white space. Cafés, health food, juice bars |
+| **Street Food** | Vibrant, colorful. Food trucks, taco joints |
+| **Fine Dining** | Dark, elegant. Upscale restaurants, wine bars |
 
 ---
 
@@ -102,8 +183,8 @@ To enable GitHub Pages for the repo:
 
 | Repo | Description |
 |------|-------------|
-| [forkit](https://github.com/douglasdemaio/forkit) | Protocol — Solana programs, Express backend, Next.js frontend |
-| [forkme](https://github.com/douglasdemaio/forkme) | Mobile companion — React Native (Expo), iOS/Android/Seeker |
+| [forkit](https://github.com/douglasdemaio/forkit) | Protocol — Solana programs (escrow, registry, loyalty), Express backend, test suite |
+| [forkme](https://github.com/douglasdemaio/forkme) | Mobile companion — React Native (Expo), iOS/Android customer + seeker apps |
 
 ---
 

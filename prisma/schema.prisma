@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id          String     @id @default(uuid())
+  wallet      String     @unique
+  name        String
+  slug        String     @unique
+  description String     @default("")
+  template    String     @default("classic-bistro")
+  logo        String?
+  banner      String?
+  currency    String     @default("USDC")
+  deliveryFee Float      @default(0)
+  published   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  menuItems   MenuItem[]
+  orders      Order[]
+}
+
+model MenuItem {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name         String
+  description  String     @default("")
+  price        Float
+  image        String?
+  category     String     @default("Main")
+  available    Boolean    @default(true)
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([restaurantId])
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  restaurantId    String
+  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
+  customerWallet  String
+  items           String         // JSON string of ordered items
+  totalAmount     Float
+  deliveryFee     Float          @default(0)
+  depositAmount   Float          @default(0)
+  escrowTarget    Float          @default(0)
+  status          String         @default("pending") // pending, funded, preparing, ready, delivered, cancelled
+  onChainOrderId  String?
+  codeAHash       String?
+  codeBHash       String?
+  shareLink       String?        @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  contributions   Contribution[]
+
+  @@index([restaurantId])
+  @@index([customerWallet])
+}
+
+model Contribution {
+  id                String   @id @default(uuid())
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  contributorWallet String
+  amount            Float
+  txSignature       String?
+  createdAt         DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Nonce {
+  id        String   @id @default(uuid())
+  wallet    String
+  nonce     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([wallet])
+}

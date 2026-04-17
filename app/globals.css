@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-forkit-orange text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-600 transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-white text-forkit-dark px-6 py-3 rounded-xl font-semibold border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors;
+  }
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow;
+  }
+}
+
+/* Wallet adapter overrides */
+.wallet-adapter-button {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
