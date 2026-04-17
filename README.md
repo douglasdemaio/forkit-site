@@ -1,6 +1,6 @@
 # ForkIt Site — Restaurant Builder + Ordering Platform on Solana
 
-A **Weebly-style restaurant website builder** with integrated ordering and **Solana payments**. Restaurant owners build beautiful pages in minutes. Customers order food and pay with USDC/EURC through on-chain escrow — with built-in bill splitting.
+A **template-style restaurant website builder** with integrated ordering and **Solana payments**. Restaurant owners build beautiful pages in minutes. Customers order food and pay with USDC/EURC through on-chain escrow — with built-in bill splitting.
 
 **Part of the ForkIt Protocol** — decentralized food delivery on Solana.
 
