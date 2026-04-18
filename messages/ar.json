@@ -82,7 +82,10 @@
     "slug": "الرابط المختصر",
     "rename": "إعادة تسمية",
     "save": "حفظ",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "editSettings": "تعديل",
+    "saveSettings": "حفظ الإعدادات",
+    "cancelEdit": "إلغاء"
   },
   "orders": {
     "title": "الطلبات",
@@ -113,7 +116,10 @@
     "connectWalletToPay": "اربط محفظتك للدفع عبر Solana",
     "processing": "جارٍ المعالجة...",
     "payAmount": "ادفع {amount} USDC",
-    "splitHint": "بعد الدفع، يمكنك مشاركة رابط ليقسّم أصدقاؤك الفاتورة"
+    "splitHint": "بعد الدفع، يمكنك مشاركة رابط ليقسّم أصدقاؤك الفاتورة",
+    "deliveryAddress": "عنوان التوصيل",
+    "deliveryAddressPlaceholder": "أدخل عنوان التوصيل",
+    "deliveryAddressHint": "الشارع، رقم المبنى، الشقة، المدينة"
   },
   "order": {
     "notFound": "الطلب غير موجود",

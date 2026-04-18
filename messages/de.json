@@ -82,7 +82,10 @@
     "slug": "Slug",
     "rename": "Umbenennen",
     "save": "Speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "editSettings": "Bearbeiten",
+    "saveSettings": "Einstellungen speichern",
+    "cancelEdit": "Abbrechen"
   },
   "orders": {
     "title": "Bestellungen",
@@ -113,7 +116,10 @@
     "connectWalletToPay": "Verbinde dein Wallet, um mit Solana zu bezahlen",
     "processing": "Wird verarbeitet...",
     "payAmount": "{amount} USDC bezahlen",
-    "splitHint": "Nach der Bestellung kannst du einen Link teilen, damit Freunde die Rechnung aufteilen können"
+    "splitHint": "Nach der Bestellung kannst du einen Link teilen, damit Freunde die Rechnung aufteilen können",
+    "deliveryAddress": "Lieferadresse",
+    "deliveryAddressPlaceholder": "Gib deine Lieferadresse ein",
+    "deliveryAddressHint": "Straße, Hausnummer, Wohnung, Stadt"
   },
   "order": {
     "notFound": "Bestellung nicht gefunden",

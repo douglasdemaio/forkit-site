@@ -7,7 +7,7 @@ import prisma from "@/lib/db";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { restaurantId, customerWallet, items } = body;
+    const { restaurantId, customerWallet, items, deliveryAddress } = body;
 
     if (!restaurantId || !customerWallet || !items || !Array.isArray(items)) {
       return NextResponse.json(
@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
         deliveryFee,
         escrowTarget,
         shareLink,
+        deliveryAddress: deliveryAddress || null,
       },
     });
 

@@ -33,6 +33,10 @@ export default function DashboardPage() {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingSettings, setEditingSettings] = useState(false);
+  const [editCurrency, setEditCurrency] = useState("");
+  const [editDeliveryFee, setEditDeliveryFee] = useState(0);
+  const [savingSettings, setSavingSettings] = useState(false);
 
   const loadRestaurant = useCallback(async () => {
     if (!token) return;
@@ -339,24 +343,103 @@ export default function DashboardPage() {
         </Link>
 
         <div className="card p-6">
-          <div className="text-3xl mb-3">⚙️</div>
-          <h3 className="font-bold text-gray-900">{t("settings")}</h3>
-          <div className="mt-3 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t("currency")}</span>
-              <span className="font-medium">{restaurant.currency}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t("deliveryFee")}</span>
-              <span className="font-medium">
-                {restaurant.deliveryFee.toFixed(2)} {restaurant.currency}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t("slug")}</span>
-              <span className="font-mono text-xs">{restaurant.slug}</span>
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-3xl">⚙️</div>
+            {!editingSettings && (
+              <button
+                onClick={() => {
+                  setEditCurrency(restaurant.currency);
+                  setEditDeliveryFee(restaurant.deliveryFee);
+                  setEditingSettings(true);
+                }}
+                className="text-sm text-forkit-orange hover:text-orange-600 font-medium transition-colors"
+              >
+                {t("editSettings")}
+              </button>
+            )}
           </div>
+          <h3 className="font-bold text-gray-900">{t("settings")}</h3>
+          {editingSettings ? (
+            <div className="mt-3 space-y-3">
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">{t("currency")}</label>
+                <select
+                  value={editCurrency}
+                  onChange={(e) => setEditCurrency(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                >
+                  <option value="USDC">USDC</option>
+                  <option value="EURC">EURC</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">{t("deliveryFee")}</label>
+                <input
+                  type="number"
+                  value={editDeliveryFee}
+                  onChange={(e) => setEditDeliveryFee(parseFloat(e.target.value) || 0)}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                />
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("slug")}</span>
+                <span className="font-mono text-xs">{restaurant.slug}</span>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={async () => {
+                    if (!restaurant) return;
+                    setSavingSettings(true);
+                    try {
+                      const res = await fetch(`/api/restaurants/${restaurant.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+                        body: JSON.stringify({ currency: editCurrency, deliveryFee: editDeliveryFee }),
+                      });
+                      if (res.ok) {
+                        const updated = await res.json();
+                        setRestaurant(updated);
+                        setEditingSettings(false);
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    } finally {
+                      setSavingSettings(false);
+                    }
+                  }}
+                  disabled={savingSettings}
+                  className="flex-1 px-3 py-2 bg-forkit-orange text-white text-sm rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                >
+                  {savingSettings ? "..." : t("saveSettings")}
+                </button>
+                <button
+                  onClick={() => setEditingSettings(false)}
+                  className="px-3 py-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
+                >
+                  {t("cancel")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-3 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("currency")}</span>
+                <span className="font-medium">{restaurant.currency}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("deliveryFee")}</span>
+                <span className="font-medium">
+                  {restaurant.deliveryFee.toFixed(2)} {restaurant.currency}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("slug")}</span>
+                <span className="font-mono text-xs">{restaurant.slug}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

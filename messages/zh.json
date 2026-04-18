@@ -82,7 +82,10 @@
     "slug": "链接别名",
     "rename": "重命名",
     "save": "保存",
-    "cancel": "取消"
+    "cancel": "取消",
+    "editSettings": "编辑",
+    "saveSettings": "保存设置",
+    "cancelEdit": "取消"
   },
   "orders": {
     "title": "订单管理",
@@ -113,7 +116,10 @@
     "connectWalletToPay": "连接钱包通过 Solana 付款",
     "processing": "处理中...",
     "payAmount": "支付 {amount} USDC",
-    "splitHint": "结账后可以分享链接让朋友一起 AA 买单"
+    "splitHint": "结账后可以分享链接让朋友一起 AA 买单",
+    "deliveryAddress": "配送地址",
+    "deliveryAddressPlaceholder": "请输入你的配送地址",
+    "deliveryAddressHint": "街道、门牌号、小区、城市"
   },
   "order": {
     "notFound": "订单未找到",

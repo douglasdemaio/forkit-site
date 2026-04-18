@@ -82,7 +82,10 @@
     "slug": "URL kısaltması",
     "rename": "Yeniden adlandır",
     "save": "Kaydet",
-    "cancel": "İptal"
+    "cancel": "İptal",
+    "editSettings": "Düzenle",
+    "saveSettings": "Ayarları Kaydet",
+    "cancelEdit": "İptal"
   },
   "orders": {
     "title": "Siparişler",
@@ -113,7 +116,10 @@
     "connectWalletToPay": "Solana ile ödemek için cüzdanını bağla",
     "processing": "İşleniyor...",
     "payAmount": "{amount} USDC Öde",
-    "splitHint": "Siparişten sonra arkadaşlarınla hesabı bölmek için bir link paylaşabilirsin"
+    "splitHint": "Siparişten sonra arkadaşlarınla hesabı bölmek için bir link paylaşabilirsin",
+    "deliveryAddress": "Teslimat Adresi",
+    "deliveryAddressPlaceholder": "Teslimat adresini gir",
+    "deliveryAddressHint": "Sokak, bina no, daire, şehir"
   },
   "order": {
     "notFound": "Sipariş bulunamadı",

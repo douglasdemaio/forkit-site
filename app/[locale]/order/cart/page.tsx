@@ -27,6 +27,7 @@ export default function CartPage() {
   const { createOrder } = useEscrow();
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
   const deliveryFee = 0; // fetched from restaurant in production
   const grandTotal = total + deliveryFee;
@@ -48,6 +49,7 @@ export default function CartPage() {
             menuItemId: item.id,
             quantity: item.quantity,
           })),
+          deliveryAddress,
         }),
       });
 
@@ -183,6 +185,22 @@ export default function CartPage() {
         ))}
       </div>
 
+      {/* Delivery Address */}
+      <div className="card mt-6 p-5">
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          {t("deliveryAddress")}
+        </label>
+        <input
+          type="text"
+          value={deliveryAddress}
+          onChange={(e) => setDeliveryAddress(e.target.value)}
+          placeholder={t("deliveryAddressPlaceholder")}
+          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+          required
+        />
+        <p className="mt-1.5 text-xs text-gray-400">{t("deliveryAddressHint")}</p>
+      </div>
+
       {/* Totals */}
       <div className="card mt-6 p-5 space-y-3">
         <div className="flex justify-between text-sm text-gray-500">
@@ -220,7 +238,7 @@ export default function CartPage() {
         ) : (
           <button
             onClick={handleCheckout}
-            disabled={placing}
+            disabled={placing || !deliveryAddress.trim()}
             className="w-full py-4 bg-forkit-orange text-white rounded-xl font-semibold text-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {placing ? (

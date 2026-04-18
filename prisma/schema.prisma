@@ -55,6 +55,7 @@ model Order {
   onChainOrderId         String?
   codeAHash              String?
   codeBHash              String?
+  deliveryAddress        String?
   shareLink              String?        @unique
   requestedDeliveryTime  DateTime?      // Customer-preferred delivery time (null = ASAP)
   requestedPickupTime    DateTime?      // Customer-preferred pickup time (null = ASAP)

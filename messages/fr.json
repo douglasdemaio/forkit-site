@@ -82,7 +82,10 @@
     "slug": "Slug",
     "rename": "Renommer",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "editSettings": "Modifier",
+    "saveSettings": "Enregistrer les paramètres",
+    "cancelEdit": "Annuler"
   },
   "orders": {
     "title": "Commandes",
@@ -113,7 +116,10 @@
     "connectWalletToPay": "Connecte ton wallet pour payer avec Solana",
     "processing": "Traitement en cours...",
     "payAmount": "Payer {amount} USDC",
-    "splitHint": "Après la commande, tu pourras partager un lien pour que tes amis participent à l'addition"
+    "splitHint": "Après la commande, tu pourras partager un lien pour que tes amis participent à l'addition",
+    "deliveryAddress": "Adresse de livraison",
+    "deliveryAddressPlaceholder": "Entre ton adresse de livraison",
+    "deliveryAddressHint": "Rue, appartement, ville"
   },
   "order": {
     "notFound": "Commande introuvable",

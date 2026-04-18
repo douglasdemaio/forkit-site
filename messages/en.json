@@ -82,7 +82,10 @@
     "slug": "Slug",
     "rename": "Rename",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "editSettings": "Edit",
+    "saveSettings": "Save Settings",
+    "cancelEdit": "Cancel"
   },
   "orders": {
     "title": "Orders",
@@ -113,7 +116,10 @@
     "connectWalletToPay": "Connect your wallet to pay with Solana",
     "processing": "Processing...",
     "payAmount": "Pay {amount} USDC",
-    "splitHint": "After checkout, you can share a link for friends to split the bill"
+    "splitHint": "After checkout, you can share a link for friends to split the bill",
+    "deliveryAddress": "Delivery Address",
+    "deliveryAddressPlaceholder": "Enter your delivery address",
+    "deliveryAddressHint": "Street address, apartment, city"
   },
   "order": {
     "notFound": "Order not found",
