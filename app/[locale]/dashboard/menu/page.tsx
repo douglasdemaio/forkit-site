@@ -42,23 +42,23 @@ export default function MenuEditorPage() {
   const loadData = useCallback(async () => {
     if (!token) return;
     try {
-      const createRes = await fetch("/api/restaurants", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-        body: JSON.stringify({ name: "__probe__" }),
+      const res = await fetch("/api/restaurants/mine", {
+        headers: getAuthHeaders(),
       });
+      if (res.ok) {
+        const data = await res.json();
+        const restaurant = data.restaurant;
+        if (restaurant) {
+          setRestaurantId(restaurant.id);
+          setRestaurantSlug(restaurant.slug);
+          setRestaurantName(restaurant.name);
+          setCurrency(restaurant.currency);
 
-      if (createRes.status === 409) {
-        const { restaurant } = await createRes.json();
-        setRestaurantId(restaurant.id);
-        setRestaurantSlug(restaurant.slug);
-        setRestaurantName(restaurant.name);
-        setCurrency(restaurant.currency);
-
-        const menuRes = await fetch(`/api/restaurants/${restaurant.id}/menu`);
-        if (menuRes.ok) {
-          const menuData = await menuRes.json();
-          setItems(menuData);
+          const menuRes = await fetch(`/api/restaurants/${restaurant.id}/menu`);
+          if (menuRes.ok) {
+            const menuData = await menuRes.json();
+            setItems(menuData);
+          }
         }
       }
     } catch (err) {
