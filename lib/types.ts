@@ -36,13 +36,14 @@ export interface OrderData {
   items: OrderItem[];
   totalAmount: number;
   deliveryFee: number;
-  depositAmount: number;
   escrowTarget: number;
   status: OrderStatus;
   onChainOrderId: string | null;
   codeAHash: string | null;
   codeBHash: string | null;
   shareLink: string | null;
+  requestedDeliveryTime: string | null; // ISO timestamp, null = ASAP
+  requestedPickupTime: string | null;   // ISO timestamp, null = ASAP
   createdAt: string;
   contributions: ContributionData[];
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import prisma from "@/lib/db";
-import { CUSTOMER_DEPOSIT_PCT } from "@/lib/constants";
+
 
 // POST /api/orders - Create a new order
 export async function POST(request: NextRequest) {
@@ -61,8 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     const deliveryFee = restaurant.deliveryFee;
-    const depositAmount = totalAmount * (CUSTOMER_DEPOSIT_PCT / 100);
-    const escrowTarget = totalAmount + deliveryFee + depositAmount;
+    const escrowTarget = totalAmount + deliveryFee;
 
     // Generate share link
     const shareId = uuidv4().slice(0, 8);
@@ -75,7 +74,6 @@ export async function POST(request: NextRequest) {
         items: JSON.stringify(orderItems),
         totalAmount,
         deliveryFee,
-        depositAmount,
         escrowTarget,
         shareLink,
       },

@@ -5,11 +5,14 @@ import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useCart } from "@/hooks/useCart";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./language-switcher";
 
 export default function Navbar() {
   const { connected } = useWallet();
   const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = useTranslations("nav");
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -27,14 +30,14 @@ export default function Navbar() {
               href="/restaurants"
               className="text-gray-600 hover:text-forkit-orange transition-colors"
             >
-              Restaurants
+              {t("restaurants")}
             </Link>
             {connected && (
               <Link
                 href="/dashboard"
                 className="text-gray-600 hover:text-forkit-orange transition-colors"
               >
-                Dashboard
+                {t("dashboard")}
               </Link>
             )}
             <Link
@@ -60,6 +63,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+            <LanguageSwitcher />
             <WalletMultiButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-lg !h-10 !text-sm" />
           </div>
 
@@ -101,7 +105,7 @@ export default function Navbar() {
               className="block text-gray-600 hover:text-forkit-orange"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Restaurants
+              {t("restaurants")}
             </Link>
             {connected && (
               <Link
@@ -109,7 +113,7 @@ export default function Navbar() {
                 className="block text-gray-600 hover:text-forkit-orange"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Dashboard
+                {t("dashboard")}
               </Link>
             )}
             <Link
@@ -117,8 +121,11 @@ export default function Navbar() {
               className="block text-gray-600 hover:text-forkit-orange"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Cart {itemCount > 0 && `(${itemCount})`}
+              {t("cart")} {itemCount > 0 && `(${itemCount})`}
             </Link>
+            <div className="pt-2">
+              <LanguageSwitcher />
+            </div>
             <WalletMultiButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-lg !h-10 !text-sm" />
           </div>
         )}

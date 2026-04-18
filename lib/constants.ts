@@ -26,8 +26,14 @@ export const EURC_MINT = new PublicKey(
 
 // Protocol constants
 export const PROTOCOL_FEE_BPS = 2; // 0.02%
-export const CUSTOMER_DEPOSIT_PCT = 2; // 2%
 export const MAX_CONTRIBUTORS = 10;
+
+// Timeout constants (seconds) — must match on-chain values
+export const CANCEL_WINDOW_SECONDS = 60;
+export const FUNDING_TIMEOUT_SECONDS = 900; // 15 min
+export const PREP_TIMEOUT_SECONDS = 2700; // 45 min
+export const PICKUP_TIMEOUT_SECONDS = 2700; // 45 min
+export const DELIVERY_TIMEOUT_SECONDS = 10800; // 3 hours
 
 // Network
 export const SOLANA_NETWORK =

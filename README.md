@@ -22,8 +22,9 @@ ForkIt Site lets anyone create a professional restaurant page and start acceptin
 1. **Browse** restaurant pages
 2. **Add items** to your shopping cart
 3. **Checkout** via the ForkIt smart contract (escrow-based payment on Solana)
-4. **Split orders** with friends — share a link and up to 10 people can contribute
-5. **Track** your order status in real-time
+4. **Split orders** with friends — share a link and up to 10 people can contribute (friends can chip in even after funding to reimburse the original payer)
+5. **Schedule delivery/pickup** — choose a preferred time or order for ASAP
+6. **Track** your order status in real-time
 
 ---
 
@@ -39,6 +40,7 @@ ForkIt Site lets anyone create a professional restaurant page and start acceptin
 | Wallet | **Solana Wallet Adapter** (Phantom, Solflare) |
 | Auth | Nonce-signing → **JWT** (wallet-based, no passwords) |
 | State | **Zustand** (cart) |
+| i18n | **next-intl** (10 languages, RTL support) |
 | Deployment | **Vercel** |
 
 ---
@@ -144,9 +146,12 @@ forkit-site/
 │   ├── dashboard/                # Owner dashboard (menu, template, orders)
 │   ├── order/                    # Cart + order tracking
 │   └── connect/                  # Wallet connection page
-├── components/                   # React components
+├── components/                   # React components (incl. language-switcher)
 ├── hooks/                        # Custom hooks (wallet, escrow, cart, orders)
 ├── lib/                          # Utilities (constants, db, auth, types, templates)
+├── messages/                     # i18n translation JSON files (en, de, es, fr, ja, zh, pt, ko, ar, tr)
+├── i18n.ts                       # next-intl configuration
+├── middleware.ts                 # Locale routing middleware
 ├── store/                        # Zustand state management
 ├── prisma/                       # Database schema
 └── public/                       # Static assets + uploads
@@ -163,6 +168,36 @@ forkit-site/
 5. Update `DATABASE_URL` and Prisma provider accordingly
 
 The included GitHub Actions workflow automates deployment on push to `main`.
+
+---
+
+## Internationalization (i18n)
+
+ForkIt supports **10 languages** out of the box via [next-intl](https://next-intl-docs.vercel.app/):
+
+| Language | Code | Native Name |
+|----------|------|-------------|
+| English | `en` | English (default) |
+| German | `de` | Deutsch |
+| Spanish | `es` | Español |
+| French | `fr` | Français |
+| Japanese | `ja` | 日本語 |
+| Chinese | `zh` | 中文 |
+| Portuguese | `pt` | Português |
+| Korean | `ko` | 한국어 |
+| Arabic | `ar` | العربية (RTL) |
+| Turkish | `tr` | Türkçe |
+
+- English is the default locale — URLs stay clean without `/en/` prefix
+- Other languages use a locale prefix (e.g., `/de/dashboard`, `/ja/order/cart`)
+- Arabic has full RTL layout support
+- Translation files live in `messages/` as JSON, organized by page/component
+- A language switcher dropdown is available in the navbar
+- Only UI chrome is translated — restaurant-created content (menu items, descriptions) stays in the owner's language
+
+To add a new language:
+1. Create `messages/<code>.json` with all translation keys
+2. Add the locale code to the `locales` array in `i18n.ts`
 
 ---
 

@@ -48,18 +48,19 @@ model Order {
   restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
   customerWallet  String
   items           String         // JSON string of ordered items
-  totalAmount     Float
-  deliveryFee     Float          @default(0)
-  depositAmount   Float          @default(0)
-  escrowTarget    Float          @default(0)
-  status          String         @default("pending") // pending, funded, preparing, ready, delivered, cancelled
-  onChainOrderId  String?
-  codeAHash       String?
-  codeBHash       String?
-  shareLink       String?        @unique
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  contributions   Contribution[]
+  totalAmount            Float
+  deliveryFee            Float          @default(0)
+  escrowTarget           Float          @default(0)
+  status                 String         @default("pending") // pending, funded, preparing, ready, delivered, cancelled
+  onChainOrderId         String?
+  codeAHash              String?
+  codeBHash              String?
+  shareLink              String?        @unique
+  requestedDeliveryTime  DateTime?      // Customer-preferred delivery time (null = ASAP)
+  requestedPickupTime    DateTime?      // Customer-preferred pickup time (null = ASAP)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  contributions          Contribution[]
 
   @@index([restaurantId])
   @@index([customerWallet])
