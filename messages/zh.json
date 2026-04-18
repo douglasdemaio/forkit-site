@@ -79,7 +79,10 @@
     "settings": "设置",
     "currency": "货币",
     "deliveryFee": "配送费",
-    "slug": "链接别名"
+    "slug": "链接别名",
+    "rename": "重命名",
+    "save": "保存",
+    "cancel": "取消"
   },
   "orders": {
     "title": "订单管理",

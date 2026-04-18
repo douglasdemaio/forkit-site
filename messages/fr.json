@@ -79,7 +79,10 @@
     "settings": "Paramètres",
     "currency": "Devise",
     "deliveryFee": "Frais de livraison",
-    "slug": "Slug"
+    "slug": "Slug",
+    "rename": "Renommer",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   },
   "orders": {
     "title": "Commandes",

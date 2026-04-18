@@ -79,7 +79,10 @@
     "settings": "Ayarlar",
     "currency": "Para birimi",
     "deliveryFee": "Teslimat ücreti",
-    "slug": "URL kısaltması"
+    "slug": "URL kısaltması",
+    "rename": "Yeniden adlandır",
+    "save": "Kaydet",
+    "cancel": "İptal"
   },
   "orders": {
     "title": "Siparişler",

@@ -79,7 +79,10 @@
     "settings": "Settings",
     "currency": "Currency",
     "deliveryFee": "Delivery fee",
-    "slug": "Slug"
+    "slug": "Slug",
+    "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "orders": {
     "title": "Orders",

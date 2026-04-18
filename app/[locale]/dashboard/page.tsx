@@ -30,6 +30,9 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const loadRestaurant = useCallback(async () => {
     if (!token) return;
@@ -205,9 +208,69 @@ export default function DashboardPage() {
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-forkit-dark">
-              {restaurant.name}
-            </h1>
+            {editing ? (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!editName.trim() || !restaurant) return;
+                  setSaving(true);
+                  try {
+                    const res = await fetch(`/api/restaurants/${restaurant.id}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+                      body: JSON.stringify({ name: editName.trim() }),
+                    });
+                    if (res.ok) {
+                      const updated = await res.json();
+                      setRestaurant(updated);
+                      setEditing(false);
+                    }
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="text-2xl font-bold text-forkit-dark border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={saving || !editName.trim()}
+                  className="px-3 py-1.5 bg-forkit-orange text-white text-sm rounded-lg hover:bg-orange-600 disabled:opacity-50"
+                >
+                  {saving ? "..." : t("save")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  className="px-3 py-1.5 text-gray-500 text-sm hover:text-gray-700"
+                >
+                  {t("cancel")}
+                </button>
+              </form>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-forkit-dark">
+                  {restaurant.name}
+                </h1>
+                <button
+                  onClick={() => { setEditName(restaurant.name); setEditing(true); }}
+                  className="p-1 text-gray-400 hover:text-forkit-orange transition-colors"
+                  title={t("rename")}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              </div>
+            )}
             <div className="flex items-center gap-2 mt-0.5">
               <span
                 className={`inline-block w-2 h-2 rounded-full ${

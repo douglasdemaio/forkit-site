@@ -79,7 +79,10 @@
     "settings": "設定",
     "currency": "通貨",
     "deliveryFee": "配達料",
-    "slug": "スラッグ"
+    "slug": "スラッグ",
+    "rename": "名前を変更",
+    "save": "保存",
+    "cancel": "キャンセル"
   },
   "orders": {
     "title": "注文一覧",

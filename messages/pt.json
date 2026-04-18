@@ -79,7 +79,10 @@
     "settings": "Configurações",
     "currency": "Moeda",
     "deliveryFee": "Taxa de entrega",
-    "slug": "Slug"
+    "slug": "Slug",
+    "rename": "Renomear",
+    "save": "Salvar",
+    "cancel": "Cancelar"
   },
   "orders": {
     "title": "Pedidos",

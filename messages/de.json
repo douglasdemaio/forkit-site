@@ -79,7 +79,10 @@
     "settings": "Einstellungen",
     "currency": "Währung",
     "deliveryFee": "Liefergebühr",
-    "slug": "Slug"
+    "slug": "Slug",
+    "rename": "Umbenennen",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   },
   "orders": {
     "title": "Bestellungen",

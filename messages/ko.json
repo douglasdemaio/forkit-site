@@ -79,7 +79,10 @@
     "settings": "설정",
     "currency": "통화",
     "deliveryFee": "배달비",
-    "slug": "슬러그"
+    "slug": "슬러그",
+    "rename": "이름 변경",
+    "save": "저장",
+    "cancel": "취소"
   },
   "orders": {
     "title": "주문 관리",
