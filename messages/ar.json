@@ -87,7 +87,11 @@
     "saveSettings": "حفظ الإعدادات",
     "payoutWallet": "محفظة التحصيل",
     "payoutWalletHint": "عنوان Solana الذي تستلم فيه المدفوعات. التغييرات تُسجّل على البلوكتشين.",
-    "cancelEdit": "إلغاء"
+    "cancelEdit": "إلغاء",
+    "createAnother": "إنشاء مطعم جديد",
+    "switchRestaurant": "تبديل المطعم",
+    "yourRestaurants": "مطاعمك",
+    "selectRestaurant": "اختر مطعماً لإدارته"
   },
   "orders": {
     "title": "الطلبات",
@@ -104,7 +108,14 @@
     "startPreparing": "بدء التحضير",
     "markReady": "تحديد كجاهز",
     "markDelivered": "تحديد كمُوصَّل",
-    "delivery": "توصيل"
+    "delivery": "توصيل",
+    "newOrders": "طلبات جديدة",
+    "newOrdersBadge": "{count} جديد",
+    "codeA": "رمز الاستلام",
+    "codeB": "رمز التوصيل",
+    "deliveryAddress": "عنوان التوصيل",
+    "noAddress": "لا يوجد عنوان توصيل",
+    "refreshing": "جارٍ التحديث..."
   },
   "cart": {
     "emptyCart": "سلتك فارغة",

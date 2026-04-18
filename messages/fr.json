@@ -87,7 +87,11 @@
     "saveSettings": "Enregistrer les paramètres",
     "payoutWallet": "Portefeuille de paiement",
     "payoutWalletHint": "Adresse Solana où vous recevez les paiements. Les modifications sont enregistrées on-chain.",
-    "cancelEdit": "Annuler"
+    "cancelEdit": "Annuler",
+    "createAnother": "Créer un nouveau restaurant",
+    "switchRestaurant": "Changer de restaurant",
+    "yourRestaurants": "Tes restaurants",
+    "selectRestaurant": "Sélectionne un restaurant à gérer"
   },
   "orders": {
     "title": "Commandes",
@@ -104,7 +108,14 @@
     "startPreparing": "Lancer la préparation",
     "markReady": "Marquer comme prêt",
     "markDelivered": "Marquer comme livré",
-    "delivery": "livraison"
+    "delivery": "livraison",
+    "newOrders": "Nouvelles commandes",
+    "newOrdersBadge": "{count} nouvelles",
+    "codeA": "Code de retrait",
+    "codeB": "Code de livraison",
+    "deliveryAddress": "Adresse de livraison",
+    "noAddress": "Pas d'adresse de livraison",
+    "refreshing": "Actualisation..."
   },
   "cart": {
     "emptyCart": "Ton panier est vide",

@@ -87,7 +87,11 @@
     "saveSettings": "Guardar ajustes",
     "payoutWallet": "Billetera de cobro",
     "payoutWalletHint": "Dirección Solana donde recibes los pagos. Los cambios quedan registrados en la blockchain.",
-    "cancelEdit": "Cancelar"
+    "cancelEdit": "Cancelar",
+    "createAnother": "Crear nuevo restaurante",
+    "switchRestaurant": "Cambiar restaurante",
+    "yourRestaurants": "Tus restaurantes",
+    "selectRestaurant": "Selecciona un restaurante para gestionar"
   },
   "orders": {
     "title": "Pedidos",
@@ -104,7 +108,14 @@
     "startPreparing": "Empezar a preparar",
     "markReady": "Marcar como listo",
     "markDelivered": "Marcar como entregado",
-    "delivery": "envío"
+    "delivery": "envío",
+    "newOrders": "Nuevos pedidos",
+    "newOrdersBadge": "{count} nuevos",
+    "codeA": "Código de recogida",
+    "codeB": "Código de entrega",
+    "deliveryAddress": "Dirección de entrega",
+    "noAddress": "Sin dirección de entrega",
+    "refreshing": "Actualizando..."
   },
   "cart": {
     "emptyCart": "Tu carrito está vacío",

@@ -87,7 +87,11 @@
     "saveSettings": "Einstellungen speichern",
     "payoutWallet": "Auszahlungs-Wallet",
     "payoutWalletHint": "Solana-Adresse für deine Zahlungseingänge. Änderungen werden on-chain protokolliert.",
-    "cancelEdit": "Abbrechen"
+    "cancelEdit": "Abbrechen",
+    "createAnother": "Neues Restaurant erstellen",
+    "switchRestaurant": "Restaurant wechseln",
+    "yourRestaurants": "Deine Restaurants",
+    "selectRestaurant": "Wähle ein Restaurant zum Verwalten"
   },
   "orders": {
     "title": "Bestellungen",
@@ -104,7 +108,14 @@
     "startPreparing": "Zubereitung starten",
     "markReady": "Als bereit markieren",
     "markDelivered": "Als geliefert markieren",
-    "delivery": "Lieferung"
+    "delivery": "Lieferung",
+    "newOrders": "Neue Bestellungen",
+    "newOrdersBadge": "{count} neu",
+    "codeA": "Abholcode",
+    "codeB": "Liefercode",
+    "deliveryAddress": "Lieferadresse",
+    "noAddress": "Keine Lieferadresse",
+    "refreshing": "Aktualisiere..."
   },
   "cart": {
     "emptyCart": "Dein Warenkorb ist leer",

@@ -87,7 +87,11 @@
     "saveSettings": "設定を保存",
     "payoutWallet": "入金ウォレット",
     "payoutWalletHint": "支払いを受け取るSolanaアドレス。変更はオンチェーンに記録されます。",
-    "cancelEdit": "キャンセル"
+    "cancelEdit": "キャンセル",
+    "createAnother": "新しいレストランを作成",
+    "switchRestaurant": "レストランを切り替え",
+    "yourRestaurants": "あなたのレストラン",
+    "selectRestaurant": "管理するレストランを選択"
   },
   "orders": {
     "title": "注文一覧",
@@ -104,7 +108,14 @@
     "startPreparing": "調理を開始",
     "markReady": "準備完了にする",
     "markDelivered": "配達済みにする",
-    "delivery": "配達"
+    "delivery": "配達",
+    "newOrders": "新しい注文",
+    "newOrdersBadge": "{count}件の新規",
+    "codeA": "受け取りコード",
+    "codeB": "配達コード",
+    "deliveryAddress": "配達先住所",
+    "noAddress": "配達先住所なし",
+    "refreshing": "更新中..."
   },
   "cart": {
     "emptyCart": "カートは空です",

@@ -87,7 +87,11 @@
     "saveSettings": "保存设置",
     "payoutWallet": "收款钱包",
     "payoutWalletHint": "接收付款的 Solana 地址。更改会记录在链上以便审计。",
-    "cancelEdit": "取消"
+    "cancelEdit": "取消",
+    "createAnother": "创建新餐厅",
+    "switchRestaurant": "切换餐厅",
+    "yourRestaurants": "我的餐厅",
+    "selectRestaurant": "选择要管理的餐厅"
   },
   "orders": {
     "title": "订单管理",
@@ -104,7 +108,14 @@
     "startPreparing": "开始制作",
     "markReady": "标记为已备好",
     "markDelivered": "标记为已送达",
-    "delivery": "配送"
+    "delivery": "配送",
+    "newOrders": "新订单",
+    "newOrdersBadge": "{count}个新订单",
+    "codeA": "取餐码",
+    "codeB": "配送码",
+    "deliveryAddress": "配送地址",
+    "noAddress": "无配送地址",
+    "refreshing": "刷新中..."
   },
   "cart": {
     "emptyCart": "购物车是空的",

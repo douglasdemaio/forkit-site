@@ -61,16 +61,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if wallet already has a restaurant
-    const existing = await prisma.restaurant.findUnique({
-      where: { wallet },
-    });
-    if (existing) {
-      return NextResponse.json(
-        { error: "Wallet already has a restaurant", restaurant: existing },
-        { status: 409 }
-      );
-    }
+    // A wallet can own multiple restaurants
 
     const body = await request.json();
     const { name, description, template, currency } = body;

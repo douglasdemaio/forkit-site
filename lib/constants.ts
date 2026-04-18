@@ -38,6 +38,7 @@ export const DELIVERY_TIMEOUT_SECONDS = 10800; // 3 hours
 // Network
 export const SOLANA_NETWORK =
   process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet";
+// Custom RPC via Tatum gateway for better reliability
 export const SOLANA_RPC_URL =
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.devnet.solana.com";
 

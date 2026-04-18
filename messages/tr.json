@@ -87,7 +87,11 @@
     "saveSettings": "Ayarları Kaydet",
     "payoutWallet": "Ödeme Cüzdanı",
     "payoutWalletHint": "Ödemeleri alacağınız Solana adresi. Değişiklikler denetim için zincir üzerinde kaydedilir.",
-    "cancelEdit": "İptal"
+    "cancelEdit": "İptal",
+    "createAnother": "Yeni Restoran Oluştur",
+    "switchRestaurant": "Restoran Değiştir",
+    "yourRestaurants": "Restoranların",
+    "selectRestaurant": "Yönetmek için bir restoran seç"
   },
   "orders": {
     "title": "Siparişler",
@@ -104,7 +108,14 @@
     "startPreparing": "Hazırlamaya Başla",
     "markReady": "Hazır Olarak İşaretle",
     "markDelivered": "Teslim Edildi Olarak İşaretle",
-    "delivery": "teslimat"
+    "delivery": "teslimat",
+    "newOrders": "Yeni Siparişler",
+    "newOrdersBadge": "{count} yeni",
+    "codeA": "Teslim Alma Kodu",
+    "codeB": "Teslimat Kodu",
+    "deliveryAddress": "Teslimat Adresi",
+    "noAddress": "Teslimat adresi yok",
+    "refreshing": "Yenileniyor..."
   },
   "cart": {
     "emptyCart": "Sepetin boş",

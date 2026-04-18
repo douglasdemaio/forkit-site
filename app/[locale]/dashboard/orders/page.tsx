@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
 import { useTranslations } from "next-intl";
@@ -13,6 +13,9 @@ interface OrderRow {
   totalAmount: number;
   deliveryFee: number;
   status: OrderStatus;
+  codeA: string | null;
+  codeB: string | null;
+  deliveryAddress: string | null;
   createdAt: string;
   contributions: { id: string; amount: number }[];
 }
@@ -34,6 +37,8 @@ export default function OrdersPage() {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const statusLabels: Record<OrderStatus, string> = {
     pending: t("statusPending"),
@@ -53,9 +58,25 @@ export default function OrdersPage() {
     cancelled: null,
   };
 
-  const loadOrders = useCallback(async () => {
+  const newOrderCount = orders.filter((o) => o.status === "funded").length;
+
+  const loadOrders = useCallback(async (silent = false) => {
     if (!token || !restaurantId) return;
-  }, [token, restaurantId]);
+    if (!silent) setRefreshing(true);
+    try {
+      const res = await fetch(`/api/orders?restaurantId=${restaurantId}`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data.orders || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (!silent) setRefreshing(false);
+    }
+  }, [token, restaurantId, getAuthHeaders]);
 
   const loadData = useCallback(async () => {
     if (!token) return;
@@ -81,11 +102,34 @@ export default function OrdersPage() {
     else setLoading(false);
   }, [token, loadData]);
 
+  // Load orders when restaurantId is set
+  useEffect(() => {
+    if (restaurantId && token) {
+      loadOrders();
+    }
+  }, [restaurantId, token, loadOrders]);
+
+  // Poll for new orders every 15 seconds
+  useEffect(() => {
+    if (!restaurantId || !token) return;
+
+    pollRef.current = setInterval(() => {
+      loadOrders(true);
+    }, 15000);
+
+    return () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    };
+  }, [restaurantId, token, loadOrders]);
+
   const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
       await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: newStatus }),
       });
       setOrders((prev) =>
@@ -120,12 +164,32 @@ export default function OrdersPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-forkit-dark">{t("title")}</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {t("subtitle")}
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-forkit-dark">{t("title")}</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {t("subtitle")}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {refreshing && (
+            <span className="text-xs text-gray-400">{t("refreshing")}</span>
+          )}
+        </div>
       </div>
+
+      {/* New orders notification banner */}
+      {newOrderCount > 0 && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl px-5 py-3 flex items-center gap-3">
+          <span className="text-2xl">🔔</span>
+          <div className="flex-1">
+            <span className="font-semibold text-blue-800">{t("newOrders")}</span>
+            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-600 text-white">
+              {t("newOrdersBadge", { count: newOrderCount })}
+            </span>
+          </div>
+        </div>
+      )}
 
       {orders.length === 0 ? (
         <div className="text-center py-20">
@@ -147,10 +211,15 @@ export default function OrdersPage() {
             const action = statusActions[order.status];
 
             return (
-              <div key={order.id} className="card p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div
+                key={order.id}
+                className={`card p-5 ${
+                  order.status === "funded" ? "ring-2 ring-blue-300 bg-blue-50/30" : ""
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap">
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           statusColors[order.status]
@@ -191,6 +260,34 @@ export default function OrdersPage() {
                         </span>
                       )}
                     </div>
+
+                    {/* Delivery address */}
+                    <div className="mt-2 text-sm">
+                      <span className="text-gray-500 font-medium">{t("deliveryAddress")}:</span>{" "}
+                      <span className="text-gray-700">
+                        {order.deliveryAddress || (
+                          <span className="italic text-gray-400">{t("noAddress")}</span>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Verification codes */}
+                    {(order.codeA || order.codeB) && (
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        {order.codeA && (
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                            <span className="text-xs text-orange-600 font-medium block">{t("codeA")}</span>
+                            <span className="text-lg font-bold font-mono text-orange-800 tracking-wider">{order.codeA}</span>
+                          </div>
+                        )}
+                        {order.codeB && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                            <span className="text-xs text-green-600 font-medium block">{t("codeB")}</span>
+                            <span className="text-lg font-bold font-mono text-green-800 tracking-wider">{order.codeB}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {action && (

@@ -9,7 +9,7 @@ datasource db {
 
 model Restaurant {
   id          String     @id @default(uuid())
-  wallet      String     @unique
+  wallet      String
   payoutWallet String?    // Separate payout address (defaults to wallet if null)
   name        String
   slug        String     @unique
@@ -24,6 +24,8 @@ model Restaurant {
   updatedAt   DateTime   @updatedAt
   menuItems   MenuItem[]
   orders      Order[]
+
+  @@index([wallet])
 }
 
 model MenuItem {
@@ -54,6 +56,8 @@ model Order {
   escrowTarget           Float          @default(0)
   status                 String         @default("pending") // pending, funded, preparing, ready, delivered, cancelled
   onChainOrderId         String?
+  codeA                  String?        // Pickup verification code (plaintext, shown to restaurant)
+  codeB                  String?        // Delivery verification code (plaintext, shown to customer)
   codeAHash              String?
   codeBHash              String?
   deliveryAddress        String?
