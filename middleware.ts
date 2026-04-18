@@ -4,7 +4,10 @@ import {locales, defaultLocale} from './i18n-config';
 export default createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'as-needed'
+  localePrefix: 'as-needed',
+  // Don't auto-detect language from Accept-Language header.
+  // Users choose their language via the language switcher.
+  localeDetection: false
 });
 
 export const config = {
