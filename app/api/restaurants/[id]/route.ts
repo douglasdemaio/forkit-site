@@ -76,7 +76,20 @@ export async function PUT(
       currency,
       deliveryFee,
       published,
+      payoutWallet,
     } = body;
+
+    // Validate Solana address if provided
+    if (payoutWallet !== undefined && payoutWallet !== null && payoutWallet !== "") {
+      // Basic Solana base58 address validation (32-44 chars, base58 charset)
+      const base58Regex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+      if (!base58Regex.test(payoutWallet)) {
+        return NextResponse.json(
+          { error: "Invalid Solana wallet address" },
+          { status: 400 }
+        );
+      }
+    }
 
     const updated = await prisma.restaurant.update({
       where: { id: params.id },
@@ -89,6 +102,7 @@ export async function PUT(
         ...(currency !== undefined && { currency }),
         ...(deliveryFee !== undefined && { deliveryFee: parseFloat(deliveryFee) }),
         ...(published !== undefined && { published }),
+        ...(payoutWallet !== undefined && { payoutWallet: payoutWallet || null }),
       },
     });
 

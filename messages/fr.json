@@ -85,6 +85,8 @@
     "cancel": "Annuler",
     "editSettings": "Modifier",
     "saveSettings": "Enregistrer les paramètres",
+    "payoutWallet": "Portefeuille de paiement",
+    "payoutWalletHint": "Adresse Solana où vous recevez les paiements. Les modifications sont enregistrées on-chain.",
     "cancelEdit": "Annuler"
   },
   "orders": {

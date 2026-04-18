@@ -85,6 +85,8 @@
     "cancel": "İptal",
     "editSettings": "Düzenle",
     "saveSettings": "Ayarları Kaydet",
+    "payoutWallet": "Ödeme Cüzdanı",
+    "payoutWalletHint": "Ödemeleri alacağınız Solana adresi. Değişiklikler denetim için zincir üzerinde kaydedilir.",
     "cancelEdit": "İptal"
   },
   "orders": {

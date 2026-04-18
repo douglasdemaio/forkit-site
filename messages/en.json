@@ -85,7 +85,9 @@
     "cancel": "Cancel",
     "editSettings": "Edit",
     "saveSettings": "Save Settings",
-    "cancelEdit": "Cancel"
+    "cancelEdit": "Cancel",
+    "payoutWallet": "Payout Wallet",
+    "payoutWalletHint": "Solana address where you receive payments. Changes are recorded on-chain for auditing."
   },
   "orders": {
     "title": "Orders",

@@ -85,6 +85,8 @@
     "cancel": "キャンセル",
     "editSettings": "編集",
     "saveSettings": "設定を保存",
+    "payoutWallet": "入金ウォレット",
+    "payoutWalletHint": "支払いを受け取るSolanaアドレス。変更はオンチェーンに記録されます。",
     "cancelEdit": "キャンセル"
   },
   "orders": {

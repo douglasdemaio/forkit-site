@@ -85,6 +85,8 @@
     "cancel": "Cancelar",
     "editSettings": "Editar",
     "saveSettings": "Guardar ajustes",
+    "payoutWallet": "Billetera de cobro",
+    "payoutWalletHint": "Dirección Solana donde recibes los pagos. Los cambios quedan registrados en la blockchain.",
     "cancelEdit": "Cancelar"
   },
   "orders": {

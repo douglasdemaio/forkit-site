@@ -85,6 +85,8 @@
     "cancel": "Cancelar",
     "editSettings": "Editar",
     "saveSettings": "Salvar configurações",
+    "payoutWallet": "Carteira de recebimento",
+    "payoutWalletHint": "Endereço Solana onde você recebe os pagamentos. Alterações são registradas on-chain.",
     "cancelEdit": "Cancelar"
   },
   "orders": {

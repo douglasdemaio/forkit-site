@@ -85,6 +85,8 @@
     "cancel": "Abbrechen",
     "editSettings": "Bearbeiten",
     "saveSettings": "Einstellungen speichern",
+    "payoutWallet": "Auszahlungs-Wallet",
+    "payoutWalletHint": "Solana-Adresse für deine Zahlungseingänge. Änderungen werden on-chain protokolliert.",
     "cancelEdit": "Abbrechen"
   },
   "orders": {

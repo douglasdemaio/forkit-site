@@ -10,6 +10,7 @@ datasource db {
 model Restaurant {
   id          String     @id @default(uuid())
   wallet      String     @unique
+  payoutWallet String?    // Separate payout address (defaults to wallet if null)
   name        String
   slug        String     @unique
   description String     @default("")

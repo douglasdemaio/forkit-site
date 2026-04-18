@@ -10,6 +10,8 @@ import Image from "next/image";
 
 interface Restaurant {
   id: string;
+  wallet: string;
+  payoutWallet: string | null;
   name: string;
   slug: string;
   description: string;
@@ -36,6 +38,7 @@ export default function DashboardPage() {
   const [editingSettings, setEditingSettings] = useState(false);
   const [editCurrency, setEditCurrency] = useState("");
   const [editDeliveryFee, setEditDeliveryFee] = useState(0);
+  const [editPayoutWallet, setEditPayoutWallet] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
 
   const loadRestaurant = useCallback(async () => {
@@ -350,6 +353,7 @@ export default function DashboardPage() {
                 onClick={() => {
                   setEditCurrency(restaurant.currency);
                   setEditDeliveryFee(restaurant.deliveryFee);
+                  setEditPayoutWallet(restaurant.payoutWallet || restaurant.wallet);
                   setEditingSettings(true);
                 }}
                 className="text-sm text-forkit-orange hover:text-orange-600 font-medium transition-colors"
@@ -383,6 +387,17 @@ export default function DashboardPage() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
                 />
               </div>
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">{t("payoutWallet")}</label>
+                <input
+                  type="text"
+                  value={editPayoutWallet}
+                  onChange={(e) => setEditPayoutWallet(e.target.value)}
+                  placeholder={restaurant.wallet}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                />
+                <p className="mt-1 text-xs text-gray-400">{t("payoutWalletHint")}</p>
+              </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">{t("slug")}</span>
                 <span className="font-mono text-xs">{restaurant.slug}</span>
@@ -396,7 +411,7 @@ export default function DashboardPage() {
                       const res = await fetch(`/api/restaurants/${restaurant.id}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-                        body: JSON.stringify({ currency: editCurrency, deliveryFee: editDeliveryFee }),
+                        body: JSON.stringify({ currency: editCurrency, deliveryFee: editDeliveryFee, payoutWallet: editPayoutWallet }),
                       });
                       if (res.ok) {
                         const updated = await res.json();
@@ -432,6 +447,12 @@ export default function DashboardPage() {
                 <span className="text-gray-500">{t("deliveryFee")}</span>
                 <span className="font-medium">
                   {restaurant.deliveryFee.toFixed(2)} {restaurant.currency}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">{t("payoutWallet")}</span>
+                <span className="font-mono text-xs truncate max-w-[140px]" title={restaurant.payoutWallet || restaurant.wallet}>
+                  {(restaurant.payoutWallet || restaurant.wallet).slice(0, 8)}...{(restaurant.payoutWallet || restaurant.wallet).slice(-4)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">

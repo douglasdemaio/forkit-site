@@ -85,6 +85,8 @@
     "cancel": "取消",
     "editSettings": "编辑",
     "saveSettings": "保存设置",
+    "payoutWallet": "收款钱包",
+    "payoutWalletHint": "接收付款的 Solana 地址。更改会记录在链上以便审计。",
     "cancelEdit": "取消"
   },
   "orders": {
