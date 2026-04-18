@@ -400,7 +400,7 @@ export default function DashboardPage() {
           {/* Dashboard cards */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
-              href="/dashboard/menu"
+              href={`/dashboard/menu?restaurantId=${restaurant.id}`}
               className="card p-6 hover:border-forkit-orange/30 transition-colors group"
             >
               <div className="text-3xl mb-3">📋</div>
@@ -413,7 +413,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/dashboard/template"
+              href={`/dashboard/template?restaurantId=${restaurant.id}`}
               className="card p-6 hover:border-forkit-orange/30 transition-colors group"
             >
               <div className="text-3xl mb-3">🎨</div>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href="/dashboard/orders"
+              href={`/dashboard/orders?restaurantId=${restaurant.id}`}
               className="card p-6 hover:border-forkit-orange/30 transition-colors group"
             >
               <div className="text-3xl mb-3">📦</div>

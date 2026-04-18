@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
+import { useSearchParams } from "next/navigation";
 import { templates } from "@/lib/templates";
 import TemplatePreview from "@/components/template-preview";
 import ImageUpload from "@/components/image-upload";
@@ -10,7 +11,9 @@ import ImageUpload from "@/components/image-upload";
 export default function TemplatePage() {
   const { connected } = useWallet();
   const { token, getAuthHeaders, authenticate } = useWalletAuth();
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const restaurantIdParam = searchParams.get("restaurantId");
+  const [restaurantId, setRestaurantId] = useState<string | null>(restaurantIdParam);
   const [selectedTemplate, setSelectedTemplate] = useState("classic-bistro");
   const [logo, setLogo] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
@@ -26,7 +29,10 @@ export default function TemplatePage() {
       });
       if (res.ok) {
         const data = await res.json();
-        const restaurant = data.restaurant;
+        const restaurants = data.restaurants || (data.restaurant ? [data.restaurant] : []);
+        const restaurant = restaurantIdParam
+          ? restaurants.find((r: any) => r.id === restaurantIdParam) || restaurants[0]
+          : restaurants[0];
         if (restaurant) {
           setRestaurantId(restaurant.id);
           setSelectedTemplate(restaurant.template);
@@ -40,7 +46,7 @@ export default function TemplatePage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders]);
+  }, [token, getAuthHeaders, restaurantIdParam]);
 
   useEffect(() => {
     if (token) loadData();

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { OrderStatus } from "@/lib/types";
 
@@ -78,8 +79,17 @@ export default function OrdersPage() {
     }
   }, [token, restaurantId, getAuthHeaders]);
 
+  const searchParams = useSearchParams();
+  const restaurantIdParam = searchParams.get("restaurantId");
+
   const loadData = useCallback(async () => {
     if (!token) return;
+    // If restaurant ID is in URL, use it directly
+    if (restaurantIdParam) {
+      setRestaurantId(restaurantIdParam);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch("/api/restaurants/mine", {
         headers: getAuthHeaders(),
@@ -95,7 +105,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders]);
+  }, [token, getAuthHeaders, restaurantIdParam]);
 
   useEffect(() => {
     if (token) loadData();

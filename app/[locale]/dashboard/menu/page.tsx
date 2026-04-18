@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
+import { useSearchParams } from "next/navigation";
 import { MenuItemData } from "@/lib/types";
 import MenuItemCard from "@/components/menu-item-card";
 import ImageUpload from "@/components/image-upload";
@@ -29,7 +30,9 @@ const emptyForm: FormData = {
 export default function MenuEditorPage() {
   const { connected } = useWallet();
   const { token, getAuthHeaders, authenticate } = useWalletAuth();
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const restaurantIdParam = searchParams.get("restaurantId");
+  const [restaurantId, setRestaurantId] = useState<string | null>(restaurantIdParam);
   const [restaurantSlug, setRestaurantSlug] = useState<string>("");
   const [restaurantName, setRestaurantName] = useState<string>("");
   const [currency, setCurrency] = useState("USDC");
@@ -47,7 +50,11 @@ export default function MenuEditorPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        const restaurant = data.restaurant;
+        const restaurants = data.restaurants || (data.restaurant ? [data.restaurant] : []);
+        // Use URL param restaurant, or fall back to first
+        const restaurant = restaurantIdParam
+          ? restaurants.find((r: any) => r.id === restaurantIdParam) || restaurants[0]
+          : restaurants[0];
         if (restaurant) {
           setRestaurantId(restaurant.id);
           setRestaurantSlug(restaurant.slug);
@@ -66,7 +73,7 @@ export default function MenuEditorPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders]);
+  }, [token, getAuthHeaders, restaurantIdParam]);
 
   useEffect(() => {
     if (token) loadData();
