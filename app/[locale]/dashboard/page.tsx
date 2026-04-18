@@ -34,21 +34,14 @@ export default function DashboardPage() {
   const loadRestaurant = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch("/api/restaurants", {
+      const res = await fetch("/api/restaurants/mine", {
         headers: getAuthHeaders(),
       });
-      const data = await res.json();
-      const createRes = await fetch("/api/restaurants", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({ name: "__probe__" }),
-      });
-      if (createRes.status === 409) {
-        const { restaurant: existing } = await createRes.json();
-        setRestaurant(existing);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.restaurant) {
+          setRestaurant(data.restaurant);
+        }
       }
     } catch (err) {
       console.error(err);

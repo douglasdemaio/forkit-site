@@ -60,15 +60,14 @@ export default function OrdersPage() {
   const loadData = useCallback(async () => {
     if (!token) return;
     try {
-      const createRes = await fetch("/api/restaurants", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-        body: JSON.stringify({ name: "__probe__" }),
+      const res = await fetch("/api/restaurants/mine", {
+        headers: getAuthHeaders(),
       });
-
-      if (createRes.status === 409) {
-        const { restaurant } = await createRes.json();
-        setRestaurantId(restaurant.id);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.restaurant) {
+          setRestaurantId(data.restaurant.id);
+        }
       }
     } catch (err) {
       console.error(err);
