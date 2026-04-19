@@ -14,17 +14,25 @@ ForkIt Site lets anyone create a professional restaurant page and start acceptin
 
 1. **Connect** your Solana wallet (Phantom, Solflare)
 2. **Choose a template** — Classic Bistro, Modern Minimal, Street Food, or Fine Dining
-3. **Upload** food photos, set menu items with names, descriptions, and prices (USDC/EURC)
-4. **Publish** your page — it's live and accepting orders instantly
+3. **Customize your brand** — pick 3 hex colors (primary, secondary, accent) and choose from 26 open-source Google Fonts; 8 preset palettes provided
+4. **Upload** food photos, set menu items with names, descriptions, and prices (USDC/EURC)
+5. **Reorder menu items** — drag-and-drop to arrange your menu in any order you like
+6. **Run multiple restaurants** from a single wallet — independent menus, branding, and publish state per location
+7. **Publish** your page — it's live and accepting orders instantly
+8. **Manage orders** — see incoming orders in real-time (15-second polling with notification banner)
+9. **Close out orders with verification** — ask the customer for their pickup/delivery code and enter it to mark the order as delivered
+10. **Separate payout wallet** (optional) — direct earnings to a different address from your login wallet; every change is recorded on-chain for auditability
 
 ### For Customers
 
 1. **Browse** restaurant pages
 2. **Add items** to your shopping cart
 3. **Checkout** via the ForkIt smart contract (escrow-based payment on Solana)
-4. **Split orders** with friends — share a link and up to 10 people can contribute (friends can chip in even after funding to reimburse the original payer)
-5. **Schedule delivery/pickup** — choose a preferred time or order for ASAP
-6. **Track** your order status in real-time
+4. **Enter delivery address** at checkout (or leave blank for pickup)
+5. **Split orders** with friends — share a link and up to 10 people can contribute (friends can chip in even after funding to reimburse the original payer)
+6. **Schedule delivery/pickup** — choose a preferred time or order for ASAP
+7. **Track** your order status in real-time
+8. **Receive a verification code** — show your delivery/pickup code to the restaurant to close out the order
 
 ---
 
@@ -56,9 +64,12 @@ ForkIt uses three on-chain programs:
 | Loyalty | `6DaFmi7haz2Ci9sXaHRviz3biwbmTwipvwc9L9cdeugR` |
 
 - **Protocol fee:** 0.02% (2 basis points)
-- **Customer deposit:** 2% (refundable on delivery)
+- **Customer deposit:** None — escrow target is food + delivery only; post-funding contributions are proportionally reimbursed via `claim_deposit` after settlement
+- **Delivery timeout:** 3 hours
+- **Pickup timeout:** 45 minutes
 - **Max contributors per order:** 10
 - **Treasury:** `BiP5PJuUiXPYCFx98RMCGCnRhdUVrkxSke9C6y2ZohQ9`
+- **Payout wallet changes** are recorded on-chain via the `PayoutWalletChanged` event for auditability
 
 Token mints (devnet):
 - USDC: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
@@ -136,19 +147,22 @@ npx prisma generate
 ```
 forkit-site/
 ├── app/                          # Next.js App Router pages
-│   ├── page.tsx                  # Landing page
-│   ├── api/                      # API routes
-│   │   ├── auth/                 # Wallet auth (nonce + verify)
-│   │   ├── restaurants/          # CRUD restaurants + menus
-│   │   ├── orders/               # Create orders + contributions
-│   │   └── upload/               # Image upload
-│   ├── restaurants/              # Public restaurant browsing
-│   ├── dashboard/                # Owner dashboard (menu, template, orders)
-│   ├── order/                    # Cart + order tracking
-│   └── connect/                  # Wallet connection page
-├── components/                   # React components (incl. language-switcher)
+│   ├── [locale]/                 # Locale-prefixed routes (de, es, fr, ja, ...)
+│   │   ├── page.tsx              # Landing page
+│   │   ├── dashboard/            # Owner dashboard (menu, template, orders)
+│   │   ├── restaurants/          # Public restaurant browsing
+│   │   ├── order/                # Cart + order tracking
+│   │   └── connect/              # Wallet connection page
+│   └── api/                      # API routes (locale-agnostic)
+│       ├── auth/                 # Wallet auth (nonce + verify)
+│       ├── restaurants/          # CRUD restaurants + menus
+│       │   └── [id]/menu/reorder # Drag-and-drop persistence
+│       ├── orders/               # Create orders + contributions
+│       │   └── [id]/verify       # Restaurant closes order with customer's code
+│       └── upload/               # Image upload
+├── components/                   # React components (incl. language-switcher, sortable-menu-item)
 ├── hooks/                        # Custom hooks (wallet, escrow, cart, orders)
-├── lib/                          # Utilities (constants, db, auth, types, templates)
+├── lib/                          # Utilities (constants, db, auth, types, templates, fonts)
 ├── messages/                     # i18n translation JSON files (en, de, es, fr, ja, zh, pt, ko, ar, tr)
 ├── i18n.ts                       # next-intl configuration
 ├── middleware.ts                 # Locale routing middleware
@@ -201,7 +215,7 @@ To add a new language:
 
 ---
 
-## Templates
+## Templates & Custom Branding
 
 Four built-in templates, each providing a different CSS theme/layout:
 
@@ -212,6 +226,23 @@ Four built-in templates, each providing a different CSS theme/layout:
 | **Street Food** | Vibrant, colorful. Food trucks, taco joints |
 | **Fine Dining** | Dark, elegant. Upscale restaurants, wine bars |
 
+### Custom Branding
+
+Restaurant owners can override template defaults with custom branding:
+
+- **3 custom hex colors** — Primary (buttons/headings), Secondary (backgrounds), Accent (text/details)
+- **8 curated palette presets** — Warm Classic, Forest & Cream, Ocean Blue, Rose Gold, Minimal Mono, Sunset, Matcha, Midnight Wine
+- **26 open-source Google Fonts** across 5 categories:
+  - **Sans-serif**: Inter, Poppins, Montserrat, Raleway, Nunito, Work Sans, DM Sans, Quicksand
+  - **Serif**: Playfair Display, Merriweather, Lora, Cormorant Garamond, Libre Baskerville, Crimson Text
+  - **Display**: Bebas Neue, Abril Fatface, Righteous, Lobster, Pacifico, Amatic SC, Fredoka
+  - **Handwriting**: Dancing Script, Caveat, Kalam, Satisfy
+  - **Monospace**: JetBrains Mono, Space Mono
+- **Live preview** updates as you pick colors and fonts
+- **Drag-to-reorder menu items** — arrange your menu in any order; changes save automatically
+
+All fonts are licensed under SIL Open Font License (OFL) or Apache 2.0.
+
 ---
 
 ## Related Repos
@@ -220,6 +251,20 @@ Four built-in templates, each providing a different CSS theme/layout:
 |------|-------------|
 | [forkit](https://github.com/douglasdemaio/forkit) | Protocol — Solana programs (escrow, registry, loyalty), Express backend, test suite |
 | [forkme](https://github.com/douglasdemaio/forkme) | Mobile companion — React Native (Expo), iOS/Android customer + seeker apps |
+
+---
+
+## Feature Highlights (recent additions)
+
+- 🎨 **Custom branding** — 3 hex colors + Google Fonts with live preview
+- ☰ **Drag-and-drop menu reordering** — powered by @dnd-kit
+- 🔐 **Order code verification** — restaurant closes out orders by confirming the customer's delivery/pickup code
+- 🏪 **Multi-restaurant support** — run multiple locations from one wallet
+- 📍 **Delivery address field** at checkout
+- 💎 **Separate payout wallet** — on-chain audit via `PayoutWalletChanged` event
+- ⚡ **Post-funding contributions** — friends can chip in to reimburse the original payer after the order is funded
+- ⏰ **Scheduled orders** — set a preferred delivery or pickup time, or leave blank for ASAP
+- 🌍 **10 languages** with full RTL for Arabic
 
 ---
 
