@@ -115,7 +115,14 @@
     "codeB": "配送码",
     "deliveryAddress": "配送地址",
     "noAddress": "无配送地址",
-    "refreshing": "刷新中..."
+    "refreshing": "刷新中...",
+    "confirmWithCode": "确认并关闭订单",
+    "confirmWithCodeDesc": "向顾客索要代码以关闭此订单",
+    "confirmAndClose": "确认",
+    "verifying": "验证中...",
+    "invalidCode": "无效代码",
+    "codeRequired": "输入代码",
+    "verifyFailed": "验证失败"
   },
   "cart": {
     "emptyCart": "购物车是空的",

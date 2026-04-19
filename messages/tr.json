@@ -115,7 +115,14 @@
     "codeB": "Teslimat Kodu",
     "deliveryAddress": "Teslimat Adresi",
     "noAddress": "Teslimat adresi yok",
-    "refreshing": "Yenileniyor..."
+    "refreshing": "Yenileniyor...",
+    "confirmWithCode": "Siparişi Onayla ve Kapat",
+    "confirmWithCodeDesc": "Bu siparişi kapatmak için müşteriden kodu isteyin",
+    "confirmAndClose": "Onayla",
+    "verifying": "Doğrulanıyor...",
+    "invalidCode": "Geçersiz kod",
+    "codeRequired": "Bir kod girin",
+    "verifyFailed": "Doğrulama başarısız"
   },
   "cart": {
     "emptyCart": "Sepetin boş",

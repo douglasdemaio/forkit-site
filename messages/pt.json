@@ -115,7 +115,14 @@
     "codeB": "Código de entrega",
     "deliveryAddress": "Endereço de entrega",
     "noAddress": "Sem endereço de entrega",
-    "refreshing": "Atualizando..."
+    "refreshing": "Atualizando...",
+    "confirmWithCode": "Confirmar e fechar pedido",
+    "confirmWithCodeDesc": "Peça ao cliente o código para fechar este pedido",
+    "confirmAndClose": "Confirmar",
+    "verifying": "Verificando...",
+    "invalidCode": "Código inválido",
+    "codeRequired": "Insira um código",
+    "verifyFailed": "Verificação falhou"
   },
   "cart": {
     "emptyCart": "Seu carrinho está vazio",

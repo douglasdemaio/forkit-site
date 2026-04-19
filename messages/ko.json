@@ -115,7 +115,14 @@
     "codeB": "배달 코드",
     "deliveryAddress": "배달 주소",
     "noAddress": "배달 주소 없음",
-    "refreshing": "새로고침 중..."
+    "refreshing": "새로고침 중...",
+    "confirmWithCode": "주문 확인 및 종료",
+    "confirmWithCodeDesc": "고객에게 코드를 요청하여 주문을 종료하세요",
+    "confirmAndClose": "확인",
+    "verifying": "확인 중...",
+    "invalidCode": "잘못된 코드",
+    "codeRequired": "코드를 입력하세요",
+    "verifyFailed": "확인 실패"
   },
   "cart": {
     "emptyCart": "장바구니가 비어있어요",

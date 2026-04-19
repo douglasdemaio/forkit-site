@@ -115,7 +115,14 @@
     "codeB": "رمز التوصيل",
     "deliveryAddress": "عنوان التوصيل",
     "noAddress": "لا يوجد عنوان توصيل",
-    "refreshing": "جارٍ التحديث..."
+    "refreshing": "جارٍ التحديث...",
+    "confirmWithCode": "تأكيد وإغلاق الطلب",
+    "confirmWithCodeDesc": "اطلب من العميل الرمز لإغلاق هذا الطلب",
+    "confirmAndClose": "تأكيد",
+    "verifying": "يتم التحقق...",
+    "invalidCode": "رمز غير صالح",
+    "codeRequired": "أدخل الرمز",
+    "verifyFailed": "فشل التحقق"
   },
   "cart": {
     "emptyCart": "سلتك فارغة",

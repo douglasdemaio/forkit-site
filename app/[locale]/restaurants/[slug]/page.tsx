@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getTemplate, getTemplateStyles } from "@/lib/templates";
 import { MenuItemData } from "@/lib/types";
 import MenuItemCard from "@/components/menu-item-card";
+import { getFont, googleFontsUrl } from "@/lib/fonts";
 
 interface RestaurantWithMenu {
   id: string;
@@ -19,6 +20,10 @@ interface RestaurantWithMenu {
   banner: string | null;
   currency: string;
   deliveryFee: number;
+  colorPrimary: string | null;
+  colorSecondary: string | null;
+  colorAccent: string | null;
+  fontFamily: string | null;
   menuItems: MenuItemData[];
 }
 
@@ -66,8 +71,32 @@ export default function RestaurantPage() {
   }
 
   const template = getTemplate(restaurant.template);
-  const styles = getTemplateStyles(restaurant.template);
-  const categories = ["All", ...new Set(restaurant.menuItems.map((i) => i.category))];
+  const baseStyles = getTemplateStyles(restaurant.template);
+
+  // Apply custom branding: colors override template defaults; font overrides default font.
+  const primary = restaurant.colorPrimary || template.colors.primary;
+  const secondary = restaurant.colorSecondary || template.colors.secondary;
+  const accent = restaurant.colorAccent || template.colors.text;
+  const font = getFont(restaurant.fontFamily);
+  const fontStack = font?.stack || (baseStyles as any).fontFamily || "system-ui, sans-serif";
+  const fontUrl = restaurant.fontFamily ? googleFontsUrl([restaurant.fontFamily]) : "";
+
+  // Merged color palette for use below
+  const colors = {
+    primary,
+    secondary,
+    text: accent,
+    background: secondary,
+  };
+
+  const styles = {
+    ...baseStyles,
+    backgroundColor: secondary,
+    color: accent,
+    fontFamily: fontStack,
+  };
+
+  const categories = ["All", ...Array.from(new Set(restaurant.menuItems.map((i) => i.category)))];
   const filteredItems =
     activeCategory === "All"
       ? restaurant.menuItems
@@ -75,6 +104,10 @@ export default function RestaurantPage() {
 
   return (
     <div style={styles} className="min-h-screen">
+      {fontUrl && (
+        /* eslint-disable-next-line @next/next/no-css-tags */
+        <link href={fontUrl} rel="stylesheet" />
+      )}
       {/* Banner */}
       <div className="relative h-64 lg:h-80 overflow-hidden">
         {restaurant.banner ? (
@@ -88,7 +121,7 @@ export default function RestaurantPage() {
           <div
             className="h-full"
             style={{
-              background: `linear-gradient(135deg, ${template.colors.primary}, ${template.colors.secondary})`,
+              background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
             }}
           />
         )}
@@ -138,10 +171,10 @@ export default function RestaurantPage() {
               style={{
                 backgroundColor:
                   activeCategory === cat
-                    ? template.colors.primary
-                    : template.colors.primary + "15",
+                    ? colors.primary
+                    : colors.primary + "15",
                 color:
-                  activeCategory === cat ? "#fff" : template.colors.primary,
+                  activeCategory === cat ? "#fff" : colors.primary,
               }}
             >
               {cat}
@@ -154,8 +187,8 @@ export default function RestaurantPage() {
           <div
             className="mb-6 p-3 rounded-xl text-sm flex items-center gap-2"
             style={{
-              backgroundColor: template.colors.primary + "10",
-              color: template.colors.text,
+              backgroundColor: colors.primary + "10",
+              color: colors.text,
             }}
           >
             🚚 Delivery fee: {restaurant.deliveryFee.toFixed(2)}{" "}

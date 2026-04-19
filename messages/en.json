@@ -115,7 +115,14 @@
     "codeB": "Delivery Code",
     "deliveryAddress": "Delivery Address",
     "noAddress": "No delivery address",
-    "refreshing": "Refreshing..."
+    "refreshing": "Refreshing...",
+    "confirmWithCode": "Confirm & Close Order",
+    "confirmWithCodeDesc": "Ask the customer for their code to close this order",
+    "confirmAndClose": "Confirm",
+    "verifying": "Verifying...",
+    "invalidCode": "Invalid code",
+    "codeRequired": "Enter a code",
+    "verifyFailed": "Verification failed"
   },
   "cart": {
     "emptyCart": "Your cart is empty",

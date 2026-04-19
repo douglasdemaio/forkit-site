@@ -20,6 +20,11 @@ model Restaurant {
   currency    String     @default("USDC")
   deliveryFee Float      @default(0)
   published   Boolean    @default(false)
+  // Branding: 3 custom hex colors + font
+  colorPrimary    String?    // e.g. "#f9a825" - headings, buttons
+  colorSecondary  String?    // e.g. "#0d1421" - backgrounds
+  colorAccent     String?    // e.g. "#ffffff" - text/details
+  fontFamily      String?    // Google Fonts family name, e.g. "Playfair Display"
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   menuItems   MenuItem[]

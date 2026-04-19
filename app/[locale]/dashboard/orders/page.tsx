@@ -150,6 +150,44 @@ export default function OrdersPage() {
     }
   };
 
+  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [verifyError, setVerifyError] = useState<Record<string, string>>({});
+
+  const verifyCode = async (orderId: string) => {
+    const code = (codeInputs[orderId] || "").trim();
+    if (!code) {
+      setVerifyError((e) => ({ ...e, [orderId]: t("codeRequired") }));
+      return;
+    }
+    setVerifyingId(orderId);
+    setVerifyError((e) => ({ ...e, [orderId]: "" }));
+    try {
+      const res = await fetch(`/api/orders/${orderId}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (res.ok && data.matched) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: "delivered" } : o))
+        );
+        setCodeInputs((p) => ({ ...p, [orderId]: "" }));
+      } else {
+        setVerifyError((e) => ({
+          ...e,
+          [orderId]: data.error || t("invalidCode"),
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+      setVerifyError((e) => ({ ...e, [orderId]: t("verifyFailed") }));
+    } finally {
+      setVerifyingId(null);
+    }
+  };
+
   if (!connected || !token) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
@@ -309,6 +347,48 @@ export default function OrdersPage() {
                     </button>
                   )}
                 </div>
+
+                {/* Code verification: close out order once customer confirms delivery/pickup */}
+                {(order.status === "ready" || order.status === "preparing") && (order.codeA || order.codeB) && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-semibold text-gray-700">
+                        🔐 {t("confirmWithCode")}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {t("confirmWithCodeDesc")}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={codeInputs[order.id] || ""}
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase();
+                          setCodeInputs((p) => ({ ...p, [order.id]: val }));
+                          setVerifyError((er) => ({ ...er, [order.id]: "" }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") verifyCode(order.id);
+                        }}
+                        placeholder="XXXX-XXXX"
+                        className="flex-1 px-3 py-2 border rounded-lg font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                        maxLength={16}
+                        disabled={verifyingId === order.id}
+                      />
+                      <button
+                        onClick={() => verifyCode(order.id)}
+                        disabled={verifyingId === order.id || !codeInputs[order.id]}
+                        className="btn-primary text-sm whitespace-nowrap disabled:opacity-50"
+                      >
+                        {verifyingId === order.id ? t("verifying") : t("confirmAndClose")}
+                      </button>
+                    </div>
+                    {verifyError[order.id] && (
+                      <p className="text-sm text-red-600 mt-2">❌ {verifyError[order.id]}</p>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}

@@ -5,8 +5,23 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
 import { useSearchParams } from "next/navigation";
 import { MenuItemData } from "@/lib/types";
-import MenuItemCard from "@/components/menu-item-card";
 import ImageUpload from "@/components/image-upload";
+import SortableMenuItem from "@/components/sortable-menu-item";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface FormData {
   id?: string;
@@ -41,6 +56,35 @@ export default function MenuEditorPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !restaurantId) return;
+
+    const oldIndex = items.findIndex((i) => i.id === active.id);
+    const newIndex = items.findIndex((i) => i.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reordered = arrayMove(items, oldIndex, newIndex);
+    setItems(reordered); // optimistic update
+
+    try {
+      await fetch(`/api/restaurants/${restaurantId}/menu/reorder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ orderedIds: reordered.map((i) => i.id) }),
+      });
+    } catch (err) {
+      console.error(err);
+      // revert on error
+      loadData();
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!token) return;
@@ -311,21 +355,34 @@ export default function MenuEditorPage() {
           </p>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
-            <MenuItemCard
-              key={item.id}
-              item={item}
-              restaurantId={restaurantId!}
-              restaurantSlug={restaurantSlug}
-              restaurantName={restaurantName}
-              currency={currency}
-              editable
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+        <>
+          <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
+            <span className="text-base">☰</span>
+            Drag the handle on the top-left of each item to reorder. Changes save automatically.
+          </p>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {items.map((item) => (
+                  <SortableMenuItem
+                    key={item.id}
+                    item={item}
+                    restaurantId={restaurantId!}
+                    restaurantSlug={restaurantSlug}
+                    restaurantName={restaurantName}
+                    currency={currency}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </>
       )}
     </div>
   );

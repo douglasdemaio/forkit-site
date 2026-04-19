@@ -115,7 +115,14 @@
     "codeB": "Code de livraison",
     "deliveryAddress": "Adresse de livraison",
     "noAddress": "Pas d'adresse de livraison",
-    "refreshing": "Actualisation..."
+    "refreshing": "Actualisation...",
+    "confirmWithCode": "Confirmer et clôturer la commande",
+    "confirmWithCodeDesc": "Demandez au client son code pour clôturer cette commande",
+    "confirmAndClose": "Confirmer",
+    "verifying": "Vérification...",
+    "invalidCode": "Code invalide",
+    "codeRequired": "Entrez un code",
+    "verifyFailed": "Échec de la vérification"
   },
   "cart": {
     "emptyCart": "Ton panier est vide",

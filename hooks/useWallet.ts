@@ -67,7 +67,7 @@ export function useWalletAuth() {
     disconnect();
   }, [disconnect]);
 
-  const getAuthHeaders = useCallback(() => {
+  const getAuthHeaders = useCallback((): Record<string, string> => {
     if (!token) return {};
     return { Authorization: `Bearer ${token}` };
   }, [token]);

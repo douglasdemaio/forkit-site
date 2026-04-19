@@ -77,7 +77,26 @@ export async function PUT(
       deliveryFee,
       published,
       payoutWallet,
+      colorPrimary,
+      colorSecondary,
+      colorAccent,
+      fontFamily,
     } = body;
+
+    // Validate hex colors if provided
+    const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    for (const [name, val] of [
+      ["colorPrimary", colorPrimary],
+      ["colorSecondary", colorSecondary],
+      ["colorAccent", colorAccent],
+    ]) {
+      if (val !== undefined && val !== null && val !== "" && !hexRegex.test(val as string)) {
+        return NextResponse.json(
+          { error: `Invalid hex color for ${name}` },
+          { status: 400 }
+        );
+      }
+    }
 
     // Validate Solana address if provided
     if (payoutWallet !== undefined && payoutWallet !== null && payoutWallet !== "") {
@@ -103,6 +122,10 @@ export async function PUT(
         ...(deliveryFee !== undefined && { deliveryFee: parseFloat(deliveryFee) }),
         ...(published !== undefined && { published }),
         ...(payoutWallet !== undefined && { payoutWallet: payoutWallet || null }),
+        ...(colorPrimary !== undefined && { colorPrimary: colorPrimary || null }),
+        ...(colorSecondary !== undefined && { colorSecondary: colorSecondary || null }),
+        ...(colorAccent !== undefined && { colorAccent: colorAccent || null }),
+        ...(fontFamily !== undefined && { fontFamily: fontFamily || null }),
       },
     });
 

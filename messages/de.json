@@ -115,7 +115,14 @@
     "codeB": "Liefercode",
     "deliveryAddress": "Lieferadresse",
     "noAddress": "Keine Lieferadresse",
-    "refreshing": "Aktualisiere..."
+    "refreshing": "Aktualisiere...",
+    "confirmWithCode": "Bestellung bestätigen & schließen",
+    "confirmWithCodeDesc": "Frage den Kunden nach seinem Code, um die Bestellung abzuschließen",
+    "confirmAndClose": "Bestätigen",
+    "verifying": "Überprüfen...",
+    "invalidCode": "Ungültiger Code",
+    "codeRequired": "Code eingeben",
+    "verifyFailed": "Überprüfung fehlgeschlagen"
   },
   "cart": {
     "emptyCart": "Dein Warenkorb ist leer",

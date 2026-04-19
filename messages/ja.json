@@ -115,7 +115,14 @@
     "codeB": "配達コード",
     "deliveryAddress": "配達先住所",
     "noAddress": "配達先住所なし",
-    "refreshing": "更新中..."
+    "refreshing": "更新中...",
+    "confirmWithCode": "注文を確認して閉じる",
+    "confirmWithCodeDesc": "お客様にコードを聞いて注文を完了してください",
+    "confirmAndClose": "確認",
+    "verifying": "検証中...",
+    "invalidCode": "無効なコード",
+    "codeRequired": "コードを入力",
+    "verifyFailed": "検証に失敗しました"
   },
   "cart": {
     "emptyCart": "カートは空です",

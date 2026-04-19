@@ -1,6 +1,7 @@
 export interface RestaurantData {
   id: string;
   wallet: string;
+  payoutWallet: string | null;
   name: string;
   slug: string;
   description: string;
@@ -10,6 +11,10 @@ export interface RestaurantData {
   currency: string;
   deliveryFee: number;
   published: boolean;
+  colorPrimary: string | null;
+  colorSecondary: string | null;
+  colorAccent: string | null;
+  fontFamily: string | null;
   createdAt: string;
 }
 
@@ -39,13 +44,23 @@ export interface OrderData {
   escrowTarget: number;
   status: OrderStatus;
   onChainOrderId: string | null;
+  codeA: string | null;
+  codeB: string | null;
   codeAHash: string | null;
   codeBHash: string | null;
+  deliveryAddress: string | null;
   shareLink: string | null;
   requestedDeliveryTime: string | null; // ISO timestamp, null = ASAP
   requestedPickupTime: string | null;   // ISO timestamp, null = ASAP
   createdAt: string;
   contributions: ContributionData[];
+  restaurant?: {
+    id: string;
+    name: string;
+    slug: string;
+    wallet: string;
+    currency: string;
+  };
 }
 
 export interface OrderItem {
