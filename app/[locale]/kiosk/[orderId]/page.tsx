@@ -18,7 +18,7 @@ export default function KioskPage() {
 
   const [order, setOrder] = useState<KioskOrder | null>(null);
   const [error, setError] = useState("");
-  const confirmed = order?.status === "delivered" || order?.status === "cancelled";
+  const confirmed = ["Delivered", "Settled", "Cancelled", "Refunded"].includes(order?.status ?? "");
 
   const fetchOrder = useCallback(async () => {
     if (!orderId || !key) return;

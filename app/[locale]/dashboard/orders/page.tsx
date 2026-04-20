@@ -13,9 +13,9 @@ const QrScanner = dynamic(() => import("@/components/qr-scanner"), { ssr: false 
 
 interface OrderRow {
   id: string;
-  customerWallet: string;
+  customer: { wallet: string };
   items: string;
-  totalAmount: number;
+  foodTotal: number;
   deliveryFee: number;
   status: OrderStatus;
   codeA: string | null;
@@ -26,12 +26,16 @@ interface OrderRow {
 }
 
 const statusColors: Record<OrderStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  funded: "bg-blue-100 text-blue-800",
-  preparing: "bg-purple-100 text-purple-800",
-  ready: "bg-green-100 text-green-800",
-  delivered: "bg-gray-100 text-gray-800",
-  cancelled: "bg-red-100 text-red-800",
+  Created:        "bg-yellow-100 text-yellow-800",
+  Funded:         "bg-blue-100 text-blue-800",
+  Preparing:      "bg-purple-100 text-purple-800",
+  ReadyForPickup: "bg-amber-100 text-amber-800",
+  PickedUp:       "bg-indigo-100 text-indigo-800",
+  Delivered:      "bg-teal-100 text-teal-800",
+  Settled:        "bg-gray-100 text-gray-800",
+  Disputed:       "bg-orange-100 text-orange-800",
+  Cancelled:      "bg-red-100 text-red-800",
+  Refunded:       "bg-rose-100 text-rose-800",
 };
 
 export default function OrdersPage() {
@@ -46,24 +50,32 @@ export default function OrdersPage() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const statusLabels: Record<OrderStatus, string> = {
-    pending: t("statusPending"),
-    funded: t("statusFunded"),
-    preparing: t("statusPreparing"),
-    ready: t("statusReady"),
-    delivered: t("statusDelivered"),
-    cancelled: t("statusCancelled"),
+    Created:        t("statusPending"),
+    Funded:         t("statusFunded"),
+    Preparing:      t("statusPreparing"),
+    ReadyForPickup: t("statusReady"),
+    PickedUp:       t("statusPickedUp") ?? "Picked Up",
+    Delivered:      t("statusDelivered"),
+    Settled:        t("statusSettled") ?? "Settled",
+    Disputed:       t("statusDisputed") ?? "Disputed",
+    Cancelled:      t("statusCancelled"),
+    Refunded:       t("statusRefunded") ?? "Refunded",
   };
 
   const statusActions: Record<string, { label: string; next: OrderStatus } | null> = {
-    pending: null,
-    funded: { label: t("startPreparing"), next: "preparing" },
-    preparing: { label: t("markReady"), next: "ready" },
-    ready: { label: t("markDelivered"), next: "delivered" },
-    delivered: null,
-    cancelled: null,
+    Created:        null,
+    Funded:         { label: t("startPreparing"), next: "Preparing" },
+    Preparing:      { label: t("markReady"), next: "ReadyForPickup" },
+    ReadyForPickup: null, // driver handles pickup
+    PickedUp:       null, // customer handles delivery confirmation
+    Delivered:      null,
+    Settled:        null,
+    Disputed:       null,
+    Cancelled:      null,
+    Refunded:       null,
   };
 
-  const newOrderCount = orders.filter((o) => o.status === "funded").length;
+  const newOrderCount = orders.filter((o) => o.status === "Funded").length;
 
   const loadOrders = useCallback(async (silent = false) => {
     if (!token || !restaurantId) return;
@@ -178,7 +190,7 @@ export default function OrdersPage() {
       const data = await res.json();
       if (res.ok && data.matched) {
         setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, status: "delivered" } : o))
+          prev.map((o) => (o.id === orderId ? { ...o, status: "Settled" as OrderStatus } : o))
         );
         setCodeInputs((p) => ({ ...p, [inputKey]: "" }));
       } else {
@@ -269,7 +281,7 @@ export default function OrdersPage() {
               <div
                 key={order.id}
                 className={`card p-5 ${
-                  order.status === "funded" ? "ring-2 ring-blue-300 bg-blue-50/30" : ""
+                  order.status === "Funded" ? "ring-2 ring-blue-300 bg-blue-50/30" : ""
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -306,7 +318,7 @@ export default function OrdersPage() {
 
                     <div className="mt-1 text-sm">
                       <span className="font-semibold text-gray-900">
-                        {order.totalAmount.toFixed(2)} USDC
+                        {order.foodTotal.toFixed(2)} USDC
                       </span>
                       {order.deliveryFee > 0 && (
                         <span className="text-gray-400">
@@ -336,7 +348,7 @@ export default function OrdersPage() {
                               <QRCodeSVG value={`forkit:${order.id}:${order.codeA}`} size={88} />
                             </div>
                             <span className="text-base font-bold font-mono text-orange-800 tracking-wider">{order.codeA}</span>
-                            {(order.status === "preparing" || order.status === "ready") && (
+                            {(order.status === "Preparing" || order.status === "ReadyForPickup") && (
                               <button
                                 onClick={() => window.open(`/kiosk/${order.id}?key=${order.codeA}`, "_blank")}
                                 className="text-xs text-orange-600 hover:text-orange-800 flex items-center gap-1 mt-1 underline underline-offset-2"
@@ -370,7 +382,7 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Code verification: close out order once customer confirms delivery/pickup */}
-                {(order.status === "ready" || order.status === "preparing") && (order.codeA || order.codeB) && (
+                {(order.status === "ReadyForPickup" || order.status === "Preparing") && (order.codeA || order.codeB) && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-sm font-semibold text-gray-700">
