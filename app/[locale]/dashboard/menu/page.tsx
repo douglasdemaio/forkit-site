@@ -56,13 +56,15 @@ export default function MenuEditorPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [orderChanged, setOrderChanged] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id || !restaurantId) return;
 
@@ -71,18 +73,29 @@ export default function MenuEditorPage() {
     if (oldIndex < 0 || newIndex < 0) return;
 
     const reordered = arrayMove(items, oldIndex, newIndex);
-    setItems(reordered); // optimistic update
+    setItems(reordered);
+    setOrderChanged(true);
+  };
 
+  const saveOrder = async () => {
+    if (!restaurantId) return;
+    setSavingOrder(true);
     try {
-      await fetch(`/api/restaurants/${restaurantId}/menu/reorder`, {
+      const res = await fetch(`/api/restaurants/${restaurantId}/menu/reorder`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-        body: JSON.stringify({ orderedIds: reordered.map((i) => i.id) }),
+        body: JSON.stringify({ orderedIds: items.map((i) => i.id) }),
       });
+      if (res.ok) {
+        setOrderChanged(false);
+      } else {
+        loadData();
+      }
     } catch (err) {
       console.error(err);
-      // revert on error
       loadData();
+    } finally {
+      setSavingOrder(false);
     }
   };
 
@@ -217,15 +230,26 @@ export default function MenuEditorPage() {
             Add and manage your menu items
           </p>
         </div>
-        <button
-          onClick={() => {
-            setForm(emptyForm);
-            setShowForm(true);
-          }}
+        <div className="flex items-center gap-2">
+          {orderChanged && (
+            <button
+              onClick={saveOrder}
+              disabled={savingOrder}
+              className="btn-primary text-sm disabled:opacity-50"
+            >
+              {savingOrder ? "Saving..." : "Save Order"}
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setForm(emptyForm);
+              setShowForm(true);
+            }}
           className="btn-primary text-sm"
-        >
-          + Add Item
-        </button>
+          >
+            + Add Item
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -358,7 +382,7 @@ export default function MenuEditorPage() {
         <>
           <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
             <span className="text-base">☰</span>
-            Drag the handle on the top-left of each item to reorder. Changes save automatically.
+            Drag the handle on the top-left of each item to reorder, then click &quot;Save Order&quot; to apply.
           </p>
           <DndContext
             sensors={sensors}
