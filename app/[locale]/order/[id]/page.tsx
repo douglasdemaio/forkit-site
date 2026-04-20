@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletButton } from "@/components/wallet-button";
 import { useOrderStatus } from "@/hooks/useOrderStatus";
 import { useEscrow } from "@/hooks/useEscrow";
 import { useTranslations } from "next-intl";
@@ -126,7 +126,7 @@ export default function OrderPage() {
           <div className="border-t pt-2 mt-2">
             <div className="flex justify-between text-sm text-gray-500">
               <span>{t("subtotal")}</span>
-              <span>{order.totalAmount.toFixed(2)} {currency}</span>
+              <span>{(order.foodTotal ?? 0).toFixed(2)} {currency}</span>
             </div>
             {order.deliveryFee > 0 && (
               <div className="flex justify-between text-sm text-gray-500">
@@ -169,7 +169,7 @@ export default function OrderPage() {
               <p className="text-sm text-gray-500 mb-3">
                 {t("connectToContribute")}
               </p>
-              <WalletMultiButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-xl !h-10 !text-sm !mx-auto" />
+              <WalletButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-xl !h-10 !text-sm !mx-auto" />
             </div>
           ) : (
             <div className="flex gap-3">

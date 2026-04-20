@@ -28,7 +28,8 @@ ForkIt Site lets anyone create a professional restaurant page and start acceptin
 1. **Browse** restaurant pages
 2. **Add items** to your shopping cart
 3. **Checkout** via the ForkIt smart contract (escrow-based payment on Solana)
-4. **Enter delivery address** at checkout (or leave blank for pickup)
+4. **Choose Delivery or Pickup** — toggle at checkout; pickup waives the delivery fee
+5. **Enter delivery address** — separate fields for Street, Apt, City, ZIP, State/Province, and Country; country auto-detected from your timezone (fully independent of UI language)
 5. **Split orders** with friends — share a link and up to 10 people can contribute (friends can chip in even after funding to reimburse the original payer)
 6. **Schedule delivery/pickup** — choose a preferred time or order for ASAP
 7. **Track** your order status in real-time
@@ -295,6 +296,16 @@ Order statuses mirror the on-chain `OrderStatus` enum exactly (used by both fork
 - 🔗 **Social preview** — og:image and twitter:card metadata for proper link previews
 - 📱 **Mobile API alignment** — all API routes aligned with forkme mobile app (status names, field names, response shapes)
 - 🖥 **Restaurant kiosk mode** — full-screen QR display for drivers to scan at pickup
+- 🚗 **Pickup vs Delivery toggle** — waives delivery fee when customer selects pickup; address fields hidden
+- 📍 **Expanded address form** — separate Street, Apt, City, ZIP, State/Province, Country fields; country auto-populated from timezone (independent of UI language)
+
+### Bug Fixes
+
+| Issue | Fix |
+|---|---|
+| `order.totalAmount` undefined crash on order page | Field renamed `foodTotal` in API alignment commit; updated `order/[id]/page.tsx` |
+| Solana payment broken — `new PublicKey("")` throws | `order.restaurant.wallet` → `order.restaurant.walletAddress` in `cart/page.tsx` |
+| React hydration mismatch — `<i>` inside `<button>` | `WalletMultiButton` wrapped in `next/dynamic` with `ssr: false` (`components/wallet-button.tsx`) |
 
 ---
 
