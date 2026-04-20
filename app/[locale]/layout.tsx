@@ -11,11 +11,22 @@ export const metadata: Metadata = {
   title: "ForkIt — Restaurant Builder on Solana",
   description:
     "Build your restaurant website and accept crypto payments via Solana. Escrow-based ordering, split payments, and beautiful templates.",
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍴</text></svg>",
+  },
   openGraph: {
     title: "ForkIt — Restaurant Builder on Solana",
     description:
       "Build your restaurant website and accept crypto payments via Solana.",
     type: "website",
+    images: ["https://opengraph.githubassets.com/1/douglasdemaio/forkit"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ForkIt — Restaurant Builder on Solana",
+    description:
+      "Build your restaurant website and accept crypto payments via Solana.",
+    images: ["https://opengraph.githubassets.com/1/douglasdemaio/forkit"],
   },
 };
 
