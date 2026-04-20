@@ -265,6 +265,17 @@ All fonts are licensed under SIL Open Font License (OFL) or Apache 2.0.
 - ⚡ **Post-funding contributions** — friends can chip in to reimburse the original payer after the order is funded
 - ⏰ **Scheduled orders** — set a preferred delivery or pickup time, or leave blank for ASAP
 - 🌍 **10 languages** with full RTL for Arabic
+- 🔗 **Social preview** — og:image and twitter:card metadata for proper link previews
+
+---
+
+## Phase 2 (Planned)
+
+These features are referenced in UI copy or have partial on-chain stubs but are **not yet fully implemented**:
+
+- **Loyalty tier discounts** (Bronze → Platinum, 5–20% fee reduction) — a contract stub exists in the Loyalty program, but tier logic and the `$FORK` token are pending
+- **AI-routed delivery bonus points** (+50%) — referenced in UI copy; no routing system is implemented yet
+- **Surge pricing UI** — the `set_surge_pricing` instruction exists on-chain, but no admin UI is included in this repo yet
 
 ---
 
