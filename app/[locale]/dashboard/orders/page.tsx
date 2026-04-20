@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { QRCodeSVG } from "qrcode.react";
 import { OrderStatus } from "@/lib/types";
+
+const QrScanner = dynamic(() => import("@/components/qr-scanner"), { ssr: false });
 
 interface OrderRow {
   id: string;
@@ -151,17 +155,20 @@ export default function OrdersPage() {
   };
 
   const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
-  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [verifyingKey, setVerifyingKey] = useState<string | null>(null);
   const [verifyError, setVerifyError] = useState<Record<string, string>>({});
+  const [scanningKey, setScanningKey] = useState<string | null>(null);
 
-  const verifyCode = async (orderId: string) => {
-    const code = (codeInputs[orderId] || "").trim();
+  // inputKey = orderId + "_A" (pickup) or orderId + "_B" (delivery)
+  // directCode: skip codeInputs state lookup (used after QR scan)
+  const verifyCode = async (orderId: string, inputKey: string, directCode?: string) => {
+    const code = (directCode ?? codeInputs[inputKey] ?? "").trim();
     if (!code) {
-      setVerifyError((e) => ({ ...e, [orderId]: t("codeRequired") }));
+      setVerifyError((e) => ({ ...e, [inputKey]: t("codeRequired") }));
       return;
     }
-    setVerifyingId(orderId);
-    setVerifyError((e) => ({ ...e, [orderId]: "" }));
+    setVerifyingKey(inputKey);
+    setVerifyError((e) => ({ ...e, [inputKey]: "" }));
     try {
       const res = await fetch(`/api/orders/${orderId}/verify`, {
         method: "POST",
@@ -173,18 +180,18 @@ export default function OrdersPage() {
         setOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, status: "delivered" } : o))
         );
-        setCodeInputs((p) => ({ ...p, [orderId]: "" }));
+        setCodeInputs((p) => ({ ...p, [inputKey]: "" }));
       } else {
         setVerifyError((e) => ({
           ...e,
-          [orderId]: data.error || t("invalidCode"),
+          [inputKey]: data.error || t("invalidCode"),
         }));
       }
     } catch (err) {
       console.error(err);
-      setVerifyError((e) => ({ ...e, [orderId]: t("verifyFailed") }));
+      setVerifyError((e) => ({ ...e, [inputKey]: t("verifyFailed") }));
     } finally {
-      setVerifyingId(null);
+      setVerifyingKey(null);
     }
   };
 
@@ -319,19 +326,33 @@ export default function OrdersPage() {
                       </span>
                     </div>
 
-                    {/* Verification codes */}
+                    {/* Verification codes with QR */}
                     {(order.codeA || order.codeB) && (
                       <div className="mt-3 flex flex-wrap gap-3">
                         {order.codeA && (
-                          <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                            <span className="text-xs text-orange-600 font-medium block">{t("codeA")}</span>
-                            <span className="text-lg font-bold font-mono text-orange-800 tracking-wider">{order.codeA}</span>
+                          <div className="bg-orange-50 border border-orange-200 rounded-lg px-3 py-3 flex flex-col items-center gap-2">
+                            <span className="text-xs text-orange-600 font-medium">{t("codeA")}</span>
+                            <div className="bg-white rounded-lg p-1.5">
+                              <QRCodeSVG value={`forkit:${order.id}:${order.codeA}`} size={88} />
+                            </div>
+                            <span className="text-base font-bold font-mono text-orange-800 tracking-wider">{order.codeA}</span>
+                            {(order.status === "preparing" || order.status === "ready") && (
+                              <button
+                                onClick={() => window.open(`/kiosk/${order.id}?key=${order.codeA}`, "_blank")}
+                                className="text-xs text-orange-600 hover:text-orange-800 flex items-center gap-1 mt-1 underline underline-offset-2"
+                              >
+                                🖥 Display on screen
+                              </button>
+                            )}
                           </div>
                         )}
                         {order.codeB && (
-                          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                            <span className="text-xs text-green-600 font-medium block">{t("codeB")}</span>
-                            <span className="text-lg font-bold font-mono text-green-800 tracking-wider">{order.codeB}</span>
+                          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-3 flex flex-col items-center gap-2">
+                            <span className="text-xs text-green-600 font-medium">{t("codeB")}</span>
+                            <div className="bg-white rounded-lg p-1.5">
+                              <QRCodeSVG value={`forkit:${order.id}:${order.codeB}`} size={88} />
+                            </div>
+                            <span className="text-base font-bold font-mono text-green-800 tracking-wider">{order.codeB}</span>
                           </div>
                         )}
                       </div>
@@ -351,7 +372,7 @@ export default function OrdersPage() {
                 {/* Code verification: close out order once customer confirms delivery/pickup */}
                 {(order.status === "ready" || order.status === "preparing") && (order.codeA || order.codeB) && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <span className="text-sm font-semibold text-gray-700">
                         🔐 {t("confirmWithCode")}
                       </span>
@@ -359,34 +380,55 @@ export default function OrdersPage() {
                         {t("confirmWithCodeDesc")}
                       </span>
                     </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={codeInputs[order.id] || ""}
-                        onChange={(e) => {
-                          const val = e.target.value.toUpperCase();
-                          setCodeInputs((p) => ({ ...p, [order.id]: val }));
-                          setVerifyError((er) => ({ ...er, [order.id]: "" }));
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") verifyCode(order.id);
-                        }}
-                        placeholder="XXXX-XXXX"
-                        className="flex-1 px-3 py-2 border rounded-lg font-mono uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
-                        maxLength={16}
-                        disabled={verifyingId === order.id}
-                      />
-                      <button
-                        onClick={() => verifyCode(order.id)}
-                        disabled={verifyingId === order.id || !codeInputs[order.id]}
-                        className="btn-primary text-sm whitespace-nowrap disabled:opacity-50"
-                      >
-                        {verifyingId === order.id ? t("verifying") : t("confirmAndClose")}
-                      </button>
+                    <div className="flex flex-col gap-3">
+                      {[
+                        order.codeA ? { key: order.id + "_A", label: t("codeA"), color: "orange" } : null,
+                        order.codeB ? { key: order.id + "_B", label: t("codeB"), color: "green" } : null,
+                      ].filter(Boolean).map((entry) => {
+                        const { key, label, color } = entry!;
+                        const ring = color === "orange" ? "focus:ring-forkit-orange/20 focus:border-forkit-orange" : "focus:ring-green-300/40 focus:border-green-500";
+                        return (
+                          <div key={key}>
+                            <label className={`text-xs font-medium mb-1 block text-${color}-600`}>
+                              {label}
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={codeInputs[key] || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.toUpperCase();
+                                  setCodeInputs((p) => ({ ...p, [key]: val }));
+                                  setVerifyError((er) => ({ ...er, [key]: "" }));
+                                }}
+                                onKeyDown={(e) => { if (e.key === "Enter") verifyCode(order.id, key); }}
+                                placeholder="XXXXXX"
+                                className={`flex-1 px-3 py-2 border rounded-lg font-mono uppercase tracking-wider focus:outline-none focus:ring-2 ${ring}`}
+                                maxLength={16}
+                                disabled={verifyingKey === key}
+                              />
+                              <button
+                                onClick={() => setScanningKey(key + "|" + order.id)}
+                                className="px-3 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 text-sm"
+                                title="Scan QR code"
+                              >
+                                📷
+                              </button>
+                              <button
+                                onClick={() => verifyCode(order.id, key)}
+                                disabled={verifyingKey === key || !codeInputs[key]}
+                                className="btn-primary text-sm whitespace-nowrap disabled:opacity-50"
+                              >
+                                {verifyingKey === key ? t("verifying") : t("confirmAndClose")}
+                              </button>
+                            </div>
+                            {verifyError[key] && (
+                              <p className="text-sm text-red-600 mt-1">❌ {verifyError[key]}</p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    {verifyError[order.id] && (
-                      <p className="text-sm text-red-600 mt-2">❌ {verifyError[order.id]}</p>
-                    )}
                   </div>
                 )}
               </div>
@@ -394,6 +436,22 @@ export default function OrdersPage() {
           })}
         </div>
       )}
+
+      {/* QR scanner modal */}
+      {scanningKey && (() => {
+        const [inputKey, orderId] = scanningKey.split("|");
+        return (
+          <QrScanner
+            title={inputKey.endsWith("_A") ? `Scan Pickup Code` : `Scan Delivery Code`}
+            onScan={(code) => {
+              setCodeInputs((p) => ({ ...p, [inputKey]: code }));
+              setScanningKey(null);
+              verifyCode(orderId, inputKey, code);
+            }}
+            onClose={() => setScanningKey(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

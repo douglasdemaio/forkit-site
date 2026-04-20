@@ -61,6 +61,21 @@ export const templates: TemplateDefinition[] = [
     },
     font: "'Playfair Display', serif",
   },
+  {
+    id: "custom",
+    name: "Custom",
+    description:
+      "Start from scratch. Your chosen colors and font are used as-is with no template defaults.",
+    preview: "/templates/custom.svg",
+    colors: {
+      primary: "#f9a825",
+      secondary: "#0d1421",
+      background: "#ffffff",
+      text: "#111111",
+      accent: "#ffffff",
+    },
+    font: "Inter, system-ui, sans-serif",
+  },
 ];
 
 export function getTemplate(id: string): TemplateDefinition {

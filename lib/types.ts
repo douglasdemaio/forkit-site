@@ -91,7 +91,8 @@ export type TemplateName =
   | "classic-bistro"
   | "modern-minimal"
   | "street-food"
-  | "fine-dining";
+  | "fine-dining"
+  | "custom";
 
 export interface TemplateDefinition {
   id: TemplateName;
