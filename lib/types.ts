@@ -37,12 +37,17 @@ export interface CartItem extends MenuItemData {
 export interface OrderData {
   id: string;
   restaurantId: string;
-  customerWallet: string;
+  // Nested to match forkme's Order.customer shape
+  customer: { wallet: string };
   items: OrderItem[];
-  totalAmount: number;
+  tokenMint: string | null;
+  foodTotal: number;
   deliveryFee: number;
   escrowTarget: number;
+  escrowFunded: number;
   status: OrderStatus;
+  driverWallet: string | null;
+  settleTxSignature: string | null;
   onChainOrderId: string | null;
   codeA: string | null;
   codeB: string | null;
@@ -50,15 +55,16 @@ export interface OrderData {
   codeBHash: string | null;
   deliveryAddress: string | null;
   shareLink: string | null;
-  requestedDeliveryTime: string | null; // ISO timestamp, null = ASAP
-  requestedPickupTime: string | null;   // ISO timestamp, null = ASAP
+  requestedDeliveryTime: string | null;
+  requestedPickupTime: string | null;
   createdAt: string;
+  updatedAt: string;
   contributions: ContributionData[];
   restaurant?: {
     id: string;
     name: string;
     slug: string;
-    wallet: string;
+    walletAddress: string;
     currency: string;
   };
 }
@@ -73,19 +79,24 @@ export interface OrderItem {
 export interface ContributionData {
   id: string;
   orderId: string;
-  contributorWallet: string;
+  wallet: string;       // mapped from contributorWallet
   amount: number;
   txSignature: string | null;
-  createdAt: string;
+  timestamp: string;    // mapped from createdAt
 }
 
+// Mirrors on-chain OrderStatus enum exactly
 export type OrderStatus =
-  | "pending"
-  | "funded"
-  | "preparing"
-  | "ready"
-  | "delivered"
-  | "cancelled";
+  | "Created"
+  | "Funded"
+  | "Preparing"
+  | "ReadyForPickup"
+  | "PickedUp"
+  | "Delivered"
+  | "Settled"
+  | "Disputed"
+  | "Cancelled"
+  | "Refunded";
 
 export type TemplateName =
   | "classic-bistro"

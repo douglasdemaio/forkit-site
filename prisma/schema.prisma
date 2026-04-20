@@ -56,10 +56,15 @@ model Order {
   restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
   customerWallet  String
   items           String         // JSON string of ordered items
-  totalAmount            Float
+  tokenMint       String?        // SPL token mint address (USDC/EURC)
+  foodTotal              Float          @default(0)
   deliveryFee            Float          @default(0)
   escrowTarget           Float          @default(0)
-  status                 String         @default("pending") // pending, funded, preparing, ready, delivered, cancelled
+  escrowFunded           Float          @default(0)
+  // Statuses mirror on-chain OrderStatus enum: Created, Funded, Preparing, ReadyForPickup, PickedUp, Delivered, Settled, Disputed, Cancelled, Refunded
+  status                 String         @default("Created")
+  driverWallet           String?
+  settleTxSignature      String?
   onChainOrderId         String?
   codeA                  String?        // Pickup verification code (plaintext, shown to restaurant)
   codeB                  String?        // Delivery verification code (plaintext, shown to customer)
@@ -75,6 +80,8 @@ model Order {
 
   @@index([restaurantId])
   @@index([customerWallet])
+  @@index([driverWallet])
+  @@index([status])
 }
 
 model Contribution {

@@ -150,6 +150,7 @@ forkit-site/
 │   ├── [locale]/                 # Locale-prefixed routes (de, es, fr, ja, ...)
 │   │   ├── page.tsx              # Landing page
 │   │   ├── dashboard/            # Owner dashboard (menu, template, orders)
+│   │   ├── kiosk/[orderId]/      # Restaurant kiosk QR display for drivers
 │   │   ├── restaurants/          # Public restaurant browsing
 │   │   ├── order/                # Cart + order tracking
 │   │   └── connect/              # Wallet connection page
@@ -157,8 +158,17 @@ forkit-site/
 │       ├── auth/                 # Wallet auth (nonce + verify)
 │       ├── restaurants/          # CRUD restaurants + menus
 │       │   └── [id]/menu/reorder # Drag-and-drop persistence
-│       ├── orders/               # Create orders + contributions
-│       │   └── [id]/verify       # Restaurant closes order with customer's code
+│       ├── orders/
+│       │   ├── [id]/contribute       # Record on-chain contributions
+│       │   ├── [id]/funding          # Funding progress
+│       │   ├── [id]/receipt          # Settlement receipt (post-Settled)
+│       │   ├── [id]/scan-confirm     # Public kiosk QR scan endpoint
+│       │   ├── [id]/share            # Generate contribution share link
+│       │   ├── [id]/status           # Status transitions (mobile app)
+│       │   ├── [id]/verify           # Web dashboard code verification
+│       │   ├── [id]/verify-delivery  # Customer confirms Code B → Settled
+│       │   ├── [id]/verify-pickup    # Driver verifies Code A → PickedUp
+│       │   └── share/[shareLink]     # Resolve share link to order
 │       └── upload/               # Image upload
 ├── components/                   # React components (incl. language-switcher, sortable-menu-item)
 ├── hooks/                        # Custom hooks (wallet, escrow, cart, orders)
@@ -254,11 +264,28 @@ All fonts are licensed under SIL Open Font License (OFL) or Apache 2.0.
 
 ---
 
+## Order Status Values
+
+Order statuses mirror the on-chain `OrderStatus` enum exactly (used by both forkit-site and the forkme mobile app):
+
+| Status | Description |
+|--------|-------------|
+| `Created` | Order placed, awaiting funding |
+| `Funded` | Escrow fully funded, ready for restaurant |
+| `Preparing` | Restaurant accepted, preparing food |
+| `ReadyForPickup` | Food ready, waiting for driver |
+| `PickedUp` | Driver confirmed pickup (Code A verified) |
+| `Delivered` | Delivery confirmed (Code B verified) |
+| `Settled` | Funds distributed atomically on-chain |
+| `Disputed` | Customer escalated after delivery timeout |
+| `Cancelled` | Cancelled within 60-second window |
+| `Refunded` | Timeout or dispute resolved as refund |
+
 ## Feature Highlights (recent additions)
 
 - 🎨 **Custom branding** — 3 hex colors + Google Fonts with live preview
 - ☰ **Drag-and-drop menu reordering** — powered by @dnd-kit
-- 🔐 **Order code verification** — restaurant closes out orders by confirming the customer's delivery/pickup code
+- 🔐 **Order code verification** — restaurant closes out orders via QR scan or manual code entry
 - 🏪 **Multi-restaurant support** — run multiple locations from one wallet
 - 📍 **Delivery address field** at checkout
 - 💎 **Separate payout wallet** — on-chain audit via `PayoutWalletChanged` event
@@ -266,6 +293,8 @@ All fonts are licensed under SIL Open Font License (OFL) or Apache 2.0.
 - ⏰ **Scheduled orders** — set a preferred delivery or pickup time, or leave blank for ASAP
 - 🌍 **10 languages** with full RTL for Arabic
 - 🔗 **Social preview** — og:image and twitter:card metadata for proper link previews
+- 📱 **Mobile API alignment** — all API routes aligned with forkme mobile app (status names, field names, response shapes)
+- 🖥 **Restaurant kiosk mode** — full-screen QR display for drivers to scan at pickup
 
 ---
 
