@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { WalletButton } from "./wallet-button";
 import { useCart } from "@/hooks/useCart";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./language-switcher";
@@ -64,7 +64,7 @@ export default function Navbar() {
               )}
             </Link>
             <LanguageSwitcher />
-            <WalletMultiButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-lg !h-10 !text-sm" />
+            <WalletButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-lg !h-10 !text-sm" />
           </div>
 
           {/* Mobile hamburger */}
@@ -126,7 +126,7 @@ export default function Navbar() {
             <div className="pt-2">
               <LanguageSwitcher />
             </div>
-            <WalletMultiButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-lg !h-10 !text-sm" />
+            <WalletButton className="!bg-forkit-orange hover:!bg-orange-600 !rounded-lg !h-10 !text-sm" />
           </div>
         )}
       </div>
