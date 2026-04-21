@@ -17,6 +17,15 @@ const nextConfig = {
       bodySizeLimit: "4mb",
     },
   },
+  webpack: (config) => {
+    // pino-pretty is an optional CLI dep pulled in by WalletConnect — not needed in browser
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'pino-pretty': false,
+      encoding: false,
+    };
+    return config;
+  },
 };
 
 module.exports = withNextIntl(nextConfig);
