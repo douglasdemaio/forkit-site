@@ -11,6 +11,9 @@ export interface RestaurantData {
   currency: string;
   deliveryFee: number;
   published: boolean;
+  addressStreet: string | null;
+  addressCity: string | null;
+  addressCountry: string | null;
   colorPrimary: string | null;
   colorSecondary: string | null;
   colorAccent: string | null;

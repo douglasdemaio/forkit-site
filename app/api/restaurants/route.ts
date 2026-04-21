@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // A wallet can own multiple restaurants
 
     const body = await request.json();
-    const { name, description, template, currency } = body;
+    const { name, description, addressStreet, addressCity, addressCountry, template, currency } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
@@ -91,6 +91,9 @@ export async function POST(request: NextRequest) {
         name: name.trim(),
         slug,
         description: description?.trim() || "",
+        addressStreet: addressStreet?.trim() || null,
+        addressCity: addressCity?.trim() || null,
+        addressCountry: addressCountry?.trim() || null,
         template: template || "classic-bistro",
         currency: currency || "USDC",
       },

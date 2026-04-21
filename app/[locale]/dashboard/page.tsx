@@ -15,6 +15,9 @@ interface Restaurant {
   name: string;
   slug: string;
   description: string;
+  addressStreet: string | null;
+  addressCity: string | null;
+  addressCountry: string | null;
   template: string;
   logo: string | null;
   banner: string | null;
@@ -34,6 +37,9 @@ export default function DashboardPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [addressStreet, setAddressStreet] = useState("");
+  const [addressCity, setAddressCity] = useState("");
+  const [addressCountry, setAddressCountry] = useState("");
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -41,6 +47,9 @@ export default function DashboardPage() {
   const [editCurrency, setEditCurrency] = useState("");
   const [editDeliveryFee, setEditDeliveryFee] = useState(0);
   const [editPayoutWallet, setEditPayoutWallet] = useState("");
+  const [editAddressStreet, setEditAddressStreet] = useState("");
+  const [editAddressCity, setEditAddressCity] = useState("");
+  const [editAddressCountry, setEditAddressCountry] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
 
   const restaurant = selectedRestaurant;
@@ -106,7 +115,13 @@ export default function DashboardPage() {
           "Content-Type": "application/json",
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({ name: name.trim(), description: description.trim() }),
+        body: JSON.stringify({
+          name: name.trim(),
+          description: description.trim(),
+          addressStreet: addressStreet.trim() || null,
+          addressCity: addressCity.trim() || null,
+          addressCountry: addressCountry.trim() || null,
+        }),
       });
 
       if (res.ok || res.status === 201) {
@@ -116,6 +131,9 @@ export default function DashboardPage() {
         setShowCreateForm(false);
         setName("");
         setDescription("");
+        setAddressStreet("");
+        setAddressCity("");
+        setAddressCountry("");
       } else if (res.status === 401) {
         clearToken();
       } else if (res.status === 409) {
@@ -231,6 +249,49 @@ export default function DashboardPage() {
               rows={3}
               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange resize-none"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              {t("streetAddressLabel")}
+            </label>
+            <input
+              type="text"
+              value={addressStreet}
+              onChange={(e) => setAddressStreet(e.target.value)}
+              placeholder={t("streetAddressPlaceholder")}
+              autoComplete="street-address"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                {t("cityLabel")}
+              </label>
+              <input
+                type="text"
+                value={addressCity}
+                onChange={(e) => setAddressCity(e.target.value)}
+                placeholder={t("cityPlaceholder")}
+                autoComplete="address-level2"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                {t("countryLabel")}
+              </label>
+              <input
+                type="text"
+                value={addressCountry}
+                onChange={(e) => setAddressCountry(e.target.value)}
+                placeholder={t("countryPlaceholder")}
+                autoComplete="country-name"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+              />
+            </div>
           </div>
 
           <button
@@ -459,6 +520,9 @@ export default function DashboardPage() {
                       setEditCurrency(restaurant.currency);
                       setEditDeliveryFee(restaurant.deliveryFee);
                       setEditPayoutWallet(restaurant.payoutWallet || restaurant.wallet);
+                      setEditAddressStreet(restaurant.addressStreet || "");
+                      setEditAddressCity(restaurant.addressCity || "");
+                      setEditAddressCountry(restaurant.addressCountry || "");
                       setEditingSettings(true);
                     }}
                     className="text-sm text-forkit-orange hover:text-orange-600 font-medium transition-colors"
@@ -503,6 +567,41 @@ export default function DashboardPage() {
                     />
                     <p className="mt-1 text-xs text-gray-400">{t("payoutWalletHint")}</p>
                   </div>
+                  <div>
+                    <label className="block text-sm text-gray-500 mb-1">{t("streetAddressLabel")}</label>
+                    <input
+                      type="text"
+                      value={editAddressStreet}
+                      onChange={(e) => setEditAddressStreet(e.target.value)}
+                      placeholder={t("streetAddressPlaceholder")}
+                      autoComplete="street-address"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">{t("cityLabel")}</label>
+                      <input
+                        type="text"
+                        value={editAddressCity}
+                        onChange={(e) => setEditAddressCity(e.target.value)}
+                        placeholder={t("cityPlaceholder")}
+                        autoComplete="address-level2"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-500 mb-1">{t("countryLabel")}</label>
+                      <input
+                        type="text"
+                        value={editAddressCountry}
+                        onChange={(e) => setEditAddressCountry(e.target.value)}
+                        placeholder={t("countryPlaceholder")}
+                        autoComplete="country-name"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
+                      />
+                    </div>
+                  </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("slug")}</span>
                     <span className="font-mono text-xs">{restaurant.slug}</span>
@@ -516,7 +615,14 @@ export default function DashboardPage() {
                           const res = await fetch(`/api/restaurants/${restaurant.id}`, {
                             method: "PUT",
                             headers: { "Content-Type": "application/json", ...getAuthHeaders() },
-                            body: JSON.stringify({ currency: editCurrency, deliveryFee: editDeliveryFee, payoutWallet: editPayoutWallet }),
+                            body: JSON.stringify({
+                              currency: editCurrency,
+                              deliveryFee: editDeliveryFee,
+                              payoutWallet: editPayoutWallet,
+                              addressStreet: editAddressStreet || null,
+                              addressCity: editAddressCity || null,
+                              addressCountry: editAddressCountry || null,
+                            }),
                           });
                           if (res.ok) {
                             const updated = await res.json();
@@ -560,6 +666,14 @@ export default function DashboardPage() {
                       {(restaurant.payoutWallet || restaurant.wallet).slice(0, 8)}...{(restaurant.payoutWallet || restaurant.wallet).slice(-4)}
                     </span>
                   </div>
+                  {(restaurant.addressStreet || restaurant.addressCity || restaurant.addressCountry) && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">{t("addressLabel")}</span>
+                      <span className="text-xs text-right max-w-[160px]">
+                        {[restaurant.addressStreet, restaurant.addressCity, restaurant.addressCountry].filter(Boolean).join(", ")}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("slug")}</span>
                     <span className="font-mono text-xs">{restaurant.slug}</span>

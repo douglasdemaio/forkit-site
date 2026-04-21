@@ -21,6 +21,9 @@ model Restaurant {
   deliveryFee Float      @default(0)
   published   Boolean    @default(false)
   // Branding: 3 custom hex colors + font
+  addressStreet   String?    // Street address
+  addressCity     String?    // City
+  addressCountry  String?    // Country
   colorPrimary    String?    // e.g. "#f9a825" - headings, buttons
   colorSecondary  String?    // e.g. "#0d1421" - backgrounds
   colorAccent     String?    // e.g. "#ffffff" - text/details

@@ -70,6 +70,9 @@ export async function PUT(
     const {
       name,
       description,
+      addressStreet,
+      addressCity,
+      addressCountry,
       template,
       logo,
       banner,
@@ -115,6 +118,9 @@ export async function PUT(
       data: {
         ...(name !== undefined && { name }),
         ...(description !== undefined && { description }),
+        ...(addressStreet !== undefined && { addressStreet: addressStreet || null }),
+        ...(addressCity !== undefined && { addressCity: addressCity || null }),
+        ...(addressCountry !== undefined && { addressCountry: addressCountry || null }),
         ...(template !== undefined && { template }),
         ...(logo !== undefined && { logo }),
         ...(banner !== undefined && { banner }),

@@ -36,7 +36,7 @@ function toApiOrder(order: any, restaurant?: any) {
           id: rest.id,
           name: rest.name,
           slug: rest.slug,
-          walletAddress: rest.wallet,
+          wallet: rest.wallet,
           currency: rest.currency,
         }
       : undefined,
