@@ -10,7 +10,7 @@ datasource db {
 model Restaurant {
   id          String     @id @default(uuid())
   wallet      String
-  payoutWallet String?    // Separate payout address (defaults to wallet if null)
+  payoutWallet String?
   name        String
   slug        String     @unique
   description String     @default("")
@@ -20,14 +20,14 @@ model Restaurant {
   currency    String     @default("USDC")
   deliveryFee Float      @default(0)
   published   Boolean    @default(false)
-  // Branding: 3 custom hex colors + font
-  addressStreet   String?    // Street address
-  addressCity     String?    // City
-  addressCountry  String?    // Country
-  colorPrimary    String?    // e.g. "#f9a825" - headings, buttons
-  colorSecondary  String?    // e.g. "#0d1421" - backgrounds
-  colorAccent     String?    // e.g. "#ffffff" - text/details
-  fontFamily      String?    // Google Fonts family name, e.g. "Playfair Display"
+  autoAcknowledge Boolean @default(false)
+  addressStreet   String?
+  addressCity     String?
+  addressCountry  String?
+  colorPrimary    String?
+  colorSecondary  String?
+  colorAccent     String?
+  fontFamily      String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   menuItems   MenuItem[]
@@ -58,28 +58,30 @@ model Order {
   restaurantId    String
   restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
   customerWallet  String
-  items           String         // JSON string of ordered items
-  tokenMint       String?        // SPL token mint address (USDC/EURC)
+  items           String
+  tokenMint       String?
   foodTotal              Float          @default(0)
   deliveryFee            Float          @default(0)
   escrowTarget           Float          @default(0)
   escrowFunded           Float          @default(0)
-  // Statuses mirror on-chain OrderStatus enum: Created, Funded, Preparing, ReadyForPickup, PickedUp, Delivered, Settled, Disputed, Cancelled, Refunded
   status                 String         @default("Created")
   driverWallet           String?
+  bidOpenAt              DateTime?
   settleTxSignature      String?
   onChainOrderId         String?
-  codeA                  String?        // Pickup verification code (plaintext, shown to restaurant)
-  codeB                  String?        // Delivery verification code (plaintext, shown to customer)
+  codeA                  String?
+  codeB                  String?
   codeAHash              String?
   codeBHash              String?
   deliveryAddress        String?
   shareLink              String?        @unique
-  requestedDeliveryTime  DateTime?      // Customer-preferred delivery time (null = ASAP)
-  requestedPickupTime    DateTime?      // Customer-preferred pickup time (null = ASAP)
+  requestedDeliveryTime  DateTime?
+  requestedPickupTime    DateTime?
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
   contributions          Contribution[]
+  driverBids             DriverBid[]
+  driverRatings          DeliveryRating[]
 
   @@index([restaurantId])
   @@index([customerWallet])
@@ -97,6 +99,44 @@ model Contribution {
   createdAt         DateTime @default(now())
 
   @@index([orderId])
+}
+
+model DriverProfile {
+  wallet               String   @id
+  completedDeliveries  Int      @default(0)
+  avgRating            Float    @default(0)
+  ratingCount          Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model DriverBid {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driverWallet String
+  status       String   @default("Pending") // Pending | Accepted | Rejected | Expired
+  createdAt    DateTime @default(now())
+
+  @@unique([orderId, driverWallet])
+  @@index([orderId])
+  @@index([driverWallet])
+}
+
+model DeliveryRating {
+  id           String   @id @default(uuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driverWallet String
+  raterWallet  String
+  raterRole    String   // "restaurant" | "customer"
+  rating       Int      // 1–5
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  @@unique([orderId, raterRole])
+  @@index([orderId])
+  @@index([driverWallet])
 }
 
 model Nonce {

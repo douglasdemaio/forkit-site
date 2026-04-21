@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
 import { OrderStatus } from "@/lib/types";
+import type { DriverBid } from "@/lib/types";
 
 const QrScanner = dynamic(() => import("@/components/qr-scanner"), { ssr: false });
 
@@ -29,6 +30,7 @@ const statusColors: Record<OrderStatus, string> = {
   Created:        "bg-yellow-100 text-yellow-800",
   Funded:         "bg-blue-100 text-blue-800",
   Preparing:      "bg-purple-100 text-purple-800",
+  DriverAssigned: "bg-violet-100 text-violet-800",
   ReadyForPickup: "bg-amber-100 text-amber-800",
   PickedUp:       "bg-indigo-100 text-indigo-800",
   Delivered:      "bg-teal-100 text-teal-800",
@@ -48,11 +50,14 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [bidsMap, setBidsMap] = useState<Record<string, DriverBid[]>>({});
+  const [acceptingBid, setAcceptingBid] = useState<string | null>(null);
 
   const statusLabels: Record<OrderStatus, string> = {
     Created:        t("statusPending"),
     Funded:         t("statusFunded"),
     Preparing:      t("statusPreparing"),
+    DriverAssigned: t("statusDriverAssigned"),
     ReadyForPickup: t("statusReady"),
     PickedUp:       t("statusPickedUp") ?? "Picked Up",
     Delivered:      t("statusDelivered"),
@@ -66,8 +71,9 @@ export default function OrdersPage() {
     Created:        null,
     Funded:         { label: t("startPreparing"), next: "Preparing" },
     Preparing:      { label: t("markReady"), next: "ReadyForPickup" },
-    ReadyForPickup: null, // driver handles pickup
-    PickedUp:       null, // customer handles delivery confirmation
+    DriverAssigned: { label: t("markReady"), next: "ReadyForPickup" },
+    ReadyForPickup: null,
+    PickedUp:       null,
     Delivered:      null,
     Settled:        null,
     Disputed:       null,
@@ -86,7 +92,24 @@ export default function OrdersPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setOrders(data.orders || []);
+        const list: OrderRow[] = data.orders || [];
+        setOrders(list);
+        // Fetch bids for all Preparing orders (no driver assigned)
+        const preparingOrders = list.filter((o) => o.status === "Preparing");
+        if (preparingOrders.length > 0) {
+          const results = await Promise.allSettled(
+            preparingOrders.map((o) =>
+              fetch(`/api/orders/${o.id}/bids`, { headers: getAuthHeaders() }).then((r) => r.json())
+            )
+          );
+          const newBidsMap: Record<string, DriverBid[]> = {};
+          results.forEach((result, i) => {
+            if (result.status === "fulfilled" && result.value.bids) {
+              newBidsMap[preparingOrders[i].id] = result.value.bids;
+            }
+          });
+          setBidsMap(newBidsMap);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -94,6 +117,23 @@ export default function OrdersPage() {
       if (!silent) setRefreshing(false);
     }
   }, [token, restaurantId, getAuthHeaders]);
+
+  const acceptBid = async (orderId: string, bidId: string) => {
+    setAcceptingBid(bidId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}/bids/${bidId}/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      });
+      if (res.ok) {
+        await loadOrders(true);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAcceptingBid(null);
+    }
+  };
 
   const searchParams = useSearchParams();
   const restaurantIdParam = searchParams.get("restaurantId");
@@ -380,6 +420,46 @@ export default function OrdersPage() {
                     </button>
                   )}
                 </div>
+
+                {/* Driver bids panel — shown for Preparing orders awaiting driver assignment */}
+                {order.status === "Preparing" && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                      🚴 {t("driverBids")} {bidsMap[order.id]?.length > 0 ? `(${bidsMap[order.id].length})` : ""}
+                    </p>
+                    {!bidsMap[order.id] || bidsMap[order.id].length === 0 ? (
+                      <p className="text-sm text-gray-400 italic">{t("noBidsYet")}</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {bidsMap[order.id].filter((b) => b.status === "Pending").map((bid) => (
+                          <div key={bid.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                            <div>
+                              <span className="text-xs font-mono text-gray-600">
+                                {bid.driverWallet.slice(0, 8)}…{bid.driverWallet.slice(-4)}
+                              </span>
+                              {bid.driver?.isNewcomer ? (
+                                <span className="ml-2 text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">
+                                  {t("newcomer")}
+                                </span>
+                              ) : (
+                                <span className="ml-2 text-xs px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                  ★ {bid.driver?.avgRating?.toFixed(1)} · {bid.driver?.completedDeliveries} {t("deliveries")}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => acceptBid(order.id, bid.id)}
+                              disabled={acceptingBid === bid.id}
+                              className="text-xs px-3 py-1.5 bg-forkit-orange text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                            >
+                              {acceptingBid === bid.id ? "…" : t("assignDriver")}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Code verification: close out order once customer confirms delivery/pickup */}
                 {(order.status === "ReadyForPickup" || order.status === "Preparing") && (order.codeA || order.codeB) && (

@@ -5,6 +5,7 @@ export interface RestaurantData {
   name: string;
   slug: string;
   description: string;
+  autoAcknowledge: boolean;
   template: string;
   logo: string | null;
   banner: string | null;
@@ -88,11 +89,11 @@ export interface ContributionData {
   timestamp: string;    // mapped from createdAt
 }
 
-// Mirrors on-chain OrderStatus enum exactly
 export type OrderStatus =
   | "Created"
   | "Funded"
   | "Preparing"
+  | "DriverAssigned"
   | "ReadyForPickup"
   | "PickedUp"
   | "Delivered"
@@ -100,6 +101,34 @@ export type OrderStatus =
   | "Disputed"
   | "Cancelled"
   | "Refunded";
+
+export interface DriverProfile {
+  wallet: string;
+  completedDeliveries: number;
+  avgRating: number;
+  ratingCount: number;
+  isNewcomer: boolean;
+}
+
+export interface DriverBid {
+  id: string;
+  orderId: string;
+  driverWallet: string;
+  status: "Pending" | "Accepted" | "Rejected" | "Expired";
+  createdAt: string;
+  driver?: DriverProfile;
+}
+
+export interface DeliveryRating {
+  id: string;
+  orderId: string;
+  driverWallet: string;
+  raterWallet: string;
+  raterRole: "restaurant" | "customer";
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
 
 export type TemplateName =
   | "classic-bistro"

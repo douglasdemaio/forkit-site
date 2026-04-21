@@ -3,16 +3,15 @@ import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  Created:       ["Cancelled"],
-  Funded:        ["Preparing", "Cancelled"],
-  Preparing:     ["ReadyForPickup"],
+  Created:        ["Cancelled"],
+  Funded:         ["Preparing", "Cancelled"],
+  Preparing:      ["DriverAssigned", "ReadyForPickup"],
+  DriverAssigned: ["ReadyForPickup"],
   ReadyForPickup: ["PickedUp"],
-  PickedUp:      ["Delivered"],
-  Delivered:     ["Settled"],
+  PickedUp:       ["Delivered"],
+  Delivered:      ["Settled"],
 };
 
-// POST /api/orders/[id]/status
-// Used by forkme restaurant and driver screens to advance order state.
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -32,7 +31,7 @@ export async function POST(
     const order = await prisma.order.findUnique({
       where: { id: params.id },
       include: {
-        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
+        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true, autoAcknowledge: true } },
         contributions: { orderBy: { createdAt: "asc" } },
       },
     });
@@ -48,8 +47,21 @@ export async function POST(
       );
     }
 
+    const now = new Date();
     const updateData: any = { status: newStatus };
-    // Track driver wallet when they accept a delivery
+
+    if (newStatus === "Preparing") {
+      updateData.bidOpenAt = now;
+    }
+
+    // Auto-acknowledge: if restaurant has flag set, chain Funded → Preparing automatically
+    const autoChainToPreparing =
+      newStatus === "Funded" && order.restaurant?.autoAcknowledge;
+    if (autoChainToPreparing) {
+      updateData.status = "Preparing";
+      updateData.bidOpenAt = now;
+    }
+
     if (newStatus === "PickedUp" && !order.driverWallet) {
       updateData.driverWallet = wallet;
     }
@@ -62,6 +74,15 @@ export async function POST(
         contributions: { orderBy: { createdAt: "asc" } },
       },
     });
+
+    // Increment driver completedDeliveries when order settles
+    if (newStatus === "Settled" && updated.driverWallet) {
+      await prisma.driverProfile.upsert({
+        where: { wallet: updated.driverWallet },
+        update: { completedDeliveries: { increment: 1 } },
+        create: { wallet: updated.driverWallet, completedDeliveries: 1 },
+      });
+    }
 
     const items = typeof updated.items === "string" ? JSON.parse(updated.items) : updated.items;
     const contributions = updated.contributions.map((c) => ({
@@ -82,7 +103,7 @@ export async function POST(
       customer: { wallet: updated.customerWallet },
       contributions,
       restaurant: rest
-        ? { id: rest.id, name: rest.name, slug: rest.slug, walletAddress: rest.wallet, currency: rest.currency }
+        ? { id: rest.id, name: rest.name, slug: rest.slug, wallet: rest.wallet, currency: rest.currency }
         : undefined,
     });
   } catch (error) {
