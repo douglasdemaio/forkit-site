@@ -3,11 +3,11 @@
 import { OrderStatus } from "@/lib/types";
 
 const STEPS: { status: OrderStatus; label: string; icon: string }[] = [
-  { status: "pending", label: "Order Placed", icon: "📝" },
-  { status: "funded", label: "Payment Confirmed", icon: "💰" },
-  { status: "preparing", label: "Preparing", icon: "👨‍🍳" },
-  { status: "ready", label: "Ready", icon: "✅" },
-  { status: "delivered", label: "Delivered", icon: "🎉" },
+  { status: "Created",   label: "Order Placed",       icon: "📝" },
+  { status: "Funded",    label: "Payment Confirmed",  icon: "💰" },
+  { status: "Preparing", label: "Preparing",          icon: "👨‍🍳" },
+  { status: "Delivered", label: "Delivered",          icon: "🎉" },
+  { status: "Settled",   label: "Completed",          icon: "✅" },
 ];
 
 interface OrderTrackerProps {
@@ -16,7 +16,7 @@ interface OrderTrackerProps {
 
 export default function OrderTracker({ status }: OrderTrackerProps) {
   const currentIndex = STEPS.findIndex((s) => s.status === status);
-  const isCancelled = status === "cancelled";
+  const isCancelled = status === "Cancelled";
 
   if (isCancelled) {
     return (

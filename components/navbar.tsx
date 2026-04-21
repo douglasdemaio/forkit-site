@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletButton } from "./wallet-button";
@@ -20,7 +21,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">🍴</span>
+            <Image src="/logo.png" alt="ForkIt" width={36} height={36} className="rounded-xl" />
             <span className="text-xl font-bold text-forkit-dark">ForkIt</span>
           </Link>
 

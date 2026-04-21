@@ -54,9 +54,9 @@ export default function FundingBar({
               className="h-full transition-all duration-500 first:rounded-l-full last:rounded-r-full"
               style={{
                 width: `${width}%`,
-                backgroundColor: walletColor(c.contributorWallet),
+                backgroundColor: walletColor(c.wallet),
               }}
-              title={`${shortenWallet(c.contributorWallet)}: ${c.amount.toFixed(2)} ${currency}`}
+              title={`${shortenWallet(c.wallet)}: ${c.amount.toFixed(2)} ${currency}`}
             />
           );
         })}
@@ -71,10 +71,10 @@ export default function FundingBar({
           >
             <div
               className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: walletColor(c.contributorWallet) }}
+              style={{ backgroundColor: walletColor(c.wallet) }}
             />
             <span className="font-mono">
-              {shortenWallet(c.contributorWallet)}
+              {shortenWallet(c.wallet)}
             </span>
             <span className="text-gray-400">
               {c.amount.toFixed(2)} {currency}

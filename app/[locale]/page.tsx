@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 export default function HomePage() {
@@ -13,7 +14,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-orange-100 text-forkit-orange px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-              <span>🍴</span> {t("badge")}
+              <Image src="/logo.png" alt="" width={20} height={20} className="rounded" />
+              {t("badge")}
             </div>
             <h1 className="text-5xl lg:text-7xl font-extrabold text-forkit-dark leading-tight">
               {t("heroTitle")}{" "}

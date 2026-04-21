@@ -155,7 +155,7 @@ export default function OrderPage() {
       </div>
 
       {/* Contribute section */}
-      {remaining > 0 && order.status === "pending" && (
+      {remaining > 0 && order.status === "Created" && (
         <div className="card p-5 mb-6">
           <h2 className="font-semibold text-gray-900 mb-3">
             {t("contributeTitle")}

@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   description:
     "Build your restaurant website and accept crypto payments via Solana. Escrow-based ordering, split payments, and beautiful templates.",
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍴</text></svg>",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
   openGraph: {
     title: "ForkIt — Restaurant Builder on Solana",
