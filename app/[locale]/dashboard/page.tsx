@@ -25,7 +25,7 @@ interface Restaurant {
 
 export default function DashboardPage() {
   const { connected } = useWallet();
-  const { token, authenticate, getAuthHeaders } = useWalletAuth();
+  const { token, authenticate, getAuthHeaders, clearToken, authError, isAuthenticating } = useWalletAuth();
   const t = useTranslations("dashboard");
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
@@ -64,6 +64,10 @@ export default function DashboardPage() {
       const res = await fetch("/api/restaurants/mine", {
         headers: getAuthHeaders(),
       });
+      if (res.status === 401) {
+        clearToken();
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         const list: Restaurant[] = data.restaurants || (data.restaurant ? [data.restaurant] : []);
@@ -83,7 +87,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders]);
+  }, [token, getAuthHeaders, clearToken]);
 
   useEffect(() => {
     if (token) loadRestaurants();
@@ -112,6 +116,8 @@ export default function DashboardPage() {
         setShowCreateForm(false);
         setName("");
         setDescription("");
+      } else if (res.status === 401) {
+        clearToken();
       } else if (res.status === 409) {
         const { restaurant: existing } = await res.json();
         setRestaurant(existing);
@@ -153,11 +159,17 @@ export default function DashboardPage() {
         <p className="mt-3 text-gray-500 max-w-md">
           {t("signToAuthDesc")}
         </p>
+        {authError && (
+          <p className="mt-4 text-sm text-red-600 max-w-md bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+            {authError}
+          </p>
+        )}
         <button
           onClick={authenticate}
-          className="mt-8 btn-primary text-lg"
+          disabled={isAuthenticating}
+          className="mt-8 btn-primary text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {t("signContinue")}
+          {isAuthenticating ? "Signing..." : t("signContinue")}
         </button>
       </div>
     );
