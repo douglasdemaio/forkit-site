@@ -1,14 +1,14 @@
 import { PublicKey } from "@solana/web3.js";
 
-// ForkIt Program IDs
+// ForkIt Program IDs (deployed to devnet 2026-04-22)
 export const ESCROW_PROGRAM_ID = new PublicKey(
-  "FNZXjjq2oceq15jVsnHT8gYJQUZ9NLCXCpYak2pXsqGB"
+  process.env.NEXT_PUBLIC_ESCROW_PROGRAM_ID || "CNUWqYhXPXszPuB8psqG2VSnwCXf1MWzT4Pztp4y8fgj"
 );
 export const REGISTRY_PROGRAM_ID = new PublicKey(
-  "2riHMdVB6eFgeQjqvnqq2Mrpqea7hrMv5ZNRh7gZgB9S"
+  process.env.NEXT_PUBLIC_REGISTRY_PROGRAM_ID || "EM1FgSzfS3F7cCYJWhUaqqPAK7ijZYpYRx7pzYkuyExz"
 );
 export const LOYALTY_PROGRAM_ID = new PublicKey(
-  "6DaFmi7haz2Ci9sXaHRviz3biwbmTwipvwc9L9cdeugR"
+  process.env.NEXT_PUBLIC_LOYALTY_PROGRAM_ID || "BnnUntqkUadZ2BsW8j675P9hJQV3aqVcmt4xG4xfeoM8"
 );
 
 // Treasury

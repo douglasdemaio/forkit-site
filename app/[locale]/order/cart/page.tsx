@@ -161,24 +161,27 @@ export default function CartPage() {
 
       // 2. Create on-chain escrow
       try {
-        if (!order.restaurant?.walletAddress) {
+        if (!order.restaurant?.wallet) {
           throw new Error("Restaurant wallet address not found");
         }
 
-        const { signature } = await createOrder({
+        const { signature, orderPda } = await createOrder({
           orderId: order.id,
-          restaurantWallet: order.restaurant.walletAddress,
-          amount: order.escrowTarget,
-          currency: "USDC",
+          restaurantWallet: order.restaurant.wallet,
+          foodAmount: order.foodTotal,
+          deliveryAmount: order.deliveryFee,
+          currency: order.restaurant.currency || "USDC",
+          codeAHash: order.codeAHash || "",
+          codeBHash: order.codeBHash || "",
         });
 
-        // 3. Update order with on-chain info
+        // 3. Update order with on-chain info (store order PDA, not tx signature)
         await fetch(`/api/orders/${order.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             status: "funded",
-            onChainOrderId: signature,
+            onChainOrderId: orderPda,
           }),
         });
 

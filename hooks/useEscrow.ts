@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback } from "react";
-import { useConnection } from "@solana/wallet-adapter-react";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   PublicKey,
   Transaction,
   TransactionInstruction,
   SystemProgram,
+  SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 import {
   ESCROW_PROGRAM_ID,
@@ -19,19 +19,52 @@ import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-// Instruction discriminators (Anchor-style, first 8 bytes of sha256 hash)
-const CREATE_ORDER_DISCRIMINATOR = Buffer.from([
-  141, 54, 37, 207, 237, 210, 250, 215,
-]);
-const CONTRIBUTE_DISCRIMINATOR = Buffer.from([
-  82, 48, 204, 145, 137, 43, 194, 101,
-]);
-const CONFIRM_DELIVERY_DISCRIMINATOR = Buffer.from([
-  104, 87, 191, 49, 195, 225, 56, 139,
-]);
+const CREATE_ORDER_DISCRIMINATOR = Buffer.from([141, 54, 37, 207, 237, 210, 250, 215]);
+const CONTRIBUTE_DISCRIMINATOR = Buffer.from([82, 48, 204, 145, 137, 43, 194, 101]);
+const CONFIRM_DELIVERY_DISCRIMINATOR = Buffer.from([104, 87, 191, 49, 195, 225, 56, 139]);
+
+// Convert a DB UUID string to a deterministic u64 for on-chain order_id.
+// Takes the first 8 bytes of the UUID hex (without hyphens) as a big-endian u64,
+// then writes it as little-endian into the 8-byte seed buffer.
+function uuidToOrderId(uuid: string): bigint {
+  return BigInt("0x" + uuid.replace(/-/g, "").slice(0, 16));
+}
+
+function orderIdToLeBytes(uuid: string): Buffer {
+  const buf = Buffer.alloc(8);
+  buf.writeBigUInt64LE(uuidToOrderId(uuid));
+  return buf;
+}
+
+function deriveOrderPda(orderIdBuf: Buffer): PublicKey {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("order"), orderIdBuf],
+    ESCROW_PROGRAM_ID
+  )[0];
+}
+
+function deriveEscrowVaultPda(orderIdBuf: Buffer): PublicKey {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("escrow_vault"), orderIdBuf],
+    ESCROW_PROGRAM_ID
+  )[0];
+}
+
+function deriveProtocolConfigPda(): PublicKey {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("protocol_config")],
+    ESCROW_PROGRAM_ID
+  )[0];
+}
+
+function deriveContributionPda(orderIdBuf: Buffer, contributor: PublicKey): PublicKey {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("contribution"), orderIdBuf, contributor.toBuffer()],
+    ESCROW_PROGRAM_ID
+  )[0];
+}
 
 export function useEscrow() {
   const { connection } = useConnection();
@@ -41,83 +74,92 @@ export function useEscrow() {
     async (params: {
       orderId: string;
       restaurantWallet: string;
-      amount: number;
+      foodAmount: number;
+      deliveryAmount: number;
       currency: string;
+      codeAHash: string; // hex string — SHA256 of code A
+      codeBHash: string; // hex string — SHA256 of code B
     }) => {
       if (!publicKey || !sendTransaction)
         throw new Error("Wallet not connected");
 
       const mint = getMintForCurrency(params.currency);
       const restaurantPubkey = new PublicKey(params.restaurantWallet);
-      const amountLamports = Math.round(params.amount * 10 ** TOKEN_DECIMALS);
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+      const orderIdNum = uuidToOrderId(params.orderId);
 
-      // Derive escrow PDA
-      const [escrowPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from("escrow"),
-          publicKey.toBuffer(),
-          Buffer.from(params.orderId.slice(0, 32)),
-        ],
-        ESCROW_PROGRAM_ID
-      );
+      const foodAmtLamports = BigInt(Math.round((params.foodAmount ?? 0) * 10 ** TOKEN_DECIMALS));
+      const deliveryAmtLamports = BigInt(Math.round((params.deliveryAmount ?? 0) * 10 ** TOKEN_DECIMALS));
+      const initialContribution = foodAmtLamports + deliveryAmtLamports;
 
-      // Get token accounts
-      const customerTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        publicKey
-      );
-      const escrowTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        escrowPda,
-        true
-      );
+      const orderPda = deriveOrderPda(orderIdBuf);
+      const escrowVaultPda = deriveEscrowVaultPda(orderIdBuf);
+      const protocolConfigPda = deriveProtocolConfigPda();
+      const contributionPda = deriveContributionPda(orderIdBuf, publicKey);
 
-      // Build instruction data
-      const data = Buffer.alloc(8 + 8 + 32);
+      const customerTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
+
+      const codeAHashBuf = Buffer.from(params.codeAHash, "hex");
+      const codeBHashBuf = Buffer.from(params.codeBHash, "hex");
+
+      // Instruction data layout (129 bytes total):
+      // [0-7]    discriminator
+      // [8-15]   order_id u64 LE
+      // [16-23]  food_amount u64 LE
+      // [24-31]  delivery_amount u64 LE
+      // [32-39]  initial_contribution u64 LE
+      // [40-71]  code_a_hash [u8; 32]
+      // [72-103] code_b_hash [u8; 32]
+      // [104-111] estimated_delivery_time i64 LE
+      // [112]    ai_confidence u8
+      // [113-120] requested_delivery_time i64 LE
+      // [121-128] requested_pickup_time i64 LE
+      const data = Buffer.alloc(129);
       CREATE_ORDER_DISCRIMINATOR.copy(data, 0);
-      data.writeBigUInt64LE(BigInt(amountLamports), 8);
-      Buffer.from(params.orderId.slice(0, 32).padEnd(32, "\0")).copy(data, 16);
+      data.writeBigUInt64LE(orderIdNum, 8);
+      data.writeBigUInt64LE(foodAmtLamports, 16);
+      data.writeBigUInt64LE(deliveryAmtLamports, 24);
+      data.writeBigUInt64LE(initialContribution, 32);
+      codeAHashBuf.copy(data, 40);
+      codeBHashBuf.copy(data, 72);
+      data.writeBigInt64LE(BigInt(0), 104); // estimated_delivery_time = 0 (no AI routing)
+      data.writeUInt8(0, 112);              // ai_confidence = 0
+      data.writeBigInt64LE(BigInt(0), 113); // requested_delivery_time = 0 (ASAP)
+      data.writeBigInt64LE(BigInt(0), 121); // requested_pickup_time = 0 (ASAP)
 
+      // Account order must match the Anchor CreateOrder struct exactly
       const instruction = new TransactionInstruction({
         keys: [
-          { pubkey: publicKey, isSigner: true, isWritable: true },
-          { pubkey: escrowPda, isSigner: false, isWritable: true },
-          { pubkey: customerTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: escrowTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: restaurantPubkey, isSigner: false, isWritable: false },
-          { pubkey: TREASURY_WALLET, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-          {
-            pubkey: ASSOCIATED_TOKEN_PROGRAM_ID,
-            isSigner: false,
-            isWritable: false,
-          },
-          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+          { pubkey: orderPda,            isSigner: false, isWritable: true  }, // order (init)
+          { pubkey: contributionPda,     isSigner: false, isWritable: true  }, // contribution (init)
+          { pubkey: protocolConfigPda,   isSigner: false, isWritable: false }, // protocol_config
+          { pubkey: restaurantPubkey,    isSigner: false, isWritable: false }, // restaurant
+          { pubkey: mint,                isSigner: false, isWritable: false }, // token_mint
+          { pubkey: escrowVaultPda,      isSigner: false, isWritable: true  }, // escrow_vault (init)
+          { pubkey: customerTokenAccount,isSigner: false, isWritable: true  }, // customer_token_account
+          { pubkey: publicKey,           isSigner: true,  isWritable: true  }, // customer
+          { pubkey: ESCROW_PROGRAM_ID,   isSigner: false, isWritable: false }, // surge_config = None
+          { pubkey: TOKEN_PROGRAM_ID,    isSigner: false, isWritable: false }, // token_program
+          { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // system_program
+          { pubkey: SYSVAR_RENT_PUBKEY,  isSigner: false, isWritable: false }, // rent
         ],
         programId: ESCROW_PROGRAM_ID,
         data,
       });
 
-      // Check if ATA needs to be created
-      const ataInfo = await connection.getAccountInfo(escrowTokenAccount);
-      const tx = new Transaction();
-      if (!ataInfo) {
-        tx.add(
-          createAssociatedTokenAccountInstruction(
-            publicKey,
-            escrowTokenAccount,
-            escrowPda,
-            mint
-          )
-        );
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey });
+
+      // Create the customer's ATA if it doesn't exist yet
+      const customerAtaInfo = await connection.getAccountInfo(customerTokenAccount);
+      if (!customerAtaInfo) {
+        tx.add(createAssociatedTokenAccountInstruction(publicKey, customerTokenAccount, publicKey, mint));
       }
+
       tx.add(instruction);
-
       const signature = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-
-      return { signature, escrowPda: escrowPda.toBase58() };
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+      return { signature, orderPda: orderPda.toBase58() };
     },
     [publicKey, sendTransaction, connection]
   );
@@ -125,7 +167,7 @@ export function useEscrow() {
   const contributeToOrder = useCallback(
     async (params: {
       orderId: string;
-      escrowPda: string;
+      escrowPda?: string; // kept for API compatibility; PDAs are re-derived from orderId
       amount: number;
       currency: string;
     }) => {
@@ -133,44 +175,39 @@ export function useEscrow() {
         throw new Error("Wallet not connected");
 
       const mint = getMintForCurrency(params.currency);
-      const escrowPubkey = new PublicKey(params.escrowPda);
-      const amountLamports = Math.round(params.amount * 10 ** TOKEN_DECIMALS);
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+      const amountLamports = BigInt(Math.round((params.amount ?? 0) * 10 ** TOKEN_DECIMALS));
 
-      const contributorTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        publicKey
-      );
-      const escrowTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        escrowPubkey,
-        true
-      );
+      const orderPda = deriveOrderPda(orderIdBuf);
+      const escrowVaultPda = deriveEscrowVaultPda(orderIdBuf);
+      const contributionPda = deriveContributionPda(orderIdBuf, publicKey);
+      const contributorTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
 
-      const data = Buffer.alloc(8 + 8);
+      const data = Buffer.alloc(16);
       CONTRIBUTE_DISCRIMINATOR.copy(data, 0);
-      data.writeBigUInt64LE(BigInt(amountLamports), 8);
+      data.writeBigUInt64LE(amountLamports, 8);
 
+      // Account order must match the Anchor ContributeToOrder struct exactly
       const instruction = new TransactionInstruction({
         keys: [
-          { pubkey: publicKey, isSigner: true, isWritable: true },
-          { pubkey: escrowPubkey, isSigner: false, isWritable: true },
-          {
-            pubkey: contributorTokenAccount,
-            isSigner: false,
-            isWritable: true,
-          },
-          { pubkey: escrowTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: orderPda,                 isSigner: false, isWritable: true  }, // order (mut)
+          { pubkey: contributionPda,          isSigner: false, isWritable: true  }, // contribution (init_if_needed)
+          { pubkey: mint,                     isSigner: false, isWritable: false }, // token_mint
+          { pubkey: escrowVaultPda,           isSigner: false, isWritable: true  }, // escrow_vault (mut)
+          { pubkey: contributorTokenAccount,  isSigner: false, isWritable: true  }, // contributor_token_account
+          { pubkey: publicKey,                isSigner: true,  isWritable: true  }, // contributor
+          { pubkey: TOKEN_PROGRAM_ID,         isSigner: false, isWritable: false }, // token_program
+          { pubkey: SystemProgram.programId,  isSigner: false, isWritable: false }, // system_program
+          { pubkey: SYSVAR_RENT_PUBKEY,       isSigner: false, isWritable: false }, // rent
         ],
         programId: ESCROW_PROGRAM_ID,
         data,
       });
 
-      const tx = new Transaction().add(instruction);
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey }).add(instruction);
       const signature = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
       return { signature };
     },
     [publicKey, sendTransaction, connection]
@@ -178,61 +215,56 @@ export function useEscrow() {
 
   const confirmDelivery = useCallback(
     async (params: {
-      escrowPda: string;
+      orderId: string;
       restaurantWallet: string;
-      codeA: string;
+      driverWallet: string;
+      codeB: string; // raw delivery code (NOT the hash) — contract verifies against stored hash
       currency: string;
     }) => {
       if (!publicKey || !sendTransaction)
         throw new Error("Wallet not connected");
 
       const mint = getMintForCurrency(params.currency);
-      const escrowPubkey = new PublicKey(params.escrowPda);
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+
+      const orderPda = deriveOrderPda(orderIdBuf);
+      const escrowVaultPda = deriveEscrowVaultPda(orderIdBuf);
+      const protocolConfigPda = deriveProtocolConfigPda();
+
       const restaurantPubkey = new PublicKey(params.restaurantWallet);
+      const driverPubkey = new PublicKey(params.driverWallet);
 
-      const escrowTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        escrowPubkey,
-        true
-      );
-      const restaurantTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        restaurantPubkey
-      );
-      const treasuryTokenAccount = await getAssociatedTokenAddress(
-        mint,
-        TREASURY_WALLET
-      );
+      const restaurantTokenAccount = await getAssociatedTokenAddress(mint, restaurantPubkey);
+      const driverTokenAccount = await getAssociatedTokenAddress(mint, driverPubkey);
+      const treasuryTokenAccount = await getAssociatedTokenAddress(mint, TREASURY_WALLET);
 
-      const codeBytes = new TextEncoder().encode(params.codeA.padEnd(32, "\0"));
-      const data = Buffer.alloc(8 + 32);
+      // Borsh-encode code_b as a String: 4-byte length (u32 LE) followed by UTF-8 bytes
+      const codeBBytes = Buffer.from(params.codeB, "utf8");
+      const data = Buffer.alloc(8 + 4 + codeBBytes.length);
       CONFIRM_DELIVERY_DISCRIMINATOR.copy(data, 0);
-      Buffer.from(codeBytes.slice(0, 32)).copy(data, 8);
+      data.writeUInt32LE(codeBBytes.length, 8);
+      codeBBytes.copy(data, 12);
 
+      // Account order must match the Anchor ConfirmDelivery struct exactly
       const instruction = new TransactionInstruction({
         keys: [
-          { pubkey: publicKey, isSigner: true, isWritable: true },
-          { pubkey: escrowPubkey, isSigner: false, isWritable: true },
-          { pubkey: escrowTokenAccount, isSigner: false, isWritable: true },
-          {
-            pubkey: restaurantTokenAccount,
-            isSigner: false,
-            isWritable: true,
-          },
-          { pubkey: treasuryTokenAccount, isSigner: false, isWritable: true },
-          { pubkey: restaurantPubkey, isSigner: false, isWritable: false },
-          { pubkey: TREASURY_WALLET, isSigner: false, isWritable: false },
-          { pubkey: mint, isSigner: false, isWritable: false },
-          { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+          { pubkey: orderPda,             isSigner: false, isWritable: true  }, // order (mut)
+          { pubkey: escrowVaultPda,       isSigner: false, isWritable: true  }, // escrow_vault (mut)
+          { pubkey: protocolConfigPda,    isSigner: false, isWritable: false }, // protocol_config
+          { pubkey: restaurantTokenAccount, isSigner: false, isWritable: true }, // restaurant_token_account
+          { pubkey: driverTokenAccount,   isSigner: false, isWritable: true  }, // driver_token_account
+          { pubkey: treasuryTokenAccount, isSigner: false, isWritable: true  }, // treasury_token_account
+          { pubkey: publicKey,            isSigner: true,  isWritable: false }, // customer
+          { pubkey: TOKEN_PROGRAM_ID,     isSigner: false, isWritable: false }, // token_program
         ],
         programId: ESCROW_PROGRAM_ID,
         data,
       });
 
-      const tx = new Transaction().add(instruction);
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey }).add(instruction);
       const signature = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(signature, "confirmed");
-
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
       return { signature };
     },
     [publicKey, sendTransaction, connection]
