@@ -22,7 +22,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="ForkIt" width={36} height={36} className="rounded-xl" />
-            <span className="text-xl font-bold text-forkit-dark">ForkIt</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-forkit-dark leading-tight">ForkIt</span>
+              <span className="text-xs text-gray-400 leading-tight hidden sm:block">Everything worth forking!</span>
+            </div>
           </Link>
 
           {/* Desktop nav */}
