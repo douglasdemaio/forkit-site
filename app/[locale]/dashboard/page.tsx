@@ -55,6 +55,7 @@ export default function DashboardPage() {
   const [editAddressCity, setEditAddressCity] = useState("");
   const [editAddressCountry, setEditAddressCountry] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSaveError, setSettingsSaveError] = useState<string | null>(null);
 
   const restaurant = selectedRestaurant;
 
@@ -529,6 +530,7 @@ export default function DashboardPage() {
                       setEditAddressStreet(restaurant.addressStreet || "");
                       setEditAddressCity(restaurant.addressCity || "");
                       setEditAddressCountry(restaurant.addressCountry || "");
+                      setSettingsSaveError(null);
                       setEditingSettings(true);
                     }}
                     className="text-sm text-forkit-orange hover:text-orange-600 font-medium transition-colors"
@@ -649,11 +651,17 @@ export default function DashboardPage() {
                     <span className="text-gray-500">{t("slug")}</span>
                     <span className="font-mono text-xs">{restaurant.slug}</span>
                   </div>
+                  {settingsSaveError && (
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                      {settingsSaveError}
+                    </p>
+                  )}
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={async () => {
                         if (!restaurant) return;
                         setSavingSettings(true);
+                        setSettingsSaveError(null);
                         try {
                           const res = await fetch(`/api/restaurants/${restaurant.id}`, {
                             method: "PUT",
@@ -673,9 +681,15 @@ export default function DashboardPage() {
                             const updated = await res.json();
                             setRestaurant(updated);
                             setEditingSettings(false);
+                          } else if (res.status === 401) {
+                            clearToken();
+                          } else {
+                            const data = await res.json().catch(() => ({}));
+                            setSettingsSaveError(data.error || `Save failed (${res.status})`);
                           }
                         } catch (err) {
                           console.error(err);
+                          setSettingsSaveError("Network error — please try again");
                         } finally {
                           setSavingSettings(false);
                         }
@@ -686,7 +700,7 @@ export default function DashboardPage() {
                       {savingSettings ? "..." : t("saveSettings")}
                     </button>
                     <button
-                      onClick={() => setEditingSettings(false)}
+                      onClick={() => { setEditingSettings(false); setSettingsSaveError(null); }}
                       className="px-3 py-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
                     >
                       {t("cancel")}
