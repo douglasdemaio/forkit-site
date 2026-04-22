@@ -46,6 +46,7 @@ export default function OrdersPage() {
   const t = useTranslations("orders");
   const tDash = useTranslations("dashboard");
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [restaurantSelfDelivery, setRestaurantSelfDelivery] = useState(false);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -69,7 +70,7 @@ export default function OrdersPage() {
 
   const statusActions: Record<string, { label: string; next: OrderStatus } | null> = {
     Created:        null,
-    Funded:         { label: t("startPreparing"), next: "Preparing" },
+    Funded:         null, // handled separately with Confirm Order UI
     Preparing:      { label: t("markReady"), next: "ReadyForPickup" },
     DriverAssigned: { label: t("markReady"), next: "ReadyForPickup" },
     ReadyForPickup: null,
@@ -140,20 +141,30 @@ export default function OrdersPage() {
 
   const loadData = useCallback(async () => {
     if (!token) return;
-    // If restaurant ID is in URL, use it directly
-    if (restaurantIdParam) {
-      setRestaurantId(restaurantIdParam);
-      setLoading(false);
-      return;
-    }
     try {
-      const res = await fetch("/api/restaurants/mine", {
-        headers: getAuthHeaders(),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.restaurant) {
-          setRestaurantId(data.restaurant.id);
+      if (restaurantIdParam) {
+        // Fetch the specific restaurant to get selfDelivery flag
+        const res = await fetch(`/api/restaurants/${restaurantIdParam}`, {
+          headers: getAuthHeaders(),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setRestaurantId(restaurantIdParam);
+          setRestaurantSelfDelivery(data.selfDelivery ?? false);
+        } else {
+          setRestaurantId(restaurantIdParam);
+        }
+      } else {
+        const res = await fetch("/api/restaurants/mine", {
+          headers: getAuthHeaders(),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const r = data.restaurant || data.restaurants?.[0];
+          if (r) {
+            setRestaurantId(r.id);
+            setRestaurantSelfDelivery(r.selfDelivery ?? false);
+          }
         }
       }
     } catch (err) {
@@ -193,14 +204,17 @@ export default function OrdersPage() {
 
   const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
-      await fetch(`/api/orders/${orderId}`, {
-        method: "PUT",
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: newStatus }),
       });
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-      );
+      if (res.ok) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+        );
+        if (newStatus === "Preparing") await loadOrders(true);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -421,8 +435,26 @@ export default function OrdersPage() {
                   )}
                 </div>
 
-                {/* Driver bids panel — shown for Preparing orders awaiting driver assignment */}
-                {order.status === "Preparing" && (
+                {/* Confirm Order — prominent CTA for funded orders */}
+                {order.status === "Funded" && (
+                  <div className="mt-4 pt-4 border-t border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-50/50 rounded-xl px-4 py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900">{t("confirmOrder")}</p>
+                      <p className="text-xs text-blue-600 mt-0.5">
+                        {restaurantSelfDelivery ? t("confirmOrderSelfHint") : t("confirmOrderDriverHint")}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => updateStatus(order.id, "Preparing")}
+                      className="px-5 py-2.5 bg-forkit-orange text-white text-sm font-semibold rounded-xl hover:bg-orange-600 transition-colors whitespace-nowrap"
+                    >
+                      {t("confirmOrder")} ✓
+                    </button>
+                  </div>
+                )}
+
+                {/* Driver bids panel — shown for Preparing orders awaiting driver assignment, not for self-delivery */}
+                {order.status === "Preparing" && !restaurantSelfDelivery && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <p className="text-sm font-semibold text-gray-700 mb-2">
                       🚴 {t("driverBids")} {bidsMap[order.id]?.length > 0 ? `(${bidsMap[order.id].length})` : ""}

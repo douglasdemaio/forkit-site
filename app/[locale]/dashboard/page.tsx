@@ -25,6 +25,7 @@ interface Restaurant {
   deliveryFee: number;
   published: boolean;
   autoAcknowledge: boolean;
+  selfDelivery: boolean;
 }
 
 export default function DashboardPage() {
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const [editDeliveryFee, setEditDeliveryFee] = useState(0);
   const [editPayoutWallet, setEditPayoutWallet] = useState("");
   const [editAutoAcknowledge, setEditAutoAcknowledge] = useState(false);
+  const [editSelfDelivery, setEditSelfDelivery] = useState(false);
   const [editAddressStreet, setEditAddressStreet] = useState("");
   const [editAddressCity, setEditAddressCity] = useState("");
   const [editAddressCountry, setEditAddressCountry] = useState("");
@@ -523,6 +525,7 @@ export default function DashboardPage() {
                       setEditDeliveryFee(restaurant.deliveryFee);
                       setEditPayoutWallet(restaurant.payoutWallet || restaurant.wallet);
                       setEditAutoAcknowledge(restaurant.autoAcknowledge);
+                      setEditSelfDelivery(restaurant.selfDelivery);
                       setEditAddressStreet(restaurant.addressStreet || "");
                       setEditAddressCity(restaurant.addressCity || "");
                       setEditAddressCountry(restaurant.addressCountry || "");
@@ -558,6 +561,9 @@ export default function DashboardPage() {
                       step="0.01"
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
                     />
+                    {editSelfDelivery && (
+                      <p className="mt-1 text-xs text-gray-400">{t("deliveryFeeOwnHint")}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm text-gray-500 mb-1">{t("payoutWallet")}</label>
@@ -569,6 +575,23 @@ export default function DashboardPage() {
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
                     />
                     <p className="mt-1 text-xs text-gray-400">{t("payoutWalletHint")}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-sm text-gray-700 font-medium">{t("selfDeliveryLabel")}</label>
+                      <p className="text-xs text-gray-400 mt-0.5">{t("selfDeliveryHint")}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditSelfDelivery((v) => !v)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        editSelfDelivery ? "bg-forkit-orange" : "bg-gray-200"
+                      }`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        editSelfDelivery ? "translate-x-6" : "translate-x-1"
+                      }`} />
+                    </button>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
@@ -640,6 +663,7 @@ export default function DashboardPage() {
                               deliveryFee: editDeliveryFee,
                               payoutWallet: editPayoutWallet,
                               autoAcknowledge: editAutoAcknowledge,
+                              selfDelivery: editSelfDelivery,
                               addressStreet: editAddressStreet || null,
                               addressCity: editAddressCity || null,
                               addressCountry: editAddressCountry || null,
@@ -685,6 +709,12 @@ export default function DashboardPage() {
                     <span className="text-gray-500">{t("payoutWallet")}</span>
                     <span className="font-mono text-xs truncate max-w-[140px]" title={restaurant.payoutWallet || restaurant.wallet}>
                       {(restaurant.payoutWallet || restaurant.wallet).slice(0, 8)}...{(restaurant.payoutWallet || restaurant.wallet).slice(-4)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">{t("selfDeliveryLabel")}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${restaurant.selfDelivery ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"}`}>
+                      {restaurant.selfDelivery ? t("on") : t("off")}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const orders = await prisma.order.findMany({
-      where: { status: "Preparing", driverWallet: null },
+      where: { status: "Preparing", driverWallet: null, bidOpenAt: { not: null } },
       orderBy: { bidOpenAt: "asc" },
       include: { restaurant: true, contributions: true },
     });

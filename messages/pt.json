@@ -98,7 +98,10 @@
     "createAnother": "Criar novo restaurante",
     "switchRestaurant": "Trocar restaurante",
     "yourRestaurants": "Seus restaurantes",
-    "selectRestaurant": "Selecione um restaurante para gerenciar"
+    "selectRestaurant": "Selecione um restaurante para gerenciar",
+    "selfDeliveryLabel": "Delivery by Restaurant",
+    "selfDeliveryHint": "Your team handles all deliveries. ForkMe drivers won't receive bid requests.",
+    "deliveryFeeOwnHint": "Amount charged to the customer for your delivery service"
   },
   "orders": {
     "title": "Pedidos",
@@ -129,7 +132,10 @@
     "verifying": "Verificando...",
     "invalidCode": "Código inválido",
     "codeRequired": "Insira um código",
-    "verifyFailed": "Verificação falhou"
+    "verifyFailed": "Verificação falhou",
+    "confirmOrder": "Confirm Order",
+    "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
   },
   "cart": {
     "emptyCart": "Seu carrinho está vazio",

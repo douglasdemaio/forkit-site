@@ -98,7 +98,10 @@
     "createAnother": "创建新餐厅",
     "switchRestaurant": "切换餐厅",
     "yourRestaurants": "我的餐厅",
-    "selectRestaurant": "选择要管理的餐厅"
+    "selectRestaurant": "选择要管理的餐厅",
+    "selfDeliveryLabel": "Delivery by Restaurant",
+    "selfDeliveryHint": "Your team handles all deliveries. ForkMe drivers won't receive bid requests.",
+    "deliveryFeeOwnHint": "Amount charged to the customer for your delivery service"
   },
   "orders": {
     "title": "订单管理",
@@ -129,7 +132,10 @@
     "verifying": "验证中...",
     "invalidCode": "无效代码",
     "codeRequired": "输入代码",
-    "verifyFailed": "验证失败"
+    "verifyFailed": "验证失败",
+    "confirmOrder": "Confirm Order",
+    "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
   },
   "cart": {
     "emptyCart": "购物车是空的",

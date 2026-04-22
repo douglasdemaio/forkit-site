@@ -98,7 +98,10 @@
     "createAnother": "새 레스토랑 만들기",
     "switchRestaurant": "레스토랑 전환",
     "yourRestaurants": "내 레스토랑",
-    "selectRestaurant": "관리할 레스토랑을 선택하세요"
+    "selectRestaurant": "관리할 레스토랑을 선택하세요",
+    "selfDeliveryLabel": "Delivery by Restaurant",
+    "selfDeliveryHint": "Your team handles all deliveries. ForkMe drivers won't receive bid requests.",
+    "deliveryFeeOwnHint": "Amount charged to the customer for your delivery service"
   },
   "orders": {
     "title": "주문 관리",
@@ -129,7 +132,10 @@
     "verifying": "확인 중...",
     "invalidCode": "잘못된 코드",
     "codeRequired": "코드를 입력하세요",
-    "verifyFailed": "확인 실패"
+    "verifyFailed": "확인 실패",
+    "confirmOrder": "Confirm Order",
+    "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
   },
   "cart": {
     "emptyCart": "장바구니가 비어있어요",

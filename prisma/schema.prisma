@@ -21,6 +21,7 @@ model Restaurant {
   deliveryFee Float      @default(0)
   published   Boolean    @default(false)
   autoAcknowledge Boolean @default(false)
+  selfDelivery    Boolean @default(false)
   addressStreet   String?
   addressCity     String?
   addressCountry  String?

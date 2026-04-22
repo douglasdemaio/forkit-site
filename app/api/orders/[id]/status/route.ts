@@ -31,7 +31,7 @@ export async function POST(
     const order = await prisma.order.findUnique({
       where: { id: params.id },
       include: {
-        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true, autoAcknowledge: true } },
+        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true, autoAcknowledge: true, selfDelivery: true } },
         contributions: { orderBy: { createdAt: "asc" } },
       },
     });
@@ -50,7 +50,8 @@ export async function POST(
     const now = new Date();
     const updateData: any = { status: newStatus };
 
-    if (newStatus === "Preparing") {
+    // Only open for driver bids when the restaurant doesn't handle delivery itself
+    if (newStatus === "Preparing" && !order.restaurant?.selfDelivery) {
       updateData.bidOpenAt = now;
     }
 
@@ -59,7 +60,9 @@ export async function POST(
       newStatus === "Funded" && order.restaurant?.autoAcknowledge;
     if (autoChainToPreparing) {
       updateData.status = "Preparing";
-      updateData.bidOpenAt = now;
+      if (!order.restaurant?.selfDelivery) {
+        updateData.bidOpenAt = now;
+      }
     }
 
     if (newStatus === "PickedUp" && !order.driverWallet) {
