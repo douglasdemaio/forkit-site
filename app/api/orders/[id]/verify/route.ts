@@ -32,7 +32,7 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    if (order.status === "Delivered" || order.status === "Settled" || order.status === "Cancelled") {
+    if (order.status === "Settled" || order.status === "Cancelled") {
       return NextResponse.json({ error: "Order is already closed" }, { status: 400 });
     }
 
@@ -42,6 +42,10 @@ export async function POST(
 
     if (!codeAMatches && !codeBMatches) {
       return NextResponse.json({ error: "Invalid code", matched: false }, { status: 400 });
+    }
+
+    if (order.status === "Delivered" && !codeBMatches) {
+      return NextResponse.json({ error: "Only the delivery code is accepted at this stage", matched: false }, { status: 400 });
     }
 
     const newStatus = codeBMatches ? "Settled" : "PickedUp";

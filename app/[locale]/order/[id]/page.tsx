@@ -6,6 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletButton } from "@/components/wallet-button";
 import { useOrderStatus } from "@/hooks/useOrderStatus";
 import { useEscrow } from "@/hooks/useEscrow";
+import { useWalletAuth } from "@/hooks/useWallet";
 import { useTranslations } from "next-intl";
 import OrderTracker from "@/components/order-tracker";
 import FundingBar from "@/components/funding-bar";
@@ -14,6 +15,7 @@ export default function OrderPage() {
   const params = useParams();
   const orderId = params.id as string;
   const { publicKey, connected } = useWallet();
+  const { token, authenticate, getAuthHeaders } = useWalletAuth();
   const { order, loading, error, refetch } = useOrderStatus(orderId);
   const { contributeToOrder } = useEscrow();
   const t = useTranslations("order");
@@ -29,6 +31,13 @@ export default function OrderPage() {
       const amount = parseFloat(contributeAmount);
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid amount");
 
+      // Ensure we have a JWT before recording the contribution
+      let authToken = token;
+      if (!authToken) {
+        authToken = await authenticate();
+        if (!authToken) throw new Error("Wallet authentication required");
+      }
+
       const { signature } = await contributeToOrder({
         orderId: order.id,
         escrowPda: order.onChainOrderId || "",
@@ -36,10 +45,10 @@ export default function OrderPage() {
         currency: order.restaurant?.currency || "USDC",
       });
 
-      // Record contribution
+      // Record contribution with auth
       await fetch(`/api/orders/${order.id}/contribute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
         body: JSON.stringify({
           contributorWallet: publicKey.toBase58(),
           amount,

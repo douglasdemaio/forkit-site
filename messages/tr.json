@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "Restoranlar",
     "dashboard": "Panel",
-    "cart": "Sepet"
+    "cart": "Sepet",
+    "delivery": "Teslimat"
   },
   "home": {
     "badge": "Solana ile çalışır",
@@ -135,7 +136,18 @@
     "verifyFailed": "Doğrulama başarısız",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "Teslimatı Başlat",
+    "statusDriverAssigned": "sürücü atandı",
+    "statusPickedUp": "teslim alındı",
+    "statusSettled": "tamamlandı",
+    "statusDisputed": "itirazda",
+    "statusRefunded": "iade edildi",
+    "driverBids": "Sürücü Teklifleri",
+    "noBidsYet": "Henüz teklif yok — sürücüler teklif verince burada görünecek.",
+    "newcomer": "yeni",
+    "deliveries": "teslimatlar",
+    "assignDriver": "Ata"
   },
   "cart": {
     "emptyCart": "Sepetin boş",
@@ -152,7 +164,8 @@
     "splitHint": "Siparişten sonra arkadaşlarınla hesabı bölmek için bir link paylaşabilirsin",
     "deliveryAddress": "Teslimat Adresi",
     "deliveryAddressPlaceholder": "Teslimat adresini gir",
-    "deliveryAddressHint": "Sokak, bina no, daire, şehir"
+    "deliveryAddressHint": "Sokak, bina no, daire, şehir",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "Sipariş bulunamadı",
@@ -170,5 +183,22 @@
     "shareDesc": "Bu linki arkadaşlarına gönder, böylece siparişe katkıda bulunabilirler.",
     "copy": "Kopyala",
     "copied": "Kopyalandı!"
+  },
+  "delivery": {
+    "title": "Mevcut Teslimatlar",
+    "subtitle": "Açık teslimat taleplerini inceleyin ve teklif verin",
+    "noOrders": "Mevcut teslimat yok",
+    "noOrdersDesc": "Yakında tekrar kontrol edin — yeni teslimat talepleri burada görünecek.",
+    "authRequired": "Kimlik doğrulama gerekli",
+    "restaurant": "Restoran",
+    "deliverTo": "Teslimat adresi",
+    "deliveryFee": "Teslimat ücreti",
+    "items": "Ürünler",
+    "bid": "Teslimat için teklif ver",
+    "bidPlaced": "Teklif verildi",
+    "autoAssigned": "Size atandı!",
+    "bidding": "Teklif veriliyor...",
+    "refreshing": "Yenileniyor...",
+    "signContinue": "İmzala ve Devam Et"
   }
 }

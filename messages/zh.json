@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "餐厅",
     "dashboard": "控制台",
-    "cart": "购物车"
+    "cart": "购物车",
+    "delivery": "配送"
   },
   "home": {
     "badge": "Powered by Solana",
@@ -135,7 +136,18 @@
     "verifyFailed": "验证失败",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "开始配送",
+    "statusDriverAssigned": "已分配司机",
+    "statusPickedUp": "已取货",
+    "statusSettled": "已结算",
+    "statusDisputed": "有争议",
+    "statusRefunded": "已退款",
+    "driverBids": "司机竞价",
+    "noBidsYet": "暂无竞价 — 司机竞价后将显示在此处。",
+    "newcomer": "新手",
+    "deliveries": "配送",
+    "assignDriver": "分配"
   },
   "cart": {
     "emptyCart": "购物车是空的",
@@ -152,7 +164,8 @@
     "splitHint": "结账后可以分享链接让朋友一起 AA 买单",
     "deliveryAddress": "配送地址",
     "deliveryAddressPlaceholder": "请输入你的配送地址",
-    "deliveryAddressHint": "街道、门牌号、小区、城市"
+    "deliveryAddressHint": "街道、门牌号、小区、城市",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "订单未找到",
@@ -170,5 +183,22 @@
     "shareDesc": "把这个链接发给朋友，让他们一起分担订单。",
     "copy": "复制",
     "copied": "已复制！"
+  },
+  "delivery": {
+    "title": "可用配送",
+    "subtitle": "浏览开放的配送请求并竞价接单",
+    "noOrders": "暂无可用配送",
+    "noOrdersDesc": "请稍后再来 — 新的配送请求将显示在此处。",
+    "authRequired": "需要身份验证",
+    "restaurant": "餐厅",
+    "deliverTo": "送达地址",
+    "deliveryFee": "配送费",
+    "items": "商品",
+    "bid": "竞价配送",
+    "bidPlaced": "已竞价",
+    "autoAssigned": "已分配给您！",
+    "bidding": "竞价中...",
+    "refreshing": "刷新中...",
+    "signContinue": "签名并继续"
   }
 }

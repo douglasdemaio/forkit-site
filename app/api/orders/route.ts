@@ -93,14 +93,29 @@ export async function GET(request: NextRequest) {
     }
 
     if (role === "driver") {
-      const where: any = {};
-      if (statusFilter) where.status = statusFilter;
+      // Drivers only see orders that are open for pickup or assigned to them.
+      // Customer wallet and delivery address are withheld until driver is assigned.
+      const driverStatuses = ["Preparing", "ReadyForPickup", "PickedUp"];
+      const where: any = {
+        status: statusFilter
+          ? (driverStatuses.includes(statusFilter) ? statusFilter : { in: driverStatuses })
+          : { in: driverStatuses },
+        OR: [{ driverWallet: null }, { driverWallet: wallet }],
+      };
       const orders = await prisma.order.findMany({
         where,
         orderBy: { createdAt: "desc" },
         include: { contributions: true, restaurant: true },
       });
-      return NextResponse.json(orders.map((o) => toApiOrder(o)));
+      // Redact customer info for orders not yet assigned to this driver
+      return NextResponse.json(orders.map((o) => {
+        const mapped = toApiOrder(o);
+        if (o.driverWallet !== wallet) {
+          mapped.customer = { wallet: "***" };
+          mapped.deliveryAddress = null;
+        }
+        return mapped;
+      }));
     }
 
     // Customer: return their own orders
@@ -117,18 +132,20 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/orders - Create a new order
+// Auth: JWT required. The authenticated wallet becomes the customer.
 export async function POST(request: NextRequest) {
   try {
+    const customerWallet = await getWalletFromRequest(request);
+    if (!customerWallet) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { restaurantId, items, tokenMint, deliveryAddress, customerWallet: bodyWallet } = body;
+    const { restaurantId, items, tokenMint, deliveryAddress } = body;
 
-    // Prefer wallet from JWT; fall back to body (for web clients that send it)
-    const authWallet = await getWalletFromRequest(request);
-    const customerWallet = authWallet || bodyWallet;
-
-    if (!restaurantId || !customerWallet || !items || !Array.isArray(items)) {
+    if (!restaurantId || !items || !Array.isArray(items)) {
       return NextResponse.json(
-        { error: "restaurantId, authenticated wallet, and items are required" },
+        { error: "restaurantId and items are required" },
         { status: 400 }
       );
     }

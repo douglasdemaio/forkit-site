@@ -39,6 +39,11 @@ export async function POST(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // Only the restaurant owner may drive order status from the dashboard
+    if (order.restaurant?.wallet !== wallet) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const allowed = VALID_TRANSITIONS[order.status] ?? [];
     if (!allowed.includes(newStatus)) {
       return NextResponse.json(

@@ -3,6 +3,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { OrderData } from "@/lib/types";
 
+function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = localStorage.getItem("forkit-auth-token");
+    if (!stored) return null;
+    const b64 = stored.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(b64));
+    return payload.exp * 1000 > Date.now() ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
 export function useOrderStatus(orderId: string | null) {
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -14,7 +27,11 @@ export function useOrderStatus(orderId: string | null) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/orders/${orderId}`);
+      const token = getStoredToken();
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(`/api/orders/${orderId}`, { headers });
       if (!res.ok) throw new Error("Failed to fetch order");
       const data = await res.json();
       setOrder({

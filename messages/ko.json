@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "레스토랑",
     "dashboard": "대시보드",
-    "cart": "장바구니"
+    "cart": "장바구니",
+    "delivery": "배달"
   },
   "home": {
     "badge": "Powered by Solana",
@@ -135,7 +136,18 @@
     "verifyFailed": "확인 실패",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "배달 시작",
+    "statusDriverAssigned": "드라이버 배정됨",
+    "statusPickedUp": "픽업됨",
+    "statusSettled": "정산됨",
+    "statusDisputed": "분쟁중",
+    "statusRefunded": "환불됨",
+    "driverBids": "드라이버 입찰",
+    "noBidsYet": "아직 입찰 없음 — 드라이버가 입찰하면 여기에 표시됩니다.",
+    "newcomer": "신규",
+    "deliveries": "배달",
+    "assignDriver": "배정"
   },
   "cart": {
     "emptyCart": "장바구니가 비어있어요",
@@ -152,7 +164,8 @@
     "splitHint": "결제 후 링크를 공유해서 친구와 더치페이할 수 있어요",
     "deliveryAddress": "배달 주소",
     "deliveryAddressPlaceholder": "배달 주소를 입력하세요",
-    "deliveryAddressHint": "도로명, 건물명, 동/호수"
+    "deliveryAddressHint": "도로명, 건물명, 동/호수",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "주문을 찾을 수 없어요",
@@ -170,5 +183,22 @@
     "shareDesc": "이 링크를 친구에게 보내서 함께 주문에 참여하게 하세요.",
     "copy": "복사",
     "copied": "복사됨!"
+  },
+  "delivery": {
+    "title": "이용 가능한 배달",
+    "subtitle": "열린 배달 요청을 검색하고 입찰하세요",
+    "noOrders": "이용 가능한 배달 없음",
+    "noOrdersDesc": "곧 확인하세요 — 새로운 배달 요청이 여기에 표시됩니다.",
+    "authRequired": "인증 필요",
+    "restaurant": "레스토랑",
+    "deliverTo": "배달지",
+    "deliveryFee": "배달료",
+    "items": "항목",
+    "bid": "배달 입찰",
+    "bidPlaced": "입찰 완료",
+    "autoAssigned": "배정되었습니다!",
+    "bidding": "입찰 중...",
+    "refreshing": "새로고침 중...",
+    "signContinue": "서명 및 계속"
   }
 }

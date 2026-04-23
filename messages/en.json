@@ -2,6 +2,7 @@
   "nav": {
     "restaurants": "Restaurants",
     "dashboard": "Dashboard",
+    "delivery": "Delivery",
     "cart": "Cart"
   },
   "home": {
@@ -129,6 +130,7 @@
     "confirmOrderSelfHint": "Start preparing — your team handles delivery",
     "startPreparing": "Start Preparing",
     "markReady": "Mark Ready",
+    "startDelivery": "Start Delivery",
     "driverBids": "Driver Bids",
     "noBidsYet": "No bids yet — drivers will appear here once they bid.",
     "newcomer": "newcomer",
@@ -150,6 +152,23 @@
     "invalidCode": "Invalid code",
     "codeRequired": "Enter a code",
     "verifyFailed": "Verification failed"
+  },
+  "delivery": {
+    "title": "Available Deliveries",
+    "subtitle": "Browse open delivery requests and bid to claim them",
+    "noOrders": "No deliveries available",
+    "noOrdersDesc": "Check back soon — new delivery requests will appear here.",
+    "authRequired": "Authentication required",
+    "restaurant": "Restaurant",
+    "deliverTo": "Deliver to",
+    "deliveryFee": "Delivery fee",
+    "items": "Items",
+    "bid": "Bid on Delivery",
+    "bidPlaced": "Bid Placed",
+    "autoAssigned": "Assigned to you!",
+    "bidding": "Placing bid...",
+    "refreshing": "Refreshing...",
+    "signContinue": "Sign & Continue"
   },
   "cart": {
     "emptyCart": "Your cart is empty",
@@ -181,7 +200,8 @@
     "stateProvince": "State / Province",
     "stateProvincePlaceholder": "NY",
     "country": "Country",
-    "countryPlaceholder": "United States"
+    "countryPlaceholder": "United States",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "Order not found",

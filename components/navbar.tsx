@@ -44,6 +44,14 @@ export default function Navbar() {
                 {t("dashboard")}
               </Link>
             )}
+            {connected && (
+              <Link
+                href="/delivery"
+                className="text-gray-600 hover:text-forkit-orange transition-colors"
+              >
+                {t("delivery")}
+              </Link>
+            )}
             <Link
               href="/order/cart"
               className="relative text-gray-600 hover:text-forkit-orange transition-colors"
@@ -118,6 +126,15 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {t("dashboard")}
+              </Link>
+            )}
+            {connected && (
+              <Link
+                href="/delivery"
+                className="block text-gray-600 hover:text-forkit-orange"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t("delivery")}
               </Link>
             )}
             <Link

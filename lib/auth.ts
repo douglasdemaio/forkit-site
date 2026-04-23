@@ -15,7 +15,7 @@ export async function createToken(wallet: string): Promise<string> {
   return new SignJWT({ wallet })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime("24h")
     .sign(JWT_SECRET);
 }
 

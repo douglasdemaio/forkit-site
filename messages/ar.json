@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "المطاعم",
     "dashboard": "لوحة التحكم",
-    "cart": "السلة"
+    "cart": "السلة",
+    "delivery": "التوصيل"
   },
   "home": {
     "badge": "مدعوم من Solana",
@@ -135,7 +136,18 @@
     "verifyFailed": "فشل التحقق",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "بدء التوصيل",
+    "statusDriverAssigned": "تم تعيين السائق",
+    "statusPickedUp": "تم الاستلام",
+    "statusSettled": "تمت التسوية",
+    "statusDisputed": "متنازع عليه",
+    "statusRefunded": "تم الاسترداد",
+    "driverBids": "عروض السائقين",
+    "noBidsYet": "لا توجد عروض بعد — سيظهر السائقون هنا عند تقديم عروضهم.",
+    "newcomer": "جديد",
+    "deliveries": "عمليات التوصيل",
+    "assignDriver": "تعيين"
   },
   "cart": {
     "emptyCart": "سلتك فارغة",
@@ -152,7 +164,8 @@
     "splitHint": "بعد الدفع، يمكنك مشاركة رابط ليقسّم أصدقاؤك الفاتورة",
     "deliveryAddress": "عنوان التوصيل",
     "deliveryAddressPlaceholder": "أدخل عنوان التوصيل",
-    "deliveryAddressHint": "الشارع، رقم المبنى، الشقة، المدينة"
+    "deliveryAddressHint": "الشارع، رقم المبنى، الشقة، المدينة",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "الطلب غير موجود",
@@ -170,5 +183,22 @@
     "shareDesc": "أرسل هذا الرابط لأصدقائك ليساهموا في الطلب.",
     "copy": "نسخ",
     "copied": "تم النسخ!"
+  },
+  "delivery": {
+    "title": "عمليات التوصيل المتاحة",
+    "subtitle": "تصفح طلبات التوصيل المفتوحة وقدم عرضاً لقبولها",
+    "noOrders": "لا توجد عمليات توصيل متاحة",
+    "noOrdersDesc": "تحقق مرة أخرى قريباً — ستظهر طلبات توصيل جديدة هنا.",
+    "authRequired": "المصادقة مطلوبة",
+    "restaurant": "المطعم",
+    "deliverTo": "التوصيل إلى",
+    "deliveryFee": "رسوم التوصيل",
+    "items": "العناصر",
+    "bid": "تقديم عرض للتوصيل",
+    "bidPlaced": "تم تقديم العرض",
+    "autoAssigned": "تم تعيينك!",
+    "bidding": "جاري تقديم العرض...",
+    "refreshing": "جاري التحديث...",
+    "signContinue": "توقيع والمتابعة"
   }
 }

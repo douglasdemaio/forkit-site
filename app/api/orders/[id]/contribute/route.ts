@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { getWalletFromRequest } from "@/lib/auth";
 
-// POST /api/orders/[id]/contribute - Record a contribution to an order
+// POST /api/orders/[id]/contribute - Record an on-chain contribution to an order.
+// Auth: JWT required; the authenticated wallet must match contributorWallet.
+// The txSignature proves the Solana transaction actually executed on-chain.
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const authWallet = await getWalletFromRequest(request);
+    if (!authWallet) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    // Accept both field names for compatibility
     const contributorWallet = body.contributorWallet || body.wallet;
     const { amount, txSignature } = body;
 
@@ -19,12 +26,21 @@ export async function POST(
       );
     }
 
+    // The authenticated wallet must match the contributor wallet
+    if (authWallet !== contributorWallet) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { contributions: true },
+      include: { contributions: true, restaurant: { select: { autoAcknowledge: true, selfDelivery: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    if (order.status === "Settled" || order.status === "Cancelled" || order.status === "Refunded") {
+      return NextResponse.json({ error: "Order is closed" }, { status: 400 });
     }
 
     const uniqueContributors = new Set(order.contributions.map((c) => c.contributorWallet));
@@ -43,10 +59,16 @@ export async function POST(
       order.contributions.reduce((sum, c) => sum + c.amount, 0) + amount;
 
     let funded = false;
-    if (totalContributed >= order.escrowTarget && order.status === "Created") {
+    if (totalContributed >= order.escrowTarget && (order.status === "Created" || order.status === "Funded")) {
+      const autoAck = order.restaurant?.autoAcknowledge ?? false;
+      const selfDelivery = order.restaurant?.selfDelivery ?? false;
       await prisma.order.update({
         where: { id: params.id },
-        data: { status: "Funded", escrowFunded: totalContributed },
+        data: {
+          status: autoAck ? "Preparing" : "Funded",
+          escrowFunded: totalContributed,
+          ...(autoAck && !selfDelivery ? { bidOpenAt: new Date() } : {}),
+        },
       });
       funded = true;
     } else {

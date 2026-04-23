@@ -3,13 +3,26 @@ import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
 // GET /api/restaurants/[id]/menu - Get menu items
+// Public: returns only available items.
+// Authenticated owner: returns all items including unavailable.
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const wallet = await getWalletFromRequest(request);
+
+    let isOwner = false;
+    if (wallet) {
+      const restaurant = await prisma.restaurant.findUnique({ where: { id: params.id } });
+      isOwner = restaurant?.wallet === wallet;
+    }
+
     const items = await prisma.menuItem.findMany({
-      where: { restaurantId: params.id },
+      where: {
+        restaurantId: params.id,
+        ...(isOwner ? {} : { available: true }),
+      },
       orderBy: [{ category: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
     });
 

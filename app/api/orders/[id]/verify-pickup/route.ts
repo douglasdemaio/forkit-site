@@ -32,6 +32,12 @@ export async function POST(
       );
     }
 
+    // Only the assigned driver may confirm pickup
+    const isAssignedDriver = !!order.driverWallet && order.driverWallet === wallet;
+    if (!isAssignedDriver) {
+      return NextResponse.json({ error: "Forbidden", valid: false }, { status: 403 });
+    }
+
     const normalized = code.trim().toUpperCase();
     if (!order.codeA || order.codeA.toUpperCase() !== normalized) {
       return NextResponse.json({ valid: false }, { status: 400 });
@@ -41,7 +47,7 @@ export async function POST(
       where: { id: params.id },
       data: {
         status: "PickedUp",
-        driverWallet: order.driverWallet || wallet,
+        driverWallet: order.driverWallet,
       },
     });
 

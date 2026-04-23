@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "レストラン",
     "dashboard": "ダッシュボード",
-    "cart": "カート"
+    "cart": "カート",
+    "delivery": "配達"
   },
   "home": {
     "badge": "Powered by Solana",
@@ -135,7 +136,18 @@
     "verifyFailed": "検証に失敗しました",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "配達を開始",
+    "statusDriverAssigned": "ドライバー割当済み",
+    "statusPickedUp": "受け取り済み",
+    "statusSettled": "決済済み",
+    "statusDisputed": "紛争中",
+    "statusRefunded": "返金済み",
+    "driverBids": "ドライバーの入札",
+    "noBidsYet": "まだ入札なし — ドライバーが入札するとここに表示されます。",
+    "newcomer": "新規",
+    "deliveries": "配達",
+    "assignDriver": "割り当て"
   },
   "cart": {
     "emptyCart": "カートは空です",
@@ -152,7 +164,8 @@
     "splitHint": "お会計後、友人と割り勘するためのリンクをシェアできます",
     "deliveryAddress": "お届け先住所",
     "deliveryAddressPlaceholder": "お届け先の住所を入力してください",
-    "deliveryAddressHint": "番地、マンション名・部屋番号、市区町村"
+    "deliveryAddressHint": "番地、マンション名・部屋番号、市区町村",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "注文が見つかりません",
@@ -170,5 +183,22 @@
     "shareDesc": "このリンクを友人に送って、注文に参加してもらいましょう。",
     "copy": "コピー",
     "copied": "コピーしました！"
+  },
+  "delivery": {
+    "title": "利用可能な配達",
+    "subtitle": "オープンな配達リクエストを閲覧して入札する",
+    "noOrders": "利用可能な配達なし",
+    "noOrdersDesc": "まもなく確認してください — 新しい配達リクエストがここに表示されます。",
+    "authRequired": "認証が必要です",
+    "restaurant": "レストラン",
+    "deliverTo": "配達先",
+    "deliveryFee": "配達料",
+    "items": "アイテム",
+    "bid": "配達に入札",
+    "bidPlaced": "入札済み",
+    "autoAssigned": "あなたに割り当てられました！",
+    "bidding": "入札中...",
+    "refreshing": "更新中...",
+    "signContinue": "署名して続行"
   }
 }

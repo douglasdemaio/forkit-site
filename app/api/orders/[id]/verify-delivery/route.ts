@@ -33,9 +33,9 @@ export async function POST(
       );
     }
 
-    // Only the customer or the assigned driver may confirm delivery
+    // Only the customer or the explicitly assigned driver may confirm delivery
     const isCustomer = order.customerWallet === wallet;
-    const isDriver = order.driverWallet === wallet || !order.driverWallet;
+    const isDriver = !!order.driverWallet && order.driverWallet === wallet;
     if (!isCustomer && !isDriver) {
       return NextResponse.json({ error: "Forbidden", valid: false }, { status: 403 });
     }

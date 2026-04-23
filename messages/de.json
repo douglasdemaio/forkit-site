@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "Restaurants",
     "dashboard": "Dashboard",
-    "cart": "Warenkorb"
+    "cart": "Warenkorb",
+    "delivery": "Lieferung"
   },
   "home": {
     "badge": "Powered by Solana",
@@ -135,7 +136,18 @@
     "verifyFailed": "Überprüfung fehlgeschlagen",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "Lieferung starten",
+    "statusDriverAssigned": "Fahrer zugewiesen",
+    "statusPickedUp": "abgeholt",
+    "statusSettled": "abgerechnet",
+    "statusDisputed": "in Streit",
+    "statusRefunded": "erstattet",
+    "driverBids": "Fahrerangebote",
+    "noBidsYet": "Noch keine Angebote — Fahrer erscheinen hier, sobald sie bieten.",
+    "newcomer": "Neuling",
+    "deliveries": "Lieferungen",
+    "assignDriver": "Zuweisen"
   },
   "cart": {
     "emptyCart": "Dein Warenkorb ist leer",
@@ -152,7 +164,8 @@
     "splitHint": "Nach der Bestellung kannst du einen Link teilen, damit Freunde die Rechnung aufteilen können",
     "deliveryAddress": "Lieferadresse",
     "deliveryAddressPlaceholder": "Gib deine Lieferadresse ein",
-    "deliveryAddressHint": "Straße, Hausnummer, Wohnung, Stadt"
+    "deliveryAddressHint": "Straße, Hausnummer, Wohnung, Stadt",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "Bestellung nicht gefunden",
@@ -170,5 +183,22 @@
     "shareDesc": "Sende diesen Link an Freunde, damit sie sich an der Bestellung beteiligen können.",
     "copy": "Kopieren",
     "copied": "Kopiert!"
+  },
+  "delivery": {
+    "title": "Verfügbare Lieferungen",
+    "subtitle": "Offene Lieferaufträge durchsuchen und darauf bieten",
+    "noOrders": "Keine Lieferungen verfügbar",
+    "noOrdersDesc": "Schauen Sie bald wieder vorbei — neue Lieferanfragen erscheinen hier.",
+    "authRequired": "Authentifizierung erforderlich",
+    "restaurant": "Restaurant",
+    "deliverTo": "Liefern an",
+    "deliveryFee": "Liefergebühr",
+    "items": "Artikel",
+    "bid": "Auf Lieferung bieten",
+    "bidPlaced": "Angebot platziert",
+    "autoAssigned": "Ihnen zugewiesen!",
+    "bidding": "Angebot wird platziert...",
+    "refreshing": "Aktualisieren...",
+    "signContinue": "Unterschreiben & Weiter"
   }
 }

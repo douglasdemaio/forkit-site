@@ -73,8 +73,8 @@ export default function OrdersPage() {
     Funded:         null, // handled separately with Confirm Order UI
     Preparing:      { label: t("markReady"), next: "ReadyForPickup" },
     DriverAssigned: { label: t("markReady"), next: "ReadyForPickup" },
-    ReadyForPickup: null,
-    PickedUp:       null,
+    ReadyForPickup: restaurantSelfDelivery ? { label: t("startDelivery"), next: "PickedUp" } : null,
+    PickedUp:       restaurantSelfDelivery ? { label: t("markDelivered"), next: "Delivered" } : null,
     Delivered:      null,
     Settled:        null,
     Disputed:       null,
@@ -243,8 +243,9 @@ export default function OrdersPage() {
       });
       const data = await res.json();
       if (res.ok && data.matched) {
+        const newStatus = (data.order?.status as OrderStatus) ?? (data.codeType === "delivery" ? "Settled" : "PickedUp");
         setOrders((prev) =>
-          prev.map((o) => (o.id === orderId ? { ...o, status: "Settled" as OrderStatus } : o))
+          prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
         );
         setCodeInputs((p) => ({ ...p, [inputKey]: "" }));
       } else {
@@ -494,7 +495,7 @@ export default function OrdersPage() {
                 )}
 
                 {/* Code verification: close out order once customer confirms delivery/pickup */}
-                {(order.status === "ReadyForPickup" || order.status === "Preparing") && (order.codeA || order.codeB) && (
+                {(order.status === "ReadyForPickup" || order.status === "Preparing" || (restaurantSelfDelivery && order.status === "Delivered")) && (order.codeA || order.codeB) && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-sm font-semibold text-gray-700">
@@ -506,7 +507,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="flex flex-col gap-3">
                       {[
-                        order.codeA ? { key: order.id + "_A", label: t("codeA"), color: "orange" } : null,
+                        (order.status !== "Delivered" && order.codeA) ? { key: order.id + "_A", label: t("codeA"), color: "orange" } : null,
                         order.codeB ? { key: order.id + "_B", label: t("codeB"), color: "green" } : null,
                       ].filter(Boolean).map((entry) => {
                         const { key, label, color } = entry!;

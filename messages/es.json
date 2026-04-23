@@ -2,7 +2,8 @@
   "nav": {
     "restaurants": "Restaurantes",
     "dashboard": "Panel",
-    "cart": "Carrito"
+    "cart": "Carrito",
+    "delivery": "Entrega"
   },
   "home": {
     "badge": "Powered by Solana",
@@ -135,7 +136,18 @@
     "verifyFailed": "Verificación fallida",
     "confirmOrder": "Confirm Order",
     "confirmOrderDriverHint": "Start preparing — delivery drivers on ForkMe will be notified",
-    "confirmOrderSelfHint": "Start preparing — your team handles delivery"
+    "confirmOrderSelfHint": "Start preparing — your team handles delivery",
+    "startDelivery": "Iniciar entrega",
+    "statusDriverAssigned": "conductor asignado",
+    "statusPickedUp": "recogido",
+    "statusSettled": "liquidado",
+    "statusDisputed": "disputado",
+    "statusRefunded": "reembolsado",
+    "driverBids": "Ofertas de conductores",
+    "noBidsYet": "Aún no hay ofertas — los conductores aparecerán aquí cuando pujen.",
+    "newcomer": "novato",
+    "deliveries": "entregas",
+    "assignDriver": "Asignar"
   },
   "cart": {
     "emptyCart": "Tu carrito está vacío",
@@ -152,7 +164,8 @@
     "splitHint": "Después del pago, puedes compartir un enlace para que tus amigos dividan la cuenta",
     "deliveryAddress": "Dirección de entrega",
     "deliveryAddressPlaceholder": "Introduce tu dirección de entrega",
-    "deliveryAddressHint": "Calle, número, piso, ciudad"
+    "deliveryAddressHint": "Calle, número, piso, ciudad",
+    "signing": "Signing..."
   },
   "order": {
     "notFound": "Pedido no encontrado",
@@ -170,5 +183,22 @@
     "shareDesc": "Envía este enlace a tus amigos para que colaboren en el pedido.",
     "copy": "Copiar",
     "copied": "¡Copiado!"
+  },
+  "delivery": {
+    "title": "Entregas disponibles",
+    "subtitle": "Explore solicitudes de entrega abiertas y puje para reclamarlas",
+    "noOrders": "No hay entregas disponibles",
+    "noOrdersDesc": "Vuelve pronto — nuevas solicitudes de entrega aparecerán aquí.",
+    "authRequired": "Autenticación requerida",
+    "restaurant": "Restaurante",
+    "deliverTo": "Entregar en",
+    "deliveryFee": "Tarifa de entrega",
+    "items": "Artículos",
+    "bid": "Pujar por entrega",
+    "bidPlaced": "Oferta realizada",
+    "autoAssigned": "¡Asignado a ti!",
+    "bidding": "Realizando oferta...",
+    "refreshing": "Actualizando...",
+    "signContinue": "Firmar y Continuar"
   }
 }

@@ -7,6 +7,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletButton } from "@/components/wallet-button";
 import { useCart } from "@/hooks/useCart";
 import { useEscrow } from "@/hooks/useEscrow";
+import { useWalletAuth } from "@/hooks/useWallet";
 import { useTranslations } from "next-intl";
 
 // Map IANA timezone to country name — independent of UI language.
@@ -79,6 +80,7 @@ function detectCountry(): string {
 export default function CartPage() {
   const router = useRouter();
   const { publicKey, connected } = useWallet();
+  const { token, authenticate, getAuthHeaders, isAuthenticating } = useWalletAuth();
   const t = useTranslations("cart");
   const {
     items,
@@ -136,13 +138,22 @@ export default function CartPage() {
     setPlacing(true);
     setError(null);
     try {
+      // Ensure we have a valid JWT before making authenticated API calls
+      let authToken = token;
+      if (!authToken) {
+        authToken = await authenticate();
+        if (!authToken) {
+          throw new Error("Wallet authentication required to place an order");
+        }
+      }
+      const authHeaders = { Authorization: `Bearer ${authToken}` };
+
       // 1. Create order in database
       const orderRes = await fetch("/api/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
           restaurantId,
-          customerWallet: publicKey.toBase58(),
           items: items.map((item) => ({
             menuItemId: item.id,
             quantity: item.quantity,
@@ -161,13 +172,13 @@ export default function CartPage() {
 
       // 2. Create on-chain escrow
       try {
-        if (!order.restaurant?.wallet) {
+        if (!order.restaurant?.walletAddress && !order.restaurant?.wallet) {
           throw new Error("Restaurant wallet address not found");
         }
 
         const { signature, orderPda } = await createOrder({
           orderId: order.id,
-          restaurantWallet: order.restaurant.wallet,
+          restaurantWallet: order.restaurant.walletAddress || order.restaurant.wallet,
           foodAmount: order.foodTotal,
           deliveryAmount: order.deliveryFee,
           currency: order.restaurant.currency || "USDC",
@@ -178,9 +189,9 @@ export default function CartPage() {
         // 3. Update order with on-chain info (store order PDA, not tx signature)
         await fetch(`/api/orders/${order.id}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...authHeaders },
           body: JSON.stringify({
-            status: "funded",
+            status: "Funded",
             onChainOrderId: orderPda,
           }),
         });
@@ -188,7 +199,7 @@ export default function CartPage() {
         // Record the customer's contribution
         await fetch(`/api/orders/${order.id}/contribute`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...authHeaders },
           body: JSON.stringify({
             contributorWallet: publicKey.toBase58(),
             amount: order.escrowTarget,
@@ -472,13 +483,13 @@ export default function CartPage() {
         ) : (
           <button
             onClick={handleCheckout}
-            disabled={placing || !addressReady}
+            disabled={placing || isAuthenticating || !addressReady}
             className="w-full py-4 bg-forkit-orange text-white rounded-xl font-semibold text-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {placing ? (
+            {placing || isAuthenticating ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                {t("processing")}
+                {isAuthenticating ? t("signing") : t("processing")}
               </span>
             ) : (
               t("payAmount", { amount: grandTotal.toFixed(2) })
