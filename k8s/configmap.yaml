@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forkit-site-config
+  namespace: forkit
+  labels:
+    app: forkit-site
+data:
+  NODE_ENV: "production"
+  UPLOAD_DIR: "/app/public/uploads"
+  # Point at the forkme service within the same cluster (for CORS),
+  # or at a remote ingress for a federated setup.
+  FORKME_URL: "http://forkme:3001"
+  # SQLite default — swap to a Postgres URL for production.
+  DATABASE_URL: "file:/data/forkit.db"

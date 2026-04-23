@@ -1,0 +1,30 @@
+# Persistent volumes for SQLite database and user uploads.
+# For production at scale, swap the DB to managed Postgres and drop the
+# forkit-site-db PVC — keep the uploads PVC or move to S3-compatible object storage.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: forkit-site-db
+  namespace: forkit
+  labels:
+    app: forkit-site
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: forkit-site-uploads
+  namespace: forkit
+  labels:
+    app: forkit-site
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

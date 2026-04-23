@@ -7,6 +7,11 @@ import Navbar from "@/components/navbar";
 import "../globals.css";
 import { locales, type Locale } from "@/i18n-config";
 
+// next-intl reads request headers to resolve the active locale, which opts
+// the entire locale-prefixed subtree into dynamic rendering. Declaring it
+// here is required for production builds to succeed.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "ForkIt — Restaurant Builder on Solana",
   description:

@@ -1,0 +1,23 @@
+# Apply everything at once:
+#   kubectl apply -k k8s/
+# Or with kustomize:
+#   kustomize build k8s/ | kubectl apply -f -
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: forkit
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  # Uncomment to enable external Ingress:
+  # - ingress.yaml
+
+# Override image tag for a specific release:
+# images:
+#   - name: forkit-site
+#     newTag: v1.0.0

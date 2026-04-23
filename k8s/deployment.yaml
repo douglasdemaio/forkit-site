@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forkit-site
+  namespace: forkit
+  labels:
+    app: forkit-site
+    app.kubernetes.io/part-of: forkit
+spec:
+  # Keep at 1 while using SQLite (single-writer). Scale out once on Postgres.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: forkit-site
+  template:
+    metadata:
+      labels:
+        app: forkit-site
+    spec:
+      containers:
+        - name: forkit-site
+          image: forkit-site:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: forkit-site-config
+            - secretRef:
+                name: forkit-site-secret
+          volumeMounts:
+            - name: db
+              mountPath: /data
+            - name: uploads
+              mountPath: /app/public/uploads
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1500m"
+              memory: "1Gi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            allowPrivilegeEscalation: false
+      volumes:
+        - name: db
+          persistentVolumeClaim:
+            claimName: forkit-site-db
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: forkit-site-uploads
+      restartPolicy: Always

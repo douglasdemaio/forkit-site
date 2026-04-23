@@ -184,7 +184,11 @@ forkit-site/
 
 ---
 
-## Deployment (Vercel)
+## Deployment
+
+Pick the target that matches your infrastructure.
+
+### 1. Vercel
 
 1. Push to GitHub
 2. Import project in [Vercel](https://vercel.com)
@@ -193,6 +197,79 @@ forkit-site/
 5. Update `DATABASE_URL` and Prisma provider accordingly
 
 The included GitHub Actions workflow automates deployment on push to `main`.
+
+### 2. Docker / Podman
+
+A multi-stage `Dockerfile` (with identical `Containerfile`) produces a small, non-root Next.js image. Prisma schema, client, and query engine are bundled into the final image so migrations can run on startup.
+
+```bash
+# Build
+docker build -t forkit-site:latest \
+  --build-arg NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com \
+  --build-arg NEXT_PUBLIC_SOLANA_NETWORK=devnet \
+  --build-arg NEXT_PUBLIC_BASE_URL=https://your-host.example \
+  .
+
+# Run — SQLite at /data (volume) and uploads at /app/public/uploads (volume)
+docker run --rm -p 3000:3000 \
+  -e JWT_SECRET=$(openssl rand -hex 32) \
+  -v forkit-db:/data \
+  -v forkit-uploads:/app/public/uploads \
+  forkit-site:latest
+```
+
+Podman works identically — swap `docker` for `podman`.
+
+#### docker compose / podman compose
+
+The top-level `compose.yaml` wires up forkit-site with named volumes for the database and uploads. It also includes the Rust `forkme-mcp` server behind the `mcp` profile so you can bring the whole stack up with one command.
+
+```bash
+# Set at minimum JWT_SECRET in a local .env next to compose.yaml
+echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
+
+# forkit-site only
+docker compose up --build
+
+# forkit-site + Rust MCP server
+docker compose --profile mcp up --build
+```
+
+The default image uses SQLite inside a volume so it works out of the box. For production, set `DATABASE_URL` to a Postgres URL and change `prisma/schema.prisma` `provider` to `postgresql`.
+
+### 3. Kubernetes
+
+Manifests in `k8s/` cover Namespace, ConfigMap, Secret (template), PVCs for DB + uploads, Deployment, Services (ClusterIP + LoadBalancer), and an optional Ingress. Everything lives in the shared `forkit` namespace so it can sit next to `forkme` and `forkme-mcp`.
+
+```bash
+# Build and push to your registry
+docker build -t registry.example.com/forkit-site:v1.0.0 .
+docker push registry.example.com/forkit-site:v1.0.0
+
+# Create the JWT secret (do not commit the value)
+kubectl create namespace forkit
+kubectl create secret generic forkit-site-secret \
+  --from-literal=JWT_SECRET=$(openssl rand -hex 32) \
+  -n forkit
+
+# Apply the bundle
+kubectl apply -k k8s/
+```
+
+Notes:
+
+- **Replicas** — the bundled Deployment pins `replicas: 1` with `strategy: Recreate` because SQLite is single-writer. Scale out only after swapping to Postgres.
+- **Persistent storage** — `forkit-site-db` (RWO, 1 Gi) for SQLite, `forkit-site-uploads` (RWX, 10 Gi) for user-uploaded images. On managed clusters without RWX, point uploads at S3-compatible object storage instead.
+- **Ingress** — nginx-ingress example; uncomment `ingress.yaml` in `kustomization.yaml` and set your host + TLS secret.
+
+### 4. MCP Server (Rust, optional)
+
+The `mcp-server/` directory ships its own OCI container pipeline (`Dockerfile` + `Containerfile` + `compose.yaml` + `k8s/`) for exposing the ForkIt API to AI agents over stdio or SSE. See `mcp-server/README.md` or run:
+
+```bash
+cd mcp-server
+docker compose up --build
+```
 
 ---
 

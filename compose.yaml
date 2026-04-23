@@ -1,0 +1,48 @@
+# docker compose / podman compose entry point for forkit-site.
+#
+# Usage:
+#   docker compose up --build
+#   podman compose up --build
+#
+# Optional: bring up the Rust MCP server alongside by enabling the
+# `mcp-server` profile:
+#   docker compose --profile mcp up --build
+
+services:
+  forkit-site:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SOLANA_RPC_URL: ${NEXT_PUBLIC_SOLANA_RPC_URL:-https://api.devnet.solana.com}
+        NEXT_PUBLIC_SOLANA_NETWORK: ${NEXT_PUBLIC_SOLANA_NETWORK:-devnet}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env before running}
+      DATABASE_URL: ${DATABASE_URL:-file:/data/forkit.db}
+      UPLOAD_DIR: /app/public/uploads
+      FORKME_URL: ${FORKME_URL:-http://localhost:3001}
+    volumes:
+      - forkit-db:/data
+      - forkit-uploads:/app/public/uploads
+    restart: unless-stopped
+
+  forkme-mcp:
+    profiles: ["mcp"]
+    build:
+      context: ./mcp-server
+    ports:
+      - "3001:3001"
+    environment:
+      FORKIT_API_URL: http://forkit-site:3000
+      FORKIT_JWT_TOKEN: ${FORKIT_JWT_TOKEN:-}
+      RUST_LOG: info
+    depends_on:
+      - forkit-site
+    restart: unless-stopped
+
+volumes:
+  forkit-db:
+  forkit-uploads:
