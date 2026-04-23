@@ -1,0 +1,11 @@
+services:
+  forkme-mcp:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      FORKIT_API_URL: ${FORKIT_API_URL:-http://host.docker.internal:3000}
+      FORKIT_JWT_TOKEN: ${FORKIT_JWT_TOKEN:-}
+      RUST_LOG: info
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

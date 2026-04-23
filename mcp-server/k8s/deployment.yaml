@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forkme-mcp
+  namespace: forkit
+  labels:
+    app: forkme-mcp
+    app.kubernetes.io/part-of: forkit
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: forkme-mcp
+  template:
+    metadata:
+      labels:
+        app: forkme-mcp
+    spec:
+      containers:
+        - name: forkme-mcp
+          image: forkme-mcp:latest
+          imagePullPolicy: IfNotPresent
+          args: ["--transport", "sse", "--port", "3001"]
+          ports:
+            - name: sse
+              containerPort: 3001
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: forkme-mcp-config
+            - secretRef:
+                name: forkme-mcp-secret
+          livenessProbe:
+            tcpSocket:
+              port: sse
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: sse
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "32Mi"
+            limits:
+              cpu: "500m"
+              memory: "128Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+      restartPolicy: Always

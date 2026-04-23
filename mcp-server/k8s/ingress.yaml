@@ -1,0 +1,33 @@
+# Requires an Ingress controller (nginx, traefik, etc.)
+# Set the host and TLS secret before applying.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: forkme-mcp
+  namespace: forkit
+  labels:
+    app: forkme-mcp
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # SSE requires these to disable buffering
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+spec:
+  ingressClassName: nginx
+  # Uncomment and fill in for TLS:
+  # tls:
+  #   - hosts:
+  #       - mcp.your-forkit-node.example
+  #     secretName: forkme-mcp-tls
+  rules:
+    - host: mcp.your-forkit-node.example
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: forkme-mcp
+                port:
+                  number: 3001

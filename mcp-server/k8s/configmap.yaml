@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: forkme-mcp-config
+  namespace: forkit
+  labels:
+    app: forkme-mcp
+data:
+  # Point at the forkit-site service within the same cluster,
+  # or at a remote cluster's ingress for a federated setup.
+  FORKIT_API_URL: "http://forkit-site:3000"
+  RUST_LOG: "info"
