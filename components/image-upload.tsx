@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
+import { useWalletAuth } from "@/hooks/useWallet";
 
 interface ImageUploadProps {
   currentImage?: string | null;
@@ -18,6 +19,7 @@ export default function ImageUpload({
   className = "",
   aspectRatio = "square",
 }: ImageUploadProps) {
+  const { getAuthHeaders, token } = useWalletAuth();
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage ?? null);
@@ -25,6 +27,10 @@ export default function ImageUpload({
 
   const uploadFile = useCallback(
     async (file: File) => {
+      if (!token) {
+        alert("Please connect your wallet and sign in before uploading.");
+        return;
+      }
       setUploading(true);
       try {
         const formData = new FormData();
@@ -32,6 +38,7 @@ export default function ImageUpload({
 
         const res = await fetch("/api/upload", {
           method: "POST",
+          headers: getAuthHeaders(),
           body: formData,
         });
 
@@ -47,7 +54,7 @@ export default function ImageUpload({
         setUploading(false);
       }
     },
-    [onUpload]
+    [onUpload, getAuthHeaders, token]
   );
 
   const handleDrop = useCallback(

@@ -19,7 +19,17 @@ import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
+import type { Connection } from "@solana/web3.js";
+
+async function resolveTokenProgram(connection: Connection, mint: PublicKey): Promise<PublicKey> {
+  const info = await connection.getAccountInfo(mint);
+  if (!info) throw new Error(`Mint ${mint.toBase58()} not found`);
+  if (info.owner.equals(TOKEN_2022_PROGRAM_ID)) return TOKEN_2022_PROGRAM_ID;
+  if (info.owner.equals(TOKEN_PROGRAM_ID)) return TOKEN_PROGRAM_ID;
+  throw new Error(`Mint ${mint.toBase58()} is not owned by a known token program`);
+}
 
 const CREATE_ORDER_DISCRIMINATOR = Buffer.from([141, 54, 37, 207, 237, 210, 250, 215]);
 const CONTRIBUTE_DISCRIMINATOR = Buffer.from([82, 48, 204, 145, 137, 43, 194, 101]);
@@ -84,6 +94,7 @@ export function useEscrow() {
         throw new Error("Wallet not connected");
 
       const mint = getMintForCurrency(params.currency);
+      const tokenProgram = await resolveTokenProgram(connection, mint);
       const restaurantPubkey = new PublicKey(params.restaurantWallet);
       const orderIdBuf = orderIdToLeBytes(params.orderId);
       const orderIdNum = uuidToOrderId(params.orderId);
@@ -97,7 +108,7 @@ export function useEscrow() {
       const protocolConfigPda = deriveProtocolConfigPda();
       const contributionPda = deriveContributionPda(orderIdBuf, publicKey);
 
-      const customerTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
+      const customerTokenAccount = await getAssociatedTokenAddress(mint, publicKey, false, tokenProgram);
 
       const codeAHashBuf = Buffer.from(params.codeAHash, "hex");
       const codeBHashBuf = Buffer.from(params.codeBHash, "hex");
@@ -139,7 +150,7 @@ export function useEscrow() {
           { pubkey: customerTokenAccount,isSigner: false, isWritable: true  }, // customer_token_account
           { pubkey: publicKey,           isSigner: true,  isWritable: true  }, // customer
           { pubkey: ESCROW_PROGRAM_ID,   isSigner: false, isWritable: false }, // surge_config = None
-          { pubkey: TOKEN_PROGRAM_ID,    isSigner: false, isWritable: false }, // token_program
+          { pubkey: tokenProgram,        isSigner: false, isWritable: false }, // token_program
           { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // system_program
           { pubkey: SYSVAR_RENT_PUBKEY,  isSigner: false, isWritable: false }, // rent
         ],
@@ -153,7 +164,7 @@ export function useEscrow() {
       // Create the customer's ATA if it doesn't exist yet
       const customerAtaInfo = await connection.getAccountInfo(customerTokenAccount);
       if (!customerAtaInfo) {
-        tx.add(createAssociatedTokenAccountInstruction(publicKey, customerTokenAccount, publicKey, mint));
+        tx.add(createAssociatedTokenAccountInstruction(publicKey, customerTokenAccount, publicKey, mint, tokenProgram));
       }
 
       tx.add(instruction);
@@ -175,13 +186,14 @@ export function useEscrow() {
         throw new Error("Wallet not connected");
 
       const mint = getMintForCurrency(params.currency);
+      const tokenProgram = await resolveTokenProgram(connection, mint);
       const orderIdBuf = orderIdToLeBytes(params.orderId);
       const amountLamports = BigInt(Math.round((params.amount ?? 0) * 10 ** TOKEN_DECIMALS));
 
       const orderPda = deriveOrderPda(orderIdBuf);
       const escrowVaultPda = deriveEscrowVaultPda(orderIdBuf);
       const contributionPda = deriveContributionPda(orderIdBuf, publicKey);
-      const contributorTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
+      const contributorTokenAccount = await getAssociatedTokenAddress(mint, publicKey, false, tokenProgram);
 
       const data = Buffer.alloc(16);
       CONTRIBUTE_DISCRIMINATOR.copy(data, 0);
@@ -196,7 +208,7 @@ export function useEscrow() {
           { pubkey: escrowVaultPda,           isSigner: false, isWritable: true  }, // escrow_vault (mut)
           { pubkey: contributorTokenAccount,  isSigner: false, isWritable: true  }, // contributor_token_account
           { pubkey: publicKey,                isSigner: true,  isWritable: true  }, // contributor
-          { pubkey: TOKEN_PROGRAM_ID,         isSigner: false, isWritable: false }, // token_program
+          { pubkey: tokenProgram,             isSigner: false, isWritable: false }, // token_program
           { pubkey: SystemProgram.programId,  isSigner: false, isWritable: false }, // system_program
           { pubkey: SYSVAR_RENT_PUBKEY,       isSigner: false, isWritable: false }, // rent
         ],
@@ -225,6 +237,7 @@ export function useEscrow() {
         throw new Error("Wallet not connected");
 
       const mint = getMintForCurrency(params.currency);
+      const tokenProgram = await resolveTokenProgram(connection, mint);
       const orderIdBuf = orderIdToLeBytes(params.orderId);
 
       const orderPda = deriveOrderPda(orderIdBuf);
@@ -234,9 +247,9 @@ export function useEscrow() {
       const restaurantPubkey = new PublicKey(params.restaurantWallet);
       const driverPubkey = new PublicKey(params.driverWallet);
 
-      const restaurantTokenAccount = await getAssociatedTokenAddress(mint, restaurantPubkey);
-      const driverTokenAccount = await getAssociatedTokenAddress(mint, driverPubkey);
-      const treasuryTokenAccount = await getAssociatedTokenAddress(mint, TREASURY_WALLET);
+      const restaurantTokenAccount = await getAssociatedTokenAddress(mint, restaurantPubkey, false, tokenProgram);
+      const driverTokenAccount = await getAssociatedTokenAddress(mint, driverPubkey, false, tokenProgram);
+      const treasuryTokenAccount = await getAssociatedTokenAddress(mint, TREASURY_WALLET, false, tokenProgram);
 
       // Borsh-encode code_b as a String: 4-byte length (u32 LE) followed by UTF-8 bytes
       const codeBBytes = Buffer.from(params.codeB, "utf8");
@@ -251,11 +264,12 @@ export function useEscrow() {
           { pubkey: orderPda,             isSigner: false, isWritable: true  }, // order (mut)
           { pubkey: escrowVaultPda,       isSigner: false, isWritable: true  }, // escrow_vault (mut)
           { pubkey: protocolConfigPda,    isSigner: false, isWritable: false }, // protocol_config
+          { pubkey: mint,                 isSigner: false, isWritable: false }, // token_mint
           { pubkey: restaurantTokenAccount, isSigner: false, isWritable: true }, // restaurant_token_account
           { pubkey: driverTokenAccount,   isSigner: false, isWritable: true  }, // driver_token_account
           { pubkey: treasuryTokenAccount, isSigner: false, isWritable: true  }, // treasury_token_account
           { pubkey: publicKey,            isSigner: true,  isWritable: false }, // customer
-          { pubkey: TOKEN_PROGRAM_ID,     isSigner: false, isWritable: false }, // token_program
+          { pubkey: tokenProgram,         isSigner: false, isWritable: false }, // token_program
         ],
         programId: ESCROW_PROGRAM_ID,
         data,
