@@ -18,15 +18,22 @@ services:
         NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3000}
     ports:
       - "3000:3000"
+    # Rootless Podman: map container uid/gid 1001 (nextjs) to host uid/gid 1000
+    # so bind-mounted host files (owned by the host user) are writable.
+    userns_mode: "keep-id:uid=1001,gid=1001"
     environment:
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env before running}
-      DATABASE_URL: ${DATABASE_URL:-file:/data/forkit.db}
+      # Resolves relative to prisma/schema.prisma → /app/prisma/dev.db (bind-mounted below)
+      DATABASE_URL: file:./dev.db
       UPLOAD_DIR: /app/public/uploads
       FORKME_URL: ${FORKME_URL:-http://localhost:3001}
     volumes:
-      - forkit-db:/data
-      - forkit-uploads:/app/public/uploads
+      # Bind-mount host paths so state survives image rebuilds.
+      # The DB lives in ./prisma/dev.db on the host (matches the dev workflow);
+      # uploads live in ./public/uploads.
+      - ./prisma:/app/prisma:Z
+      - ./public/uploads:/app/public/uploads:Z
     restart: unless-stopped
 
   forkme-mcp:
@@ -42,7 +49,3 @@ services:
     depends_on:
       - forkit-site
     restart: unless-stopped
-
-volumes:
-  forkit-db:
-  forkit-uploads:
