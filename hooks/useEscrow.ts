@@ -31,9 +31,11 @@ async function resolveTokenProgram(connection: Connection, mint: PublicKey): Pro
   throw new Error(`Mint ${mint.toBase58()} is not owned by a known token program`);
 }
 
-const CREATE_ORDER_DISCRIMINATOR = Buffer.from([141, 54, 37, 207, 237, 210, 250, 215]);
-const CONTRIBUTE_DISCRIMINATOR = Buffer.from([82, 48, 204, 145, 137, 43, 194, 101]);
-const CONFIRM_DELIVERY_DISCRIMINATOR = Buffer.from([104, 87, 191, 49, 195, 225, 56, 139]);
+// Anchor discriminators: sha256("global:<snake_case_name>")[..8]
+const CREATE_ORDER_DISCRIMINATOR        = Buffer.from([141,  54,  37, 207, 237, 210, 250, 215]);
+const CONTRIBUTE_DISCRIMINATOR          = Buffer.from([206,   3, 153, 116, 116, 195,  16,  23]);
+const MARK_READY_FOR_PICKUP_DISCRIMINATOR = Buffer.from([136,  90, 147,   6, 135,  88,  15, 125]);
+const CONFIRM_DELIVERY_DISCRIMINATOR    = Buffer.from([ 11, 109, 227,  53, 179, 190,  88, 155]);
 
 // Convert a DB UUID string to a deterministic u64 for on-chain order_id.
 // Takes the first 8 bytes of the UUID hex (without hyphens) as a big-endian u64,
@@ -225,6 +227,37 @@ export function useEscrow() {
     [publicKey, sendTransaction, connection]
   );
 
+  const markReadyForPickup = useCallback(
+    async (params: { orderId: string }) => {
+      if (!publicKey || !sendTransaction)
+        throw new Error("Wallet not connected");
+
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+      const orderPda = deriveOrderPda(orderIdBuf);
+
+      // No payload args — just the discriminator
+      const data = Buffer.alloc(8);
+      MARK_READY_FOR_PICKUP_DISCRIMINATOR.copy(data, 0);
+
+      // MarkReadyForPickup struct: order (mut), restaurant (signer)
+      const ix = new TransactionInstruction({
+        keys: [
+          { pubkey: orderPda,  isSigner: false, isWritable: true },
+          { pubkey: publicKey, isSigner: true,  isWritable: false },
+        ],
+        programId: ESCROW_PROGRAM_ID,
+        data,
+      });
+
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey }).add(ix);
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+      return { signature };
+    },
+    [publicKey, sendTransaction, connection]
+  );
+
   const confirmDelivery = useCallback(
     async (params: {
       orderId: string;
@@ -284,5 +317,5 @@ export function useEscrow() {
     [publicKey, sendTransaction, connection]
   );
 
-  return { createOrder, contributeToOrder, confirmDelivery };
+  return { createOrder, contributeToOrder, markReadyForPickup, confirmDelivery };
 }

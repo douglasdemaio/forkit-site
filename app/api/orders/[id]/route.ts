@@ -27,6 +27,9 @@ function toApiOrder(order: any) {
           id: rest.id,
           name: rest.name,
           slug: rest.slug,
+          // Both keys for backwards compatibility: forkme reads `wallet`,
+          // forkit-site cart reads `walletAddress`.
+          wallet: rest.wallet,
           walletAddress: rest.wallet,
           currency: rest.currency,
         }

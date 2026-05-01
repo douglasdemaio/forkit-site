@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "@/hooks/useWallet";
+import { useEscrow } from "@/hooks/useEscrow";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { QRCodeSVG } from "qrcode.react";
@@ -43,6 +44,7 @@ const statusColors: Record<OrderStatus, string> = {
 export default function OrdersPage() {
   const { connected } = useWallet();
   const { token, getAuthHeaders, authenticate } = useWalletAuth();
+  const { markReadyForPickup } = useEscrow();
   const t = useTranslations("orders");
   const tDash = useTranslations("dashboard");
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -204,6 +206,22 @@ export default function OrdersPage() {
 
   const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
+      // For the Preparing → ReadyForPickup transition, the restaurant must
+      // sign mark_ready_for_pickup on-chain — without it, the customer's
+      // later confirm_delivery will fail (chain status would still be
+      // Preparing, but confirm_delivery requires PickedUp). Sign first, then
+      // update DB. If the on-chain call fails, do not advance the DB.
+      if (newStatus === "ReadyForPickup") {
+        const current = orders.find((o) => o.id === orderId);
+        if (current && current.status === "Preparing") {
+          try {
+            await markReadyForPickup({ orderId });
+          } catch (e) {
+            console.error("mark_ready_for_pickup failed:", e);
+            return;
+          }
+        }
+      }
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
