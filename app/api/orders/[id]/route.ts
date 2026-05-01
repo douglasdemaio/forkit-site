@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
+import { toShareableOrder } from "@/lib/order-dto";
 
 function toApiOrder(order: any) {
   const items =
@@ -59,19 +60,24 @@ export async function GET(
     }
 
     // Share-link access: the ID is the 8-char slug embedded in the share URL,
-    // not the full UUID — treat as public read-only for order tracking.
+    // not the full UUID. Treat as public read but return only the shareable
+    // DTO (no codeA/codeB/hashes/deliveryAddress/driverWallet) — possessing
+    // a share link grants visibility, not the ability to spoof pickup or
+    // settlement.
     const isShareLinkAccess = id !== order.id;
 
-    if (!isShareLinkAccess) {
-      if (!wallet) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      const isOwner = order.restaurant?.wallet === wallet;
-      const isCustomer = order.customerWallet === wallet;
-      const isDriver = order.driverWallet === wallet;
-      if (!isOwner && !isCustomer && !isDriver) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+    if (isShareLinkAccess) {
+      return NextResponse.json(toShareableOrder(order));
+    }
+
+    if (!wallet) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const isOwner = order.restaurant?.wallet === wallet;
+    const isCustomer = order.customerWallet === wallet;
+    const isDriver = order.driverWallet === wallet;
+    if (!isOwner && !isCustomer && !isDriver) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json(toApiOrder(order));

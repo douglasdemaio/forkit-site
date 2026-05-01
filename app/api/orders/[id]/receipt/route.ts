@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { getWalletFromRequest } from "@/lib/auth";
 
 const TOKEN_SYMBOLS: Record<string, { symbol: string; currencySign: string }> = {
   "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": { symbol: "USDC", currencySign: "$" },
@@ -12,21 +13,34 @@ const TOKEN_SYMBOLS: Record<string, { symbol: string; currencySign: string }> = 
 const FEE_BASIS_POINTS = 2;
 const DEPOSIT_BASIS_POINTS = 200;
 
-// GET /api/orders/[id]/receipt - Settlement receipt (after Settled/Delivered)
+// GET /api/orders/[id]/receipt - Settlement receipt (after Settled/Delivered).
+// Auth: restaurant owner, customer, or assigned driver. Receipts contain
+// purchase history + tx signatures; without auth, anyone with a UUID could
+// reconstruct what a customer ordered.
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const wallet = await getWalletFromRequest(request);
+    if (!wallet) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const order = await prisma.order.findUnique({
       where: { id: params.id },
       include: {
-        restaurant: { select: { name: true } },
+        restaurant: { select: { name: true, wallet: true } },
         contributions: true,
       },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    const isOwner = order.restaurant?.wallet === wallet;
+    const isCustomer = order.customerWallet === wallet;
+    const isDriver = order.driverWallet === wallet;
+    if (!isOwner && !isCustomer && !isDriver) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     if (!["Settled", "Delivered"].includes(order.status)) {
       return NextResponse.json({ error: "Order not yet settled" }, { status: 400 });
