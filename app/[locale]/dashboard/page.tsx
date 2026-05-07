@@ -551,6 +551,7 @@ export default function DashboardPage() {
                     >
                       <option value="USDC">USDC</option>
                       <option value="EURC">EURC</option>
+                      <option value="PYUSD">PYUSD</option>
                     </select>
                   </div>
                   <div>

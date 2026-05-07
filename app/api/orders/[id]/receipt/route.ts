@@ -4,7 +4,7 @@ import { getWalletFromRequest } from "@/lib/auth";
 
 const TOKEN_SYMBOLS: Record<string, { symbol: string; currencySign: string }> = {
   "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU": { symbol: "USDC", currencySign: "$" },
-  "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM": { symbol: "EURC", currencySign: "€" },
+  "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM": { symbol: "PYUSD", currencySign: "$" },
   // Mainnet
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": { symbol: "USDC", currencySign: "$" },
   "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr": { symbol: "EURC", currencySign: "€" },

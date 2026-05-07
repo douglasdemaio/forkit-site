@@ -20,8 +20,13 @@ export const TREASURY_WALLET = new PublicKey(
 export const USDC_MINT = new PublicKey(
   "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
 );
-export const EURC_MINT = new PublicKey(
+export const PYUSD_MINT = new PublicKey(
   "CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM"
+);
+// Circle EURC — mainnet mint. No devnet equivalent currently; selecting EURC
+// while running on devnet will fail at transaction time.
+export const EURC_MINT = new PublicKey(
+  "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr"
 );
 
 // Protocol constants
@@ -47,6 +52,8 @@ export const TOKEN_DECIMALS = 6;
 
 export function getMintForCurrency(currency: string): PublicKey {
   switch (currency.toUpperCase()) {
+    case "PYUSD":
+      return PYUSD_MINT;
     case "EURC":
       return EURC_MINT;
     case "USDC":
