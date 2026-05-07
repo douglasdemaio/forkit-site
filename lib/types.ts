@@ -120,6 +120,7 @@ export interface DriverBid {
   id: string;
   orderId: string;
   driverWallet: string;
+  amount: number;
   status: "Pending" | "Accepted" | "Rejected" | "Expired";
   createdAt: string;
   driver?: DriverProfile;

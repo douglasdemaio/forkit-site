@@ -147,7 +147,8 @@
     "noBidsYet": "まだ入札なし — ドライバーが入札するとここに表示されます。",
     "newcomer": "新規",
     "deliveries": "配達",
-    "assignDriver": "割り当て"
+    "assignDriver": "割り当て",
+    "savesAmount": "{amount} 節約"
   },
   "cart": {
     "emptyCart": "カートは空です",

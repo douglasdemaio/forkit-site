@@ -151,7 +151,8 @@
     "verifying": "Verifying...",
     "invalidCode": "Invalid code",
     "codeRequired": "Enter a code",
-    "verifyFailed": "Verification failed"
+    "verifyFailed": "Verification failed",
+    "savesAmount": "saves {amount}"
   },
   "delivery": {
     "title": "Available Deliveries",

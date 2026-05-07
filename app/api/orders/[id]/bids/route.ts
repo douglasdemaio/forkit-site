@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
-const AUTO_ASSIGN_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 const NEWCOMER_DELIVERY_THRESHOLD = 5;
 const NEWCOMER_RATING_THRESHOLD = 4.0;
 
@@ -35,7 +34,7 @@ export async function GET(
 
     const bids = await prisma.driverBid.findMany({
       where: { orderId: params.id },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ amount: "asc" }, { createdAt: "asc" }],
     });
 
     const profiles = await prisma.driverProfile.findMany({
@@ -60,7 +59,7 @@ export async function GET(
   }
 }
 
-// POST /api/orders/[id]/bids — driver places a bid
+// POST /api/orders/[id]/bids — driver places a bid with a proposed amount
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -69,6 +68,15 @@ export async function POST(
     const wallet = await getWalletFromRequest(request);
     if (!wallet) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const offerAmount = Number(body?.offerAmount);
+    if (!Number.isFinite(offerAmount) || offerAmount <= 0) {
+      return NextResponse.json(
+        { error: "offerAmount must be a positive number" },
+        { status: 400 }
+      );
     }
 
     const order = await prisma.order.findUnique({
@@ -83,36 +91,21 @@ export async function POST(
     if (order.driverWallet) {
       return NextResponse.json({ error: "Order already has an assigned driver" }, { status: 409 });
     }
-
-    // Upsert bid (driver may re-bid after expiry)
-    const bid = await prisma.driverBid.upsert({
-      where: { orderId_driverWallet: { orderId: params.id, driverWallet: wallet } },
-      update: { status: "Pending", createdAt: new Date() },
-      create: { orderId: params.id, driverWallet: wallet },
-    });
-
-    // Auto-assign: reputable driver within 5-minute window
-    const profile = await prisma.driverProfile.findUnique({ where: { wallet } });
-    const withinWindow =
-      order.bidOpenAt !== null &&
-      Date.now() - new Date(order.bidOpenAt).getTime() < AUTO_ASSIGN_WINDOW_MS;
-
-    if (!isNewcomer(profile) && withinWindow) {
-      // Auto-assign this driver
-      await prisma.$transaction([
-        prisma.order.update({
-          where: { id: params.id },
-          data: { status: "DriverAssigned", driverWallet: wallet },
-        }),
-        prisma.driverBid.update({
-          where: { id: bid.id },
-          data: { status: "Accepted" },
-        }),
-      ]);
-      return NextResponse.json({ bid: { ...bid, status: "Accepted" }, autoAssigned: true });
+    if (offerAmount > order.deliveryFee) {
+      return NextResponse.json(
+        { error: `offerAmount cannot exceed posted delivery fee (${order.deliveryFee})` },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ bid, autoAssigned: false });
+    // Upsert: driver can re-bid any new amount (lower or higher) before acceptance
+    const bid = await prisma.driverBid.upsert({
+      where: { orderId_driverWallet: { orderId: params.id, driverWallet: wallet } },
+      update: { amount: offerAmount, status: "Pending", createdAt: new Date() },
+      create: { orderId: params.id, driverWallet: wallet, amount: offerAmount },
+    });
+
+    return NextResponse.json({ bid });
   } catch (error) {
     console.error("Error placing bid:", error);
     return NextResponse.json({ error: "Failed to place bid" }, { status: 500 });

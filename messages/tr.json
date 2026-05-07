@@ -147,7 +147,8 @@
     "noBidsYet": "Henüz teklif yok — sürücüler teklif verince burada görünecek.",
     "newcomer": "yeni",
     "deliveries": "teslimatlar",
-    "assignDriver": "Ata"
+    "assignDriver": "Ata",
+    "savesAmount": "{amount} tasarruf"
   },
   "cart": {
     "emptyCart": "Sepetin boş",

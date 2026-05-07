@@ -147,7 +147,8 @@
     "noBidsYet": "暂无竞价 — 司机竞价后将显示在此处。",
     "newcomer": "新手",
     "deliveries": "配送",
-    "assignDriver": "分配"
+    "assignDriver": "分配",
+    "savesAmount": "省 {amount}"
   },
   "cart": {
     "emptyCart": "购物车是空的",

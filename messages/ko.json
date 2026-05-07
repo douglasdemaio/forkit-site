@@ -147,7 +147,8 @@
     "noBidsYet": "아직 입찰 없음 — 드라이버가 입찰하면 여기에 표시됩니다.",
     "newcomer": "신규",
     "deliveries": "배달",
-    "assignDriver": "배정"
+    "assignDriver": "배정",
+    "savesAmount": "{amount} 절약"
   },
   "cart": {
     "emptyCart": "장바구니가 비어있어요",

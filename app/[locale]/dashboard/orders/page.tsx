@@ -20,6 +20,7 @@ interface OrderRow {
   foodTotal: number;
   deliveryFee: number;
   status: OrderStatus;
+  tokenMint: string | null;
   codeA: string | null;
   codeB: string | null;
   deliveryAddress: string | null;
@@ -44,7 +45,7 @@ const statusColors: Record<OrderStatus, string> = {
 export default function OrdersPage() {
   const { connected } = useWallet();
   const { token, getAuthHeaders, authenticate } = useWalletAuth();
-  const { markReadyForPickup } = useEscrow();
+  const { markReadyForPickup, updateDeliveryAmount } = useEscrow();
   const t = useTranslations("orders");
   const tDash = useTranslations("dashboard");
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -121,16 +122,49 @@ export default function OrdersPage() {
     }
   }, [token, restaurantId, getAuthHeaders]);
 
-  const acceptBid = async (orderId: string, bidId: string) => {
+  const acceptBid = async (
+    orderId: string,
+    bidId: string,
+    bidAmount: number,
+    postedFee: number
+  ) => {
     setAcceptingBid(bidId);
     try {
-      const res = await fetch(`/api/orders/${orderId}/bids/${bidId}/accept`, {
+      // Phase 1: ask the server. Equal-amount bids assign immediately;
+      // lower-amount bids need an on-chain update_delivery_amount signed
+      // by the restaurant first.
+      const intentRes = await fetch(`/api/orders/${orderId}/bids/${bidId}/accept`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({}),
       });
-      if (res.ok) {
-        await loadOrders(true);
+      if (!intentRes.ok) {
+        console.error("acceptBid intent failed:", intentRes.status);
+        return;
       }
+      const intent = await intentRes.json();
+      if (intent.requiresOnChainUpdate) {
+        // Two-phase commit: sign update_delivery_amount on-chain, then re-call
+        // the endpoint with the signature so the server can verify and commit.
+        const { signature } = await updateDeliveryAmount({
+          orderId,
+          newAmount: intent.newDeliveryAmount,
+        });
+        const confirmRes = await fetch(`/api/orders/${orderId}/bids/${bidId}/accept`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          body: JSON.stringify({ updateSignature: signature }),
+        });
+        if (!confirmRes.ok) {
+          const err = await confirmRes.json().catch(() => ({}));
+          console.error("acceptBid confirm failed:", err);
+          if (typeof window !== "undefined") {
+            alert(`Bid acceptance failed: ${err.error ?? confirmRes.status}`);
+          }
+          return;
+        }
+      }
+      await loadOrders(true);
     } catch (err) {
       console.error(err);
     } finally {
@@ -482,31 +516,51 @@ export default function OrdersPage() {
                       <p className="text-sm text-gray-400 italic">{t("noBidsYet")}</p>
                     ) : (
                       <div className="space-y-2">
-                        {bidsMap[order.id].filter((b) => b.status === "Pending").map((bid) => (
-                          <div key={bid.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                            <div>
-                              <span className="text-xs font-mono text-gray-600">
-                                {bid.driverWallet.slice(0, 8)}…{bid.driverWallet.slice(-4)}
-                              </span>
-                              {bid.driver?.isNewcomer ? (
-                                <span className="ml-2 text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded-full">
-                                  {t("newcomer")}
+                        {bidsMap[order.id].filter((b) => b.status === "Pending").map((bid) => {
+                          const currency = order.tokenMint && order.tokenMint.startsWith("Hzwq")
+                            ? "EURC"
+                            : order.tokenMint && order.tokenMint.startsWith("CXk2")
+                            ? "PYUSD"
+                            : "USDC";
+                          const savings = order.deliveryFee - bid.amount;
+                          return (
+                            <div key={bid.id} className="flex items-center justify-between gap-3 bg-gray-50 rounded-lg px-3 py-2">
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-mono text-gray-600">
+                                  {bid.driverWallet.slice(0, 8)}…{bid.driverWallet.slice(-4)}
                                 </span>
-                              ) : (
-                                <span className="ml-2 text-xs px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                  ★ {bid.driver?.avgRating?.toFixed(1)} · {bid.driver?.completedDeliveries} {t("deliveries")}
-                                </span>
-                              )}
+                                {bid.driver?.isNewcomer ? (
+                                  <span className="mt-0.5 text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded-full w-fit">
+                                    {t("newcomer")}
+                                  </span>
+                                ) : (
+                                  <span className="mt-0.5 text-xs px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full w-fit">
+                                    ★ {bid.driver?.avgRating?.toFixed(1)} · {bid.driver?.completedDeliveries} {t("deliveries")}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                  <span className="text-sm font-semibold text-gray-900">
+                                    {bid.amount.toFixed(2)} {currency}
+                                  </span>
+                                  {savings > 0.005 && (
+                                    <p className="text-xs text-green-600">
+                                      {t("savesAmount", { amount: savings.toFixed(2) })}
+                                    </p>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={() => acceptBid(order.id, bid.id, bid.amount, order.deliveryFee)}
+                                  disabled={acceptingBid === bid.id}
+                                  className="text-xs px-3 py-1.5 bg-forkit-orange text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                                >
+                                  {acceptingBid === bid.id ? "…" : t("assignDriver")}
+                                </button>
+                              </div>
                             </div>
-                            <button
-                              onClick={() => acceptBid(order.id, bid.id)}
-                              disabled={acceptingBid === bid.id}
-                              className="text-xs px-3 py-1.5 bg-forkit-orange text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors"
-                            >
-                              {acceptingBid === bid.id ? "…" : t("assignDriver")}
-                            </button>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>

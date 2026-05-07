@@ -32,10 +32,11 @@ async function resolveTokenProgram(connection: Connection, mint: PublicKey): Pro
 }
 
 // Anchor discriminators: sha256("global:<snake_case_name>")[..8]
-const CREATE_ORDER_DISCRIMINATOR        = Buffer.from([141,  54,  37, 207, 237, 210, 250, 215]);
-const CONTRIBUTE_DISCRIMINATOR          = Buffer.from([206,   3, 153, 116, 116, 195,  16,  23]);
+const CREATE_ORDER_DISCRIMINATOR          = Buffer.from([141,  54,  37, 207, 237, 210, 250, 215]);
+const CONTRIBUTE_DISCRIMINATOR            = Buffer.from([206,   3, 153, 116, 116, 195,  16,  23]);
 const MARK_READY_FOR_PICKUP_DISCRIMINATOR = Buffer.from([136,  90, 147,   6, 135,  88,  15, 125]);
-const CONFIRM_DELIVERY_DISCRIMINATOR    = Buffer.from([ 11, 109, 227,  53, 179, 190,  88, 155]);
+const CONFIRM_DELIVERY_DISCRIMINATOR      = Buffer.from([ 11, 109, 227,  53, 179, 190,  88, 155]);
+const UPDATE_DELIVERY_AMOUNT_DISCRIMINATOR = Buffer.from([107, 103, 251,  81,  74, 101, 222, 210]);
 
 // Convert a DB UUID string to a deterministic u64 for on-chain order_id.
 // Takes the first 8 bytes of the UUID hex (without hyphens) as a big-endian u64,
@@ -283,6 +284,9 @@ export function useEscrow() {
       const restaurantTokenAccount = await getAssociatedTokenAddress(mint, restaurantPubkey, false, tokenProgram);
       const driverTokenAccount = await getAssociatedTokenAddress(mint, driverPubkey, false, tokenProgram);
       const treasuryTokenAccount = await getAssociatedTokenAddress(mint, TREASURY_WALLET, false, tokenProgram);
+      // Customer's ATA — receives any escrow surplus (when the accepted bid was
+      // below the posted delivery fee). Customer is the signer (publicKey).
+      const customerTokenAccount = await getAssociatedTokenAddress(mint, publicKey, false, tokenProgram);
 
       // Borsh-encode code_b as a String: 4-byte length (u32 LE) followed by UTF-8 bytes
       const codeBBytes = Buffer.from(params.codeB, "utf8");
@@ -294,15 +298,16 @@ export function useEscrow() {
       // Account order must match the Anchor ConfirmDelivery struct exactly
       const instruction = new TransactionInstruction({
         keys: [
-          { pubkey: orderPda,             isSigner: false, isWritable: true  }, // order (mut)
-          { pubkey: escrowVaultPda,       isSigner: false, isWritable: true  }, // escrow_vault (mut)
-          { pubkey: protocolConfigPda,    isSigner: false, isWritable: false }, // protocol_config
-          { pubkey: mint,                 isSigner: false, isWritable: false }, // token_mint
-          { pubkey: restaurantTokenAccount, isSigner: false, isWritable: true }, // restaurant_token_account
-          { pubkey: driverTokenAccount,   isSigner: false, isWritable: true  }, // driver_token_account
-          { pubkey: treasuryTokenAccount, isSigner: false, isWritable: true  }, // treasury_token_account
-          { pubkey: publicKey,            isSigner: true,  isWritable: false }, // customer
-          { pubkey: tokenProgram,         isSigner: false, isWritable: false }, // token_program
+          { pubkey: orderPda,               isSigner: false, isWritable: true  }, // order (mut)
+          { pubkey: escrowVaultPda,         isSigner: false, isWritable: true  }, // escrow_vault (mut)
+          { pubkey: protocolConfigPda,      isSigner: false, isWritable: false }, // protocol_config
+          { pubkey: mint,                   isSigner: false, isWritable: false }, // token_mint
+          { pubkey: restaurantTokenAccount, isSigner: false, isWritable: true  }, // restaurant_token_account
+          { pubkey: driverTokenAccount,     isSigner: false, isWritable: true  }, // driver_token_account
+          { pubkey: treasuryTokenAccount,   isSigner: false, isWritable: true  }, // treasury_token_account
+          { pubkey: customerTokenAccount,   isSigner: false, isWritable: true  }, // customer_token_account (refund target)
+          { pubkey: publicKey,              isSigner: true,  isWritable: false }, // customer (signer)
+          { pubkey: tokenProgram,           isSigner: false, isWritable: false }, // token_program
         ],
         programId: ESCROW_PROGRAM_ID,
         data,
@@ -317,5 +322,45 @@ export function useEscrow() {
     [publicKey, sendTransaction, connection]
   );
 
-  return { createOrder, contributeToOrder, markReadyForPickup, confirmDelivery };
+  // Restaurant-side: lower the on-chain delivery_amount on an order after
+  // accepting a low driver bid. Surplus is refunded to the customer at
+  // confirm_delivery.
+  const updateDeliveryAmount = useCallback(
+    async (params: { orderId: string; newAmount: number }) => {
+      if (!publicKey || !sendTransaction)
+        throw new Error("Wallet not connected");
+
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+      const orderPda = deriveOrderPda(orderIdBuf);
+      const protocolConfigPda = deriveProtocolConfigPda();
+
+      const newAmountLamports = BigInt(
+        Math.round(params.newAmount * 10 ** TOKEN_DECIMALS)
+      );
+
+      // discriminator (8) || new_delivery_amount u64 LE (8)
+      const data = Buffer.alloc(16);
+      UPDATE_DELIVERY_AMOUNT_DISCRIMINATOR.copy(data, 0);
+      data.writeBigUInt64LE(newAmountLamports, 8);
+
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: orderPda,          isSigner: false, isWritable: true  }, // order (mut)
+          { pubkey: protocolConfigPda, isSigner: false, isWritable: false }, // protocol_config
+          { pubkey: publicKey,         isSigner: true,  isWritable: false }, // restaurant
+        ],
+        programId: ESCROW_PROGRAM_ID,
+        data,
+      });
+
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey }).add(instruction);
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+      return { signature };
+    },
+    [publicKey, sendTransaction, connection]
+  );
+
+  return { createOrder, contributeToOrder, markReadyForPickup, confirmDelivery, updateDeliveryAmount };
 }

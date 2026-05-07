@@ -147,7 +147,8 @@
     "noBidsYet": "Pas encore d'offres — les chauffeurs apparaîtront ici une fois qu'ils auront soumis.",
     "newcomer": "nouveau",
     "deliveries": "livraisons",
-    "assignDriver": "Assigner"
+    "assignDriver": "Assigner",
+    "savesAmount": "économise {amount}"
   },
   "cart": {
     "emptyCart": "Ton panier est vide",

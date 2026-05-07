@@ -147,7 +147,8 @@
     "noBidsYet": "Noch keine Angebote — Fahrer erscheinen hier, sobald sie bieten.",
     "newcomer": "Neuling",
     "deliveries": "Lieferungen",
-    "assignDriver": "Zuweisen"
+    "assignDriver": "Zuweisen",
+    "savesAmount": "spart {amount}"
   },
   "cart": {
     "emptyCart": "Dein Warenkorb ist leer",

@@ -124,6 +124,7 @@ model DriverBid {
   orderId      String
   order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   driverWallet String
+  amount       Float    // proposed delivery fee in display units (e.g., 3.50 USDC)
   status       String   @default("Pending") // Pending | Accepted | Rejected | Expired
   createdAt    DateTime @default(now())
 
