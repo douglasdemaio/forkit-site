@@ -1,14 +1,34 @@
 # docker compose / podman compose entry point for forkit-site.
 #
 # Usage:
-#   docker compose up --build
 #   podman compose up --build
+#
+# Brings up:
+#   - db:          Postgres 16 (data persisted in named volume)
+#   - forkit-site: Next.js app on :3000 (runs `prisma db push` at startup)
 #
 # Optional: bring up the Rust MCP server alongside by enabling the
 # `mcp-server` profile:
-#   docker compose --profile mcp up --build
+#   podman compose --profile mcp up --build
 
 services:
+  db:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: forkit
+      POSTGRES_PASSWORD: forkit
+      POSTGRES_DB: forkit
+    ports:
+      - "5432:5432"
+    volumes:
+      - forkit-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forkit -d forkit"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   forkit-site:
     build:
       context: .
@@ -24,16 +44,14 @@ services:
     environment:
       NODE_ENV: production
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env before running}
-      # Resolves relative to prisma/schema.prisma → /app/prisma/dev.db (bind-mounted below)
-      DATABASE_URL: file:./dev.db
+      DATABASE_URL: postgresql://forkit:forkit@db:5432/forkit?schema=public
       UPLOAD_DIR: /app/public/uploads
       FORKME_URL: ${FORKME_URL:-http://localhost:3001}
     volumes:
-      # Bind-mount host paths so state survives image rebuilds.
-      # The DB lives in ./prisma/dev.db on the host (matches the dev workflow);
-      # uploads live in ./public/uploads.
-      - ./prisma:/app/prisma:Z
       - ./public/uploads:/app/public/uploads:Z
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   forkme-mcp:
@@ -49,3 +67,6 @@ services:
     depends_on:
       - forkit-site
     restart: unless-stopped
+
+volumes:
+  forkit-pgdata:
