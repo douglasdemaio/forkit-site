@@ -44,7 +44,7 @@ ForkIt Site lets anyone create a professional restaurant page and start acceptin
 | Framework | **Next.js 14** (App Router) |
 | Language | **TypeScript** |
 | Styling | **Tailwind CSS** |
-| Database | **Prisma + SQLite** (easy local dev; swap to Postgres for production) |
+| Database | **Prisma + PostgreSQL** (Neon on Vercel, any Postgres locally) |
 | Blockchain | **Solana** (devnet) via `@solana/web3.js` |
 | Wallet | **Solana Wallet Adapter** (Phantom, Solflare) |
 | Auth | Nonce-signing → **JWT** (wallet-based, no passwords) |
@@ -94,10 +94,11 @@ cd forkit-site
 # Install dependencies
 npm install
 
-# Set up environment
+# Set up environment — fill in DATABASE_URL with a Postgres connection
+# (free dev DB on Neon, Supabase, or `docker run postgres` locally)
 cp .env.example .env
 
-# Initialize database
+# Push schema to the database
 npx prisma db push
 
 # Start dev server
@@ -116,19 +117,22 @@ NEXT_PUBLIC_SOLANA_NETWORK=devnet
 # JWT secret for wallet auth
 JWT_SECRET=your-jwt-secret-change-me
 
-# Upload directory
-UPLOAD_DIR=./public/uploads
-
 # Base URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
-# Database
-DATABASE_URL=file:./dev.db
+# Database (Postgres). DIRECT_URL is the unpooled connection used by
+# `prisma db push` / `prisma migrate`; DATABASE_URL is the pooled one.
+# Both are auto-set when you attach Neon via Vercel Storage.
+DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
+DIRECT_URL=postgresql://user:pass@host/db?sslmode=require
+
+# Vercel Blob — auto-set when you attach a Blob store in the Vercel dashboard
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_xxx
 ```
 
 ### Database
 
-Using Prisma with SQLite for zero-config local development. For production, update `prisma/schema.prisma` to use PostgreSQL and set `DATABASE_URL` accordingly.
+Prisma with PostgreSQL. For local dev, point `DATABASE_URL` / `DIRECT_URL` at any Postgres instance (Neon free tier, Supabase, or a local `docker run postgres`). Vercel deployments use Neon attached via Vercel Storage.
 
 ```bash
 # Push schema changes
@@ -191,16 +195,33 @@ Pick the target that matches your infrastructure.
 ### 1. Vercel
 
 1. Push to GitHub
-2. Import project in [Vercel](https://vercel.com)
-3. Set environment variables in Vercel dashboard
-4. For production, use a hosted PostgreSQL (e.g., Vercel Postgres, Neon, Supabase)
-5. Update `DATABASE_URL` and Prisma provider accordingly
+2. Import the project in [Vercel](https://vercel.com)
+3. **Attach storage** in the Vercel dashboard → *Storage*:
+   - Create a **Neon Postgres** database — this auto-populates `DATABASE_URL` and `DIRECT_URL`
+   - Create a **Blob** store — this auto-populates `BLOB_READ_WRITE_TOKEN`
+4. Add the remaining env vars under *Settings → Environment Variables*:
+   - `JWT_SECRET` (generate with `openssl rand -hex 32`)
+   - `NEXT_PUBLIC_SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_NETWORK`
+   - `NEXT_PUBLIC_BASE_URL` (your deployed URL)
+   - `FORKME_URL` (the customer front-end origin, for CORS)
+5. Push the schema to the new Neon DB **once** from your machine:
+
+   ```bash
+   # pull the env values Vercel set up for you
+   npx vercel env pull .env.production.local
+   # push the Prisma schema using the unpooled DIRECT_URL
+   DATABASE_URL="$DIRECT_URL" npx prisma db push
+   ```
+
+6. Redeploy. Wallet sign-in (the `Nonce` table) and image uploads (Vercel Blob) will work.
 
 The included GitHub Actions workflow automates deployment on push to `main`.
 
 ### 2. Docker / Podman
 
 A multi-stage `Dockerfile` (with identical `Containerfile`) produces a small, non-root Next.js image. Prisma schema, client, and query engine are bundled into the final image so migrations can run on startup.
+
+> **Note:** the schema is now PostgreSQL-only. The compose / k8s manifests below were originally written for SQLite — point `DATABASE_URL` at a Postgres instance before bringing the stack up, and ignore the SQLite-specific volume/replicas notes.
 
 ```bash
 # Build
