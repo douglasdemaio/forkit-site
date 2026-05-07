@@ -58,6 +58,7 @@ export default function MenuEditorPage() {
   const [saving, setSaving] = useState(false);
   const [orderChanged, setOrderChanged] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -66,6 +67,7 @@ export default function MenuEditorPage() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setExpandedId(null);
     if (!over || active.id === over.id || !restaurantId) return;
 
     const oldIndex = items.findIndex((i) => i.id === active.id);
@@ -390,7 +392,7 @@ export default function MenuEditorPage() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex flex-col gap-3 max-w-3xl">
                 {items.map((item) => (
                   <SortableMenuItem
                     key={item.id}
@@ -399,6 +401,10 @@ export default function MenuEditorPage() {
                     restaurantSlug={restaurantSlug}
                     restaurantName={restaurantName}
                     currency={currency}
+                    expanded={expandedId === item.id}
+                    onToggle={() =>
+                      setExpandedId((prev) => (prev === item.id ? null : item.id))
+                    }
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                   />

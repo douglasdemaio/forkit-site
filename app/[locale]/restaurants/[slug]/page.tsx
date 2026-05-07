@@ -33,6 +33,7 @@ export default function RestaurantPage() {
   const [restaurant, setRestaurant] = useState<RestaurantWithMenu | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -156,7 +157,10 @@ export default function RestaurantPage() {
       </div>
 
       {/* Menu */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Featured slot reserved for promoted item (follow-up spec) */}
+        <div data-featured-slot aria-hidden="true" />
+
         {/* Category tabs */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
           {categories.map((cat) => (
@@ -203,7 +207,7 @@ export default function RestaurantPage() {
             <p className="mt-4">No items in this category yet</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-3">
             {filteredItems.map((item) => (
               <MenuItemCard
                 key={item.id}
@@ -212,6 +216,10 @@ export default function RestaurantPage() {
                 restaurantSlug={restaurant.slug}
                 restaurantName={restaurant.name}
                 currency={restaurant.currency}
+                expanded={expandedId === item.id}
+                onToggle={() =>
+                  setExpandedId((prev) => (prev === item.id ? null : item.id))
+                }
               />
             ))}
           </div>
