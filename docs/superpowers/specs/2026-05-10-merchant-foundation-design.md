@@ -17,7 +17,7 @@ This spec defines the **foundation** for that expansion: a generalised `Merchant
 - Rename the `Restaurant` data model to `Merchant` across forkit-site Postgres, forkit-site API endpoints, forkit-site dashboard copy, and forkme client types.
 - Rename the on-chain `Role::Restaurant` variant to `Role::Merchant` and redeploy `forkit_registry` on devnet, with zero existing-account migration.
 - Add `vendorType`, `pickupOnly`, `category`, `subcategory`, `latitude`, and `longitude` columns to the renamed `Merchant` table.
-- Add a curated category taxonomy (7 top-level groups, 30 subcategories) as a TypeScript constant in `lib/taxonomy.ts`.
+- Add a curated category taxonomy (7 top-level groups, 29 subcategories) as a TypeScript constant in `lib/taxonomy.ts`.
 - Update merchant onboarding to capture vendor type, category cascade, and a drag-pin map for precise location, with Nominatim-based address geocoding through a server-side proxy.
 - Backfill existing merchant rows with sensible restaurant-shaped defaults and geocode their addresses.
 - Surface vendor-type-aware user-facing labels ("Restaurant" / "Kitchen" / "Shop") in all 10 supported locales.
@@ -42,7 +42,7 @@ This spec defines the **foundation** for that expansion: a generalised `Merchant
 | Merchant location capture | Geocode typed address, drop pin, allow drag to refine | Address-first matches merchant mental model; drag-pin handles bad geocodes and fine-tuning. |
 | Pin-drag behaviour | Updates lat/lng only; never reverse-geocodes back to address fields | Lets the merchant keep a printed/receipt address distinct from the actual pickup pin (loading dock, secondary entrance). |
 | Vendor type triple | `restaurant` / `home_cook` / `retail` | Drives onboarding defaults (`pickupOnly`, driver-bidding eligibility, menu-structure hint) without locking the merchant in — every default is overrideable. |
-| Category taxonomy | Hardcoded TS const, 7 top-level / 30 subcategories | Curated; not user-extensible in v1. Stored as English strings in the DB; localised at render time. Can move to DB tables later if needed. |
+| Category taxonomy | Hardcoded TS const, 7 top-level / 29 subcategories | Curated; not user-extensible in v1. Stored as English strings in the DB; localised at render time. Can move to DB tables later if needed. |
 | Rating UI surface | Trust-score badge (no public reviews) | Locked here for cross-spec consistency. Display itself is implemented in Spec 3. |
 | Public URL strategy | `/merchants/[slug]` canonical; `/restaurants/[slug]` permanent alias | Existing QR codes pointing at `/restaurants/[slug]` keep resolving forever. Both URLs return identical 200 responses. |
 | API endpoint strategy | Hard rename `/api/restaurants/*` → `/api/merchants/*` | We control both clients (forkit-site dashboard and forkme). Synced deploy, no alias overhead. |
@@ -121,7 +121,7 @@ Vendor type sets the *initial* values of behaviour fields when the merchant firs
 
 ### Category taxonomy
 
-Sourced from `lib/taxonomy.ts`. 7 top-level groups, 30 subcategories. No regulated substances (alcohol, tobacco, cannabis, pharmacies-with-Rx are deliberately absent).
+Sourced from `lib/taxonomy.ts`. 7 top-level groups, 29 subcategories. No regulated substances (alcohol, tobacco, cannabis, pharmacies-with-Rx are deliberately absent).
 
 ```ts
 export const VENDOR_CATEGORIES = {
@@ -243,7 +243,7 @@ The merchant dashboard's settings form gains three new field groups, inserted be
 
 1. **Vendor type** — three radio cards (Restaurant / Home cook / Retail), one selected. Selecting a card sets sensible defaults for `pickupOnly` and the menu-structure hint, but does not lock the merchant out of overriding either.
 2. **Category** — two cascading dropdowns side by side. The first lists the 7 top-level groups; the second lists the subcategories of whichever top-level is selected. Changing the top-level resets the subcategory to the first option in the new group. Both fields are required to publish.
-3. **Address & location** — the existing address fields (street, apt, city, state, country) become the trigger for an embedded MapLibre map sitting directly below them. On `onBlur` of the country field (debounced 600 ms), the form calls `/api/geocode` with the assembled address, drops a pin at the result, and stores `latitude` / `longitude`. The merchant can drag the pin to any location to fine-tune. Pin drag updates `latitude` / `longitude` only — address fields are not modified.
+3. **Address & location** — the existing address fields (street, apt, city, state, country) become the trigger for an embedded MapLibre map sitting directly below them. On `onBlur` of the country field (debounced 600 ms), the form calls `/api/geocode` with the assembled address, drops a pin at the result, and stores `latitude` / `longitude`. The merchant can drag the pin to any location to fine-tune. Pin drag updates `latitude` / `longitude` only — address fields are not modified. If a merchant later edits an address field and triggers another geocode, the new geocode result **overwrites the current pin position** (the merchant must drag again to restore a custom pin).
 
 ### Save preconditions
 
@@ -253,19 +253,21 @@ The "Save" button stays disabled until:
 - Both category levels are selected.
 - `latitude` and `longitude` are non-null (either via geocoding or pin drop).
 
-The existing publish gate (at least one menu item) is unchanged.
+This applies to **every save**, including edits to a legacy merchant whose backfill skipped them (empty `addressStreet` rows). Such merchants must set address + pin before they can save any further change. The existing publish gate (at least one menu item) is unchanged.
 
 ## API endpoints, public URLs, and naming
 
 ### API endpoints
 
-Hard rename in forkit-site:
+Hard rename in forkit-site of every route currently under `/api/restaurants/*`:
 
 - `/api/restaurants` → `/api/merchants`
 - `/api/restaurants/[id]` → `/api/merchants/[id]`
-- All nested resources (`menu-items`, `orders`, etc.) keep the existing `/api/...` shape but route under the new merchant identifier semantics
+- `/api/restaurants/[id]/menu-items` → `/api/merchants/[id]/menu-items`
+- `/api/restaurants/[id]/orders` → `/api/merchants/[id]/orders`
+- Any other `/api/restaurants/*` subpath moves to the same shape under `/api/merchants/*`
 
-forkme's `lib/api.ts` is updated in lockstep and shipped together. No alias is kept.
+The implementation plan will enumerate the full route list against current source. forkme's `lib/api.ts` is updated in lockstep and shipped together. No alias is kept on the API surface — `/api/restaurants/*` returns 404 after this ships.
 
 A new endpoint `/api/geocode` is added. It accepts `{ q: string }`, calls Nominatim server-side, caches successful results in process memory keyed by the query string for 24 h, and returns `{ lat: number, lng: number, displayName: string } | { error: 'not_found' | 'rate_limited' | 'unavailable' }`. Rate-limit 429s from Nominatim are retried once after 1.2 s; a second 429 returns `{ error: 'rate_limited' }` to the client.
 
@@ -326,6 +328,9 @@ The dashboard logo and homepage copy that currently reads "Restaurant Builder" b
 
 ## Open questions deferred to implementation planning
 
-- Exact i18n string copy for `merchant.label.home_cook` in non-English locales (translator pass).
-- Whether `/api/geocode` should persist its cache to Redis or stay in-process for v1 (in-process is the leaning).
-- Whether the dashboard logo asset itself ("Restaurant Builder" wordmark image) is regenerated as "Merchant Builder" or kept as-is for brand recognition.
+- Exact i18n string copy for `merchant.label.home_cook` and `merchant.label.retail` in the nine non-English locales (DE, ES, FR, JA, ZH, PT, KO, AR, TR) — needs a translator pass at implementation time.
+
+The following have been **decided here** and are no longer open:
+
+- `/api/geocode` cache: **in-process Map keyed by query string, 24 h TTL.** Redis-backed cache is future work and only revisited if multi-instance forkit-site deploys generate cache-coherence problems.
+- Dashboard wordmark image ("Restaurant Builder"): **kept as-is in v1.** Visible text strings change to "Merchant Builder" via i18n, but the bitmap/SVG logo asset is not regenerated. Replacing the asset is tracked as future brand work.
