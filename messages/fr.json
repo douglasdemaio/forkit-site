@@ -201,5 +201,12 @@
     "bidding": "Placement de l'offre...",
     "refreshing": "Actualisation...",
     "signContinue": "Signer & Continuer"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "Restaurant",
+      "home_cook": "Cuisine",
+      "retail": "Boutique"
+    }
   }
 }

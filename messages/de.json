@@ -201,5 +201,12 @@
     "bidding": "Angebot wird platziert...",
     "refreshing": "Aktualisieren...",
     "signContinue": "Unterschreiben & Weiter"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "Restaurant",
+      "home_cook": "Küche",
+      "retail": "Geschäft"
+    }
   }
 }

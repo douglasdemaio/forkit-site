@@ -201,5 +201,12 @@
     "bidding": "입찰 중...",
     "refreshing": "새로고침 중...",
     "signContinue": "서명 및 계속"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "음식점",
+      "home_cook": "주방",
+      "retail": "상점"
+    }
   }
 }

@@ -220,5 +220,12 @@
     "shareDesc": "Send this link to friends so they can chip in on the order.",
     "copy": "Copy",
     "copied": "Copied!"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "Restaurant",
+      "home_cook": "Kitchen",
+      "retail": "Shop"
+    }
   }
 }

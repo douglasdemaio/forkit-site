@@ -201,5 +201,12 @@
     "bidding": "Teklif veriliyor...",
     "refreshing": "Yenileniyor...",
     "signContinue": "İmzala ve Devam Et"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "Restoran",
+      "home_cook": "Mutfak",
+      "retail": "Mağaza"
+    }
   }
 }

@@ -201,5 +201,12 @@
     "bidding": "入札中...",
     "refreshing": "更新中...",
     "signContinue": "署名して続行"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "レストラン",
+      "home_cook": "キッチン",
+      "retail": "ショップ"
+    }
   }
 }

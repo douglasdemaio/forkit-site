@@ -201,5 +201,12 @@
     "bidding": "Fazendo lance...",
     "refreshing": "Atualizando...",
     "signContinue": "Assinar & Continuar"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "Restaurante",
+      "home_cook": "Cozinha",
+      "retail": "Loja"
+    }
   }
 }

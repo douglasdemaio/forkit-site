@@ -201,5 +201,12 @@
     "bidding": "جاري تقديم العرض...",
     "refreshing": "جاري التحديث...",
     "signContinue": "توقيع والمتابعة"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "مطعم",
+      "home_cook": "مطبخ",
+      "retail": "متجر"
+    }
   }
 }

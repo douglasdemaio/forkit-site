@@ -201,5 +201,12 @@
     "bidding": "竞价中...",
     "refreshing": "刷新中...",
     "signContinue": "签名并继续"
+  },
+  "merchant": {
+    "label": {
+      "restaurant": "餐厅",
+      "home_cook": "厨房",
+      "retail": "商店"
+    }
   }
 }
