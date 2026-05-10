@@ -2,7 +2,7 @@ name: Build & Deploy Zola Site
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "convert-to-zola"]
   workflow_dispatch:
 
 permissions:
