@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "从注册到收到第一个订单不到 10 分钟",
     "step1Title": "连接钱包",
     "step1Desc": "使用 Solana 钱包登录（Phantom、Solflare）。不需要邮箱，不需要密码 — 钱包就是你的身份。",
-    "step2Title": "搭建页面",
+    "step2Title": "搭建您的店面",
     "step2Desc": "选择模板，上传美食照片，用 USDC、EURC 或 PYUSD 设置菜单价格。准备好了就发布。",
     "step3Title": "接收订单",
     "step3Desc": "顾客通过 Solana 托管下单付款。确认送达后资金释放。内置 AA 付款功能。",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "通过 Solana 用 USDC/EURC/PYUSD 支付",
     "customerStep4": "AA",
     "customerStep4Desc": "最多和 10 个朋友一起付",
-    "exploreMerchants": "浏览餐厅 →",
+    "exploreMerchants": "附近门店 →",
     "ctaTitle": "准备好颠覆餐饮行业了吗？",
     "ctaDesc": "加入去中心化外送革命。连接钱包，今天就开设您的店铺。",
     "getStarted": "免费开始",
@@ -81,7 +81,7 @@
     "menuEditor": "菜单编辑",
     "menuEditorDesc": "添加菜品、设置价格、上传照片",
     "template": "模板",
-    "templateDesc": "选择餐厅的外观风格",
+    "templateDesc": "选择店面外观",
     "orders": "订单",
     "ordersDesc": "查看和管理收到的订单",
     "settings": "设置",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "购物车是空的",
     "emptyCartDesc": "去看看餐厅，加点好吃的吧！",
-    "browseMerchants": "浏览餐厅",
+    "browseMerchants": "附近门店",
     "checkout": "结账",
     "orderingFrom": "下单餐厅",
     "subtotal": "小计",
@@ -166,7 +166,8 @@
     "deliveryAddress": "配送地址",
     "deliveryAddressPlaceholder": "请输入你的配送地址",
     "deliveryAddressHint": "街道、门牌号、小区、城市",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "您将在店面取货 — 免配送费"
   },
   "order": {
     "notFound": "订单未找到",

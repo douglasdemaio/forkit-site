@@ -13,25 +13,25 @@ import { locales, type Locale } from "@/i18n-config";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "ForkIt — Merchant Builder on Solana",
+  title: "ForkIt — Your Business, On-Chain",
   description:
-    "Build your merchant website and accept crypto payments via Solana. Escrow-based ordering, split payments, and beautiful templates.",
+    "Set up a beautiful storefront in minutes and accept crypto payments via Solana. Escrow-based ordering, split payments, and beautiful templates.",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
   },
   openGraph: {
-    title: "ForkIt — Merchant Builder on Solana",
+    title: "ForkIt — Your Business, On-Chain",
     description:
-      "Build your merchant website and accept crypto payments via Solana.",
+      "Set up a beautiful storefront in minutes and accept crypto payments via Solana.",
     type: "website",
     images: ["https://opengraph.githubassets.com/1/douglasdemaio/forkit"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ForkIt — Merchant Builder on Solana",
+    title: "ForkIt — Your Business, On-Chain",
     description:
-      "Build your merchant website and accept crypto payments via Solana.",
+      "Set up a beautiful storefront in minutes and accept crypto payments via Solana.",
     images: ["https://opengraph.githubassets.com/1/douglasdemaio/forkit"],
   },
 };

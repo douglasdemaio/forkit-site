@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "Vom Setup zur ersten Bestellung in unter 10 Minuten",
     "step1Title": "Wallet verbinden",
     "step1Desc": "Melde dich mit deinem Solana-Wallet an (Phantom, Solflare). Keine E-Mail, kein Passwort — dein Wallet ist deine Identität.",
-    "step2Title": "Seite gestalten",
+    "step2Title": "Auftritt einrichten",
     "step2Desc": "Wähle ein Template, lade Fotos hoch, leg dein Menü mit Preisen in USDC, EURC oder PYUSD an. Veröffentliche, wenn du bereit bist.",
     "step3Title": "Bestellungen annehmen",
     "step3Desc": "Kunden bestellen und zahlen über Solana-Escrow. Die Freigabe erfolgt bei Lieferbestätigung. Geteilte Zahlungen inklusive.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "USDC/EURC/PYUSD über Solana",
     "customerStep4": "Teilen",
     "customerStep4Desc": "Teile mit bis zu 10 Freunden",
-    "exploreMerchants": "Merchants entdecken →",
+    "exploreMerchants": "Lokal entdecken →",
     "ctaTitle": "Bereit, die Gastronomie zu revolutionieren?",
     "ctaDesc": "Sei Teil der dezentralen Liefer-Revolution. Wallet verbinden und heute deinen Auftritt starten.",
     "getStarted": "Kostenlos starten",
@@ -81,7 +81,7 @@
     "menuEditor": "Menü-Editor",
     "menuEditorDesc": "Gerichte hinzufügen, Preise festlegen, Fotos hochladen",
     "template": "Template",
-    "templateDesc": "Wähle das Aussehen deines Merchants",
+    "templateDesc": "Wähle den Stil deines Auftritts",
     "orders": "Bestellungen",
     "ordersDesc": "Eingehende Bestellungen ansehen und verwalten",
     "settings": "Einstellungen",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "Dein Warenkorb ist leer",
     "emptyCartDesc": "Stöbere durch Merchants und füge leckere Gerichte hinzu!",
-    "browseMerchants": "Merchants entdecken",
+    "browseMerchants": "In der Nähe",
     "checkout": "Zur Kasse",
     "orderingFrom": "Bestellung bei",
     "subtotal": "Zwischensumme",
@@ -166,7 +166,8 @@
     "deliveryAddress": "Lieferadresse",
     "deliveryAddressPlaceholder": "Gib deine Lieferadresse ein",
     "deliveryAddressHint": "Straße, Hausnummer, Wohnung, Stadt",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "Du holst deine Bestellung vor Ort ab — keine Liefergebühr"
   },
   "order": {
     "notFound": "Bestellung nicht gefunden",

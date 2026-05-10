@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "Do cadastro ao primeiro pedido em menos de 10 minutos",
     "step1Title": "Conecte sua wallet",
     "step1Desc": "Entre com sua wallet Solana (Phantom, Solflare). Sem email, sem senha — sua wallet é sua identidade.",
-    "step2Title": "Monte sua página",
+    "step2Title": "Monte sua vitrine",
     "step2Desc": "Escolha um template, suba fotos dos pratos, defina seu cardápio com preços em USDC, EURC ou PYUSD. Publique quando quiser.",
     "step3Title": "Receba pedidos",
     "step3Desc": "Clientes pedem e pagam via escrow na Solana. Os fundos são liberados na confirmação de entrega. Pagamento dividido incluso.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "USDC/EURC/PYUSD via Solana",
     "customerStep4": "Rachar",
     "customerStep4Desc": "Divida com até 10 amigos",
-    "exploreMerchants": "Explorar merchantes →",
+    "exploreMerchants": "Perto de você →",
     "ctaTitle": "Pronto pra revolucionar a gastronomia?",
     "ctaDesc": "Entre na revolução da entrega descentralizada. Conecte sua carteira e monte sua vitrine hoje.",
     "getStarted": "Começar — É de graça",
@@ -81,7 +81,7 @@
     "menuEditor": "Editor de Cardápio",
     "menuEditorDesc": "Adicione pratos, defina preços, suba fotos",
     "template": "Template",
-    "templateDesc": "Escolha o visual do seu merchante",
+    "templateDesc": "Escolha o visual da sua vitrine",
     "orders": "Pedidos",
     "ordersDesc": "Veja e gerencie os pedidos recebidos",
     "settings": "Configurações",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "Seu carrinho está vazio",
     "emptyCartDesc": "Explore merchantes e adicione pratos deliciosos!",
-    "browseMerchants": "Explorar Merchantes",
+    "browseMerchants": "Perto de você",
     "checkout": "Finalizar Pedido",
     "orderingFrom": "Pedido de",
     "subtotal": "Subtotal",
@@ -166,7 +166,8 @@
     "deliveryAddress": "Endereço de entrega",
     "deliveryAddressPlaceholder": "Digite seu endereço de entrega",
     "deliveryAddressHint": "Rua, número, apartamento, cidade",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "Você retira o pedido no local — sem taxa de entrega"
   },
   "order": {
     "notFound": "Pedido não encontrado",

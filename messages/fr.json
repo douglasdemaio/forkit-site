@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "De l'inscription à la première commande en moins de 10 minutes",
     "step1Title": "Connecte ton wallet",
     "step1Desc": "Connecte-toi avec ton wallet Solana (Phantom, Solflare). Pas d'email, pas de mot de passe — ton wallet est ton identité.",
-    "step2Title": "Crée ta page",
+    "step2Title": "Crée ta vitrine",
     "step2Desc": "Choisis un template, ajoute tes photos, définis ton menu avec les prix en USDC, EURC ou PYUSD. Publie quand tu es prêt.",
     "step3Title": "Reçois des commandes",
     "step3Desc": "Les clients commandent et paient via l'escrow Solana. Les fonds sont libérés à la confirmation de livraison. Paiements partagés inclus.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "USDC/EURC/PYUSD via Solana",
     "customerStep4": "Partager",
     "customerStep4Desc": "Partage avec jusqu'à 10 amis",
-    "exploreMerchants": "Explorer les merchants →",
+    "exploreMerchants": "Près de chez toi →",
     "ctaTitle": "Prêt à bousculer la restauration ?",
     "ctaDesc": "Rejoins la révolution de la livraison décentralisée. Connecte ton wallet et lance ta vitrine aujourd'hui.",
     "getStarted": "Commencer — C'est gratuit",
@@ -81,7 +81,7 @@
     "menuEditor": "Éditeur de menu",
     "menuEditorDesc": "Ajoute des plats, fixe les prix, ajoute des photos",
     "template": "Template",
-    "templateDesc": "Choisis le look de ton merchant",
+    "templateDesc": "Choisis le style de ta vitrine",
     "orders": "Commandes",
     "ordersDesc": "Consulte et gère les commandes entrantes",
     "settings": "Paramètres",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "Ton panier est vide",
     "emptyCartDesc": "Parcours les merchants et ajoute de bons petits plats !",
-    "browseMerchants": "Parcourir les merchants",
+    "browseMerchants": "Près de chez toi",
     "checkout": "Commander",
     "orderingFrom": "Commande chez",
     "subtotal": "Sous-total",
@@ -166,7 +166,8 @@
     "deliveryAddress": "Adresse de livraison",
     "deliveryAddressPlaceholder": "Entre ton adresse de livraison",
     "deliveryAddressHint": "Rue, appartement, ville",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "Tu récupères ta commande sur place — pas de frais de livraison"
   },
   "order": {
     "notFound": "Commande introuvable",

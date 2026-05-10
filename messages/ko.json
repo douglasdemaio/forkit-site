@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "설정부터 첫 주문까지 10분이면 충분해요",
     "step1Title": "지갑 연결",
     "step1Desc": "Solana 지갑(Phantom, Solflare)으로 로그인하세요. 이메일도 비밀번호도 필요 없어요 — 지갑이 곧 신원 증명.",
-    "step2Title": "페이지 만들기",
+    "step2Title": "매장 만들기",
     "step2Desc": "템플릿을 고르고, 음식 사진을 올리고, USDC, EURC, PYUSD로 메뉴 가격을 설정하세요. 준비되면 공개!",
     "step3Title": "주문 받기",
     "step3Desc": "고객이 Solana 에스크로로 주문하고 결제해요. 배달 확인 시 자금이 풀려요. 더치페이 기능 기본 탑재.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "Solana로 USDC/EURC/PYUSD 결제",
     "customerStep4": "더치페이",
     "customerStep4Desc": "최대 10명과 나누기",
-    "exploreMerchants": "레스토랑 둘러보기 →",
+    "exploreMerchants": "근처 둘러보기 →",
     "ctaTitle": "외식 산업을 혁신할 준비 됐나요?",
     "ctaDesc": "탈중앙화 배달 혁명에 함께하세요. 지갑을 연결하고 오늘 매장을 열어보세요.",
     "getStarted": "무료로 시작하기",
@@ -81,7 +81,7 @@
     "menuEditor": "메뉴 편집기",
     "menuEditorDesc": "메뉴 추가, 가격 설정, 사진 업로드",
     "template": "템플릿",
-    "templateDesc": "레스토랑 디자인을 선택하세요",
+    "templateDesc": "매장 디자인 선택",
     "orders": "주문",
     "ordersDesc": "들어온 주문을 확인하고 관리하세요",
     "settings": "설정",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "장바구니가 비어있어요",
     "emptyCartDesc": "레스토랑을 둘러보고 맛있는 메뉴를 담아보세요!",
-    "browseMerchants": "레스토랑 둘러보기",
+    "browseMerchants": "근처 둘러보기",
     "checkout": "결제하기",
     "orderingFrom": "주문 레스토랑",
     "subtotal": "소계",
@@ -166,7 +166,8 @@
     "deliveryAddress": "배달 주소",
     "deliveryAddressPlaceholder": "배달 주소를 입력하세요",
     "deliveryAddressHint": "도로명, 건물명, 동/호수",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "매장에서 직접 픽업 — 배달비 없음"
   },
   "order": {
     "notFound": "주문을 찾을 수 없어요",

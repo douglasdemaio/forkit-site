@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "Kurulumdan ilk siparişe 10 dakikadan az",
     "step1Title": "Cüzdanını Bağla",
     "step1Desc": "Solana cüzdanınla giriş yap (Phantom, Solflare). E-posta yok, şifre yok — cüzdanın senin kimliğin.",
-    "step2Title": "Sayfanı Oluştur",
+    "step2Title": "Vitrinini oluştur",
     "step2Desc": "Bir şablon seç, yemek fotoğrafları yükle, menünü USDC, EURC veya PYUSD fiyatlarıyla oluştur. Hazır olunca yayınla.",
     "step3Title": "Sipariş Al",
     "step3Desc": "Müşteriler Solana emanet hesabıyla sipariş verir ve öder. Teslimat onayında fonlar serbest bırakılır. Hesap bölme dahil.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "Solana ile USDC/EURC/PYUSD",
     "customerStep4": "Böl",
     "customerStep4Desc": "10 arkadaşa kadar paylaş",
-    "exploreMerchants": "Restoranları Keşfet →",
+    "exploreMerchants": "Yakındakiler →",
     "ctaTitle": "Yemek sektörünü değiştirmeye hazır mısın?",
     "ctaDesc": "Merkeziyetsiz teslimat devrimine katıl. Cüzdanını bağla ve bugün dükkânını aç.",
     "getStarted": "Ücretsiz Başla",
@@ -81,7 +81,7 @@
     "menuEditor": "Menü Düzenleyici",
     "menuEditorDesc": "Yemek ekle, fiyat belirle, fotoğraf yükle",
     "template": "Şablon",
-    "templateDesc": "Restoranının görünümünü seç",
+    "templateDesc": "Vitrininin görünümünü seç",
     "orders": "Siparişler",
     "ordersDesc": "Gelen siparişleri görüntüle ve yönet",
     "settings": "Ayarlar",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "Sepetin boş",
     "emptyCartDesc": "Restoranları keşfet ve lezzetli yemekler ekle!",
-    "browseMerchants": "Restoranları Keşfet",
+    "browseMerchants": "Yakındakiler",
     "checkout": "Sipariş Ver",
     "orderingFrom": "Sipariş yeri",
     "subtotal": "Ara toplam",
@@ -166,7 +166,8 @@
     "deliveryAddress": "Teslimat Adresi",
     "deliveryAddressPlaceholder": "Teslimat adresini gir",
     "deliveryAddressHint": "Sokak, bina no, daire, şehir",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "Siparişini mekânda alacaksın — teslimat ücreti yok"
   },
   "order": {
     "notFound": "Sipariş bulunamadı",

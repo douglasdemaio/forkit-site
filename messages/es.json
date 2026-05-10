@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "Del registro al primer pedido en menos de 10 minutos",
     "step1Title": "Conecta tu wallet",
     "step1Desc": "Inicia sesión con tu wallet de Solana (Phantom, Solflare). Sin email, sin contraseña — tu wallet es tu identidad.",
-    "step2Title": "Diseña tu página",
+    "step2Title": "Monta tu tienda",
     "step2Desc": "Elige una plantilla, sube fotos de tus platos, configura tu menú con precios en USDC, EURC o PYUSD. Publica cuando quieras.",
     "step3Title": "Recibe pedidos",
     "step3Desc": "Los clientes piden y pagan a través del escrow de Solana. Los fondos se liberan al confirmar la entrega. Pagos compartidos incluidos.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "USDC/EURC/PYUSD vía Solana",
     "customerStep4": "Dividir",
     "customerStep4Desc": "Comparte con hasta 10 amigos",
-    "exploreMerchants": "Explorar merchantes →",
+    "exploreMerchants": "Explorar local →",
     "ctaTitle": "¿Listo para revolucionar la gastronomía?",
     "ctaDesc": "Únete a la revolución del reparto descentralizado. Conecta tu billetera y monta tu tienda hoy.",
     "getStarted": "Empieza gratis",
@@ -81,7 +81,7 @@
     "menuEditor": "Editor de menú",
     "menuEditorDesc": "Añade platos, fija precios, sube fotos",
     "template": "Plantilla",
-    "templateDesc": "Elige el estilo de tu merchante",
+    "templateDesc": "Elige el estilo de tu tienda",
     "orders": "Pedidos",
     "ordersDesc": "Ve y gestiona los pedidos entrantes",
     "settings": "Ajustes",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "Tu carrito está vacío",
     "emptyCartDesc": "¡Explora merchantes y añade platos deliciosos!",
-    "browseMerchants": "Explorar merchantes",
+    "browseMerchants": "Cerca de ti",
     "checkout": "Finalizar pedido",
     "orderingFrom": "Pedido de",
     "subtotal": "Subtotal",
@@ -166,7 +166,8 @@
     "deliveryAddress": "Dirección de entrega",
     "deliveryAddressPlaceholder": "Introduce tu dirección de entrega",
     "deliveryAddressHint": "Calle, número, piso, ciudad",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "Recoges tu pedido en el local — sin gastos de envío"
   },
   "order": {
     "notFound": "Pedido no encontrado",

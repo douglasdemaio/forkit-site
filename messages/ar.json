@@ -16,7 +16,7 @@
     "howItWorksSubtitle": "من التسجيل إلى أول طلب في أقل من 10 دقائق",
     "step1Title": "اربط محفظتك",
     "step1Desc": "سجّل الدخول بمحفظة Solana (Phantom أو Solflare). لا بريد إلكتروني ولا كلمة مرور — محفظتك هي هويتك.",
-    "step2Title": "صمّم صفحتك",
+    "step2Title": "أنشئ متجرك",
     "step2Desc": "اختر قالباً، ارفع صور الأطباق، حدد قائمة الأسعار بـ USDC أو EURC أو PYUSD. انشر متى ما كنت جاهزاً.",
     "step3Title": "استقبل الطلبات",
     "step3Desc": "الزبائن يطلبون ويدفعون عبر حساب ضمان Solana. تُحرر الأموال عند تأكيد التوصيل. تقسيم الفاتورة مدمج.",
@@ -44,7 +44,7 @@
     "customerStep3Desc": "USDC/EURC/PYUSD عبر Solana",
     "customerStep4": "قسّم",
     "customerStep4Desc": "شارك مع 10 أصدقاء كحد أقصى",
-    "exploreMerchants": "تصفح المطاعم ←",
+    "exploreMerchants": "تصفح القريب →",
     "ctaTitle": "مستعد لتغيير صناعة الطعام؟",
     "ctaDesc": "انضم إلى ثورة التوصيل اللامركزي. اربط محفظتك وافتح متجرك اليوم.",
     "getStarted": "ابدأ مجاناً",
@@ -81,7 +81,7 @@
     "menuEditor": "محرر القائمة",
     "menuEditorDesc": "أضف أطباقاً، حدد الأسعار، ارفع صوراً",
     "template": "القالب",
-    "templateDesc": "اختر مظهر مطعمك",
+    "templateDesc": "اختر مظهر متجرك",
     "orders": "الطلبات",
     "ordersDesc": "عرض وإدارة الطلبات الواردة",
     "settings": "الإعدادات",
@@ -153,7 +153,7 @@
   "cart": {
     "emptyCart": "سلتك فارغة",
     "emptyCartDesc": "تصفح المطاعم وأضف أطباقاً لذيذة!",
-    "browseMerchants": "تصفح المطاعم",
+    "browseMerchants": "تصفح القريب",
     "checkout": "إتمام الطلب",
     "orderingFrom": "الطلب من",
     "subtotal": "المجموع الفرعي",
@@ -166,7 +166,8 @@
     "deliveryAddress": "عنوان التوصيل",
     "deliveryAddressPlaceholder": "أدخل عنوان التوصيل",
     "deliveryAddressHint": "الشارع، رقم المبنى، الشقة، المدينة",
-    "signing": "Signing..."
+    "signing": "Signing...",
+    "pickupHint": "ستستلم طلبك من المتجر — بدون رسوم توصيل"
   },
   "order": {
     "notFound": "الطلب غير موجود",
