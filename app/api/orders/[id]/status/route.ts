@@ -31,7 +31,7 @@ export async function POST(
     const order = await prisma.order.findUnique({
       where: { id: params.id },
       include: {
-        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true, autoAcknowledge: true, selfDelivery: true } },
+        merchant: { select: { id: true, name: true, slug: true, wallet: true, currency: true, autoAcknowledge: true, selfDelivery: true } },
         contributions: { orderBy: { createdAt: "asc" } },
       },
     });
@@ -39,8 +39,8 @@ export async function POST(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Only the restaurant owner may drive order status from the dashboard
-    if (order.restaurant?.wallet !== wallet) {
+    // Only the merchant owner may drive order status from the dashboard
+    if (order.merchant?.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -55,17 +55,17 @@ export async function POST(
     const now = new Date();
     const updateData: any = { status: newStatus };
 
-    // Only open for driver bids when the restaurant doesn't handle delivery itself
-    if (newStatus === "Preparing" && !order.restaurant?.selfDelivery) {
+    // Only open for driver bids when the merchant doesn't handle delivery itself
+    if (newStatus === "Preparing" && !order.merchant?.selfDelivery) {
       updateData.bidOpenAt = now;
     }
 
-    // Auto-acknowledge: if restaurant has flag set, chain Funded → Preparing automatically
+    // Auto-acknowledge: if merchant has flag set, chain Funded → Preparing automatically
     const autoChainToPreparing =
-      newStatus === "Funded" && order.restaurant?.autoAcknowledge;
+      newStatus === "Funded" && order.merchant?.autoAcknowledge;
     if (autoChainToPreparing) {
       updateData.status = "Preparing";
-      if (!order.restaurant?.selfDelivery) {
+      if (!order.merchant?.selfDelivery) {
         updateData.bidOpenAt = now;
       }
     }
@@ -78,7 +78,7 @@ export async function POST(
       where: { id: params.id },
       data: updateData,
       include: {
-        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
+        merchant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
         contributions: { orderBy: { createdAt: "asc" } },
       },
     });
@@ -101,7 +101,7 @@ export async function POST(
       txSignature: c.txSignature,
       timestamp: c.createdAt,
     }));
-    const rest = updated.restaurant;
+    const rest = updated.merchant;
 
     return NextResponse.json({
       ...updated,
@@ -110,7 +110,7 @@ export async function POST(
       escrowFunded: updated.escrowFunded ?? 0,
       customer: { wallet: updated.customerWallet },
       contributions,
-      restaurant: rest
+      merchant: rest
         ? { id: rest.id, name: rest.name, slug: rest.slug, wallet: rest.wallet, currency: rest.currency }
         : undefined,
     });

@@ -4,14 +4,14 @@ import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-// Full menu view just redirects to the restaurant page
+// Full menu view just redirects to the merchant page
 // which already shows the full menu
 export default function MenuPage() {
   const params = useParams();
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(`/restaurants/${params.slug}`);
+    router.replace(`/merchants/${params.slug}`);
   }, [params.slug, router]);
 
   return (

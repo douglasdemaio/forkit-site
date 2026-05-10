@@ -33,7 +33,7 @@ export async function POST(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { contributions: true, restaurant: { select: { autoAcknowledge: true, selfDelivery: true } } },
+      include: { contributions: true, merchant: { select: { autoAcknowledge: true, selfDelivery: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -60,8 +60,8 @@ export async function POST(
 
     let funded = false;
     if (totalContributed >= order.escrowTarget && (order.status === "Created" || order.status === "Funded")) {
-      const autoAck = order.restaurant?.autoAcknowledge ?? false;
-      const selfDelivery = order.restaurant?.selfDelivery ?? false;
+      const autoAck = order.merchant?.autoAcknowledge ?? false;
+      const selfDelivery = order.merchant?.selfDelivery ?? false;
       await prisma.order.update({
         where: { id: params.id },
         data: {

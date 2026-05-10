@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
-// GET /api/restaurants/[id] - Get restaurant by ID or slug
+// GET /api/merchants/[id] - Get merchant by ID or slug
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -11,7 +11,7 @@ export async function GET(
     const { id } = params;
 
     // Try finding by slug first, then by ID
-    const restaurant = await prisma.restaurant.findFirst({
+    const merchant = await prisma.merchant.findFirst({
       where: {
         OR: [{ id }, { slug: id }],
       },
@@ -23,24 +23,24 @@ export async function GET(
       },
     });
 
-    if (!restaurant) {
+    if (!merchant) {
       return NextResponse.json(
-        { error: "Restaurant not found" },
+        { error: "Merchant not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(restaurant);
+    return NextResponse.json(merchant);
   } catch (error) {
-    console.error("Error fetching restaurant:", error);
+    console.error("Error fetching merchant:", error);
     return NextResponse.json(
-      { error: "Failed to fetch restaurant" },
+      { error: "Failed to fetch merchant" },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/restaurants/[id] - Update restaurant
+// PUT /api/merchants/[id] - Update merchant
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -51,18 +51,18 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const restaurant = await prisma.restaurant.findUnique({
+    const merchant = await prisma.merchant.findUnique({
       where: { id: params.id },
     });
 
-    if (!restaurant) {
+    if (!merchant) {
       return NextResponse.json(
-        { error: "Restaurant not found" },
+        { error: "Merchant not found" },
         { status: 404 }
       );
     }
 
-    if (restaurant.wallet !== wallet) {
+    if (merchant.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -115,7 +115,7 @@ export async function PUT(
       }
     }
 
-    const updated = await prisma.restaurant.update({
+    const updated = await prisma.merchant.update({
       where: { id: params.id },
       data: {
         ...(name !== undefined && { name }),
@@ -141,9 +141,9 @@ export async function PUT(
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error("Error updating restaurant:", error);
+    console.error("Error updating merchant:", error);
     return NextResponse.json(
-      { error: "Failed to update restaurant" },
+      { error: "Failed to update merchant" },
       { status: 500 }
     );
   }

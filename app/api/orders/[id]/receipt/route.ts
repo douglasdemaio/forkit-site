@@ -14,7 +14,7 @@ const FEE_BASIS_POINTS = 2;
 const DEPOSIT_BASIS_POINTS = 200;
 
 // GET /api/orders/[id]/receipt - Settlement receipt (after Settled/Delivered).
-// Auth: restaurant owner, customer, or assigned driver. Receipts contain
+// Auth: merchant owner, customer, or assigned driver. Receipts contain
 // purchase history + tx signatures; without auth, anyone with a UUID could
 // reconstruct what a customer ordered.
 export async function GET(
@@ -29,14 +29,14 @@ export async function GET(
     const order = await prisma.order.findUnique({
       where: { id: params.id },
       include: {
-        restaurant: { select: { name: true, wallet: true } },
+        merchant: { select: { name: true, wallet: true } },
         contributions: true,
       },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    const isOwner = order.restaurant?.wallet === wallet;
+    const isOwner = order.merchant?.wallet === wallet;
     const isCustomer = order.customerWallet === wallet;
     const isDriver = order.driverWallet === wallet;
     if (!isOwner && !isCustomer && !isDriver) {
@@ -62,7 +62,7 @@ export async function GET(
     return NextResponse.json({
       orderId: order.id,
       onChainOrderId: order.onChainOrderId,
-      restaurantName: order.restaurant?.name ?? "",
+      merchantName: order.merchant?.name ?? "",
       items,
       tokenMint: order.tokenMint,
       tokenSymbol: tokenInfo.symbol,

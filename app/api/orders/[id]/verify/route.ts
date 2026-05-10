@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
 // POST /api/orders/[id]/verify
-// Restaurant owner manually verifies a code (web dashboard).
+// Merchant owner manually verifies a code (web dashboard).
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -22,13 +22,13 @@ export async function POST(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: true },
+      include: { merchant: true },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    if (order.restaurant.wallet !== wallet) {
+    if (order.merchant?.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

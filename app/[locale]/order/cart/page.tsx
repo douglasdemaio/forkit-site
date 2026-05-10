@@ -85,9 +85,9 @@ export default function CartPage() {
   const {
     items,
     total,
-    restaurantId,
-    restaurantSlug,
-    restaurantName,
+    merchantId,
+    merchantSlug,
+    merchantName,
     updateQuantity,
     removeItem,
     clearCart,
@@ -112,7 +112,7 @@ export default function CartPage() {
     if (detected) setCountry(detected);
   }, []);
 
-  const deliveryFee = 0; // fetched from restaurant in production
+  const deliveryFee = 0; // fetched from merchant in production
   const effectiveDeliveryFee = deliveryMode === "pickup" ? 0 : deliveryFee;
   const grandTotal = total + effectiveDeliveryFee;
 
@@ -133,7 +133,7 @@ export default function CartPage() {
     (streetAddress.trim().length > 0 && city.trim().length > 0);
 
   const handleCheckout = async () => {
-    if (!connected || !publicKey || !restaurantId) return;
+    if (!connected || !publicKey || !merchantId) return;
 
     setPlacing(true);
     setError(null);
@@ -153,7 +153,7 @@ export default function CartPage() {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
-          restaurantId,
+          merchantId,
           items: items.map((item) => ({
             menuItemId: item.id,
             quantity: item.quantity,
@@ -172,16 +172,16 @@ export default function CartPage() {
 
       // 2. Create on-chain escrow
       try {
-        if (!order.restaurant?.walletAddress && !order.restaurant?.wallet) {
-          throw new Error("Restaurant wallet address not found");
+        if (!order.merchant?.walletAddress && !order.merchant?.wallet) {
+          throw new Error("Merchant wallet address not found");
         }
 
         const { signature, orderPda } = await createOrder({
           orderId: order.id,
-          restaurantWallet: order.restaurant.walletAddress || order.restaurant.wallet,
+          merchantWallet: order.merchant?.walletAddress || order.merchant?.wallet,
           foodAmount: order.foodTotal,
           deliveryAmount: order.deliveryFee,
-          currency: order.restaurant.currency || "USDC",
+          currency: order.merchant?.currency || "USDC",
           codeAHash: order.codeAHash || "",
           codeBHash: order.codeBHash || "",
         });
@@ -228,7 +228,7 @@ export default function CartPage() {
           {t("emptyCart")}
         </h1>
         <p className="mt-2 text-gray-500">{t("emptyCartDesc")}</p>
-        <Link href="/restaurants" className="mt-6 btn-primary">
+        <Link href="/merchants" className="mt-6 btn-primary">
           {t("browseRestaurants")}
         </Link>
       </div>
@@ -240,14 +240,14 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold text-forkit-dark mb-2">
         {t("checkout")}
       </h1>
-      {restaurantName && (
+      {merchantName && (
         <p className="text-gray-500 mb-8">
           {t("orderingFrom")}{" "}
           <Link
-            href={`/restaurants/${restaurantSlug}`}
+            href={`/merchants/${merchantSlug}`}
             className="text-forkit-orange hover:underline"
           >
-            {restaurantName}
+            {merchantName}
           </Link>
         </p>
       )}

@@ -6,11 +6,11 @@ import { CartItem, MenuItemData } from "@/lib/types";
 
 interface CartState {
   items: CartItem[];
-  restaurantId: string | null;
-  restaurantSlug: string | null;
-  restaurantName: string | null;
+  merchantId: string | null;
+  merchantSlug: string | null;
+  merchantName: string | null;
 
-  addItem: (item: MenuItemData, restaurantId: string, restaurantSlug: string, restaurantName: string) => void;
+  addItem: (item: MenuItemData, merchantId: string, merchantSlug: string, merchantName: string) => void;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -22,20 +22,20 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      restaurantId: null,
-      restaurantSlug: null,
-      restaurantName: null,
+      merchantId: null,
+      merchantSlug: null,
+      merchantName: null,
 
-      addItem: (item, restaurantId, restaurantSlug, restaurantName) => {
+      addItem: (item, merchantId, merchantSlug, merchantName) => {
         const state = get();
 
-        // If cart has items from a different restaurant, clear first
-        if (state.restaurantId && state.restaurantId !== restaurantId) {
+        // If cart has items from a different merchant, clear first
+        if (state.merchantId && state.merchantId !== merchantId) {
           set({
             items: [{ ...item, quantity: 1 }],
-            restaurantId,
-            restaurantSlug,
-            restaurantName,
+            merchantId,
+            merchantSlug,
+            merchantName,
           });
           return;
         }
@@ -46,16 +46,16 @@ export const useCartStore = create<CartState>()(
             items: state.items.map((i) =>
               i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
             ),
-            restaurantId,
-            restaurantSlug,
-            restaurantName,
+            merchantId,
+            merchantSlug,
+            merchantName,
           });
         } else {
           set({
             items: [...state.items, { ...item, quantity: 1 }],
-            restaurantId,
-            restaurantSlug,
-            restaurantName,
+            merchantId,
+            merchantSlug,
+            merchantName,
           });
         }
       },
@@ -66,9 +66,9 @@ export const useCartStore = create<CartState>()(
         if (newItems.length === 0) {
           set({
             items: [],
-            restaurantId: null,
-            restaurantSlug: null,
-            restaurantName: null,
+            merchantId: null,
+            merchantSlug: null,
+            merchantName: null,
           });
         } else {
           set({ items: newItems });
@@ -90,9 +90,9 @@ export const useCartStore = create<CartState>()(
       clearCart: () =>
         set({
           items: [],
-          restaurantId: null,
-          restaurantSlug: null,
-          restaurantName: null,
+          merchantId: null,
+          merchantSlug: null,
+          merchantName: null,
         }),
 
       getTotal: () =>

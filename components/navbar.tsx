@@ -31,10 +31,10 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             <Link
-              href="/restaurants"
+              href="/merchants"
               className="text-gray-600 hover:text-forkit-orange transition-colors"
             >
-              {t("restaurants")}
+              {t("merchants")}
             </Link>
             {connected && (
               <Link
@@ -113,11 +113,11 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden pb-4 space-y-3">
             <Link
-              href="/restaurants"
+              href="/merchants"
               className="block text-gray-600 hover:text-forkit-orange"
               onClick={() => setMobileMenuOpen(false)}
             >
-              {t("restaurants")}
+              {t("merchants")}
             </Link>
             {connected && (
               <Link

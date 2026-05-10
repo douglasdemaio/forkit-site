@@ -14,7 +14,7 @@ function toApiOrder(order: any) {
     txSignature: c.txSignature,
     timestamp: c.createdAt,
   }));
-  const rest = order.restaurant;
+  const rest = order.merchant;
   return {
     ...order,
     items,
@@ -22,7 +22,7 @@ function toApiOrder(order: any) {
     escrowFunded: order.escrowFunded ?? 0,
     customer: { wallet: order.customerWallet },
     contributions,
-    restaurant: rest
+    merchant: rest
       ? {
           id: rest.id,
           name: rest.name,
@@ -38,7 +38,7 @@ function toApiOrder(order: any) {
 }
 
 // GET /api/orders/[id]
-// Auth: restaurant owner, customer, or assigned driver may view full order.
+// Auth: merchant owner, customer, or assigned driver may view full order.
 // Share-link tokens (8-char slug) are treated as public read for order tracking.
 export async function GET(
   request: NextRequest,
@@ -54,7 +54,7 @@ export async function GET(
       },
       include: {
         contributions: { orderBy: { createdAt: "asc" } },
-        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
+        merchant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
       },
     });
 
@@ -76,7 +76,7 @@ export async function GET(
     if (!wallet) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const isOwner = order.restaurant?.wallet === wallet;
+    const isOwner = order.merchant?.wallet === wallet;
     const isCustomer = order.customerWallet === wallet;
     const isDriver = order.driverWallet === wallet;
     if (!isOwner && !isCustomer && !isDriver) {
@@ -91,7 +91,7 @@ export async function GET(
 }
 
 // PUT /api/orders/[id] - Update order fields (on-chain settlement data, status)
-// Auth: restaurant owner may update any field; assigned driver may update
+// Auth: merchant owner may update any field; assigned driver may update
 // delivery-state fields only.
 export async function PUT(
   request: NextRequest,
@@ -105,13 +105,13 @@ export async function PUT(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: { select: { wallet: true } } },
+      include: { merchant: { select: { wallet: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const isOwner = order.restaurant?.wallet === wallet;
+    const isOwner = order.merchant?.wallet === wallet;
     const isAssignedDriver = !!order.driverWallet && order.driverWallet === wallet;
 
     if (!isOwner && !isAssignedDriver) {
@@ -134,7 +134,7 @@ export async function PUT(
     const updateData: any = {};
 
     if (isOwner) {
-      // Restaurant owner can update all allowed fields
+      // Merchant owner can update all allowed fields
       if (status !== undefined) updateData.status = status;
       if (onChainOrderId !== undefined) updateData.onChainOrderId = onChainOrderId;
       if (codeAHash !== undefined) updateData.codeAHash = codeAHash;
@@ -156,7 +156,7 @@ export async function PUT(
       data: updateData,
       include: {
         contributions: { orderBy: { createdAt: "asc" } },
-        restaurant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
+        merchant: { select: { id: true, name: true, slug: true, wallet: true, currency: true } },
       },
     });
     return NextResponse.json(toApiOrder(updated));

@@ -18,7 +18,7 @@ interface OrderItem {
 interface DeliveryOrder {
   id: string;
   customer: { wallet: string };
-  restaurant?: { id: string; name: string; slug: string; wallet: string; currency: string };
+  merchant?: { id: string; name: string; slug: string; wallet: string; currency: string };
   items: OrderItem[];
   foodTotal: number;
   deliveryFee: number;
@@ -229,7 +229,7 @@ export default function DeliveryPage() {
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <div className="font-semibold text-forkit-dark">
-                      {o.restaurant?.name ?? "Restaurant"}
+                      {o.merchant?.name ?? "Merchant"}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       Order #{o.id.slice(0, 8)} · {new Date(o.createdAt).toLocaleString()}
@@ -259,7 +259,7 @@ export default function DeliveryPage() {
                   <span className="text-gray-600">
                     {t("deliveryFee")}:{" "}
                     <span className="font-semibold text-forkit-dark">
-                      {o.deliveryFee} {o.restaurant?.currency ?? "USDC"}
+                      {o.deliveryFee} {o.merchant?.currency ?? "USDC"}
                     </span>
                   </span>
                   <span className="text-gray-400">·</span>
@@ -271,7 +271,7 @@ export default function DeliveryPage() {
                 {o.status === "ReadyForPickup" && (
                   <div className="pt-3 border-t border-gray-100">
                     <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Enter pickup code (Code A) from the restaurant
+                      Enter pickup code (Code A) from the merchant
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -326,7 +326,7 @@ export default function DeliveryPage() {
 
                 {(o.status === "DriverAssigned" || o.status === "Preparing") && (
                   <div className="pt-3 border-t border-gray-100 text-sm text-gray-500">
-                    Waiting for the restaurant to mark the order ready for pickup.
+                    Waiting for the merchant to mark the order ready for pickup.
                   </div>
                 )}
 
@@ -365,7 +365,7 @@ export default function DeliveryPage() {
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
                     <div className="font-semibold text-forkit-dark">
-                      {o.restaurant?.name ?? "Restaurant"}
+                      {o.merchant?.name ?? "Merchant"}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
                       Opened {o.bidOpenAt ? new Date(o.bidOpenAt).toLocaleTimeString() : "—"}
@@ -374,7 +374,7 @@ export default function DeliveryPage() {
                   <div className="text-right">
                     <div className="text-xs text-gray-500">{t("deliveryFee")}</div>
                     <div className="text-lg font-semibold text-forkit-dark">
-                      {o.deliveryFee} {o.restaurant?.currency ?? "USDC"}
+                      {o.deliveryFee} {o.merchant?.currency ?? "USDC"}
                     </div>
                   </div>
                 </div>

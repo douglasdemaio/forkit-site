@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
 // POST /api/orders/[id]/verify-pickup
-// Driver verifies Code A to confirm they picked up from the restaurant.
+// Driver verifies Code A to confirm they picked up from the merchant.
 // Transitions: ReadyForPickup → PickedUp
 export async function POST(
   request: NextRequest,

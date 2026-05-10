@@ -12,7 +12,7 @@ function hashCode(code: string): string {
   return crypto.createHash("sha256").update(code).digest("hex");
 }
 
-function toApiOrder(order: any, restaurant?: any) {
+function toApiOrder(order: any, merchant?: any) {
   const items =
     typeof order.items === "string" ? JSON.parse(order.items) : order.items;
   const contributions = (order.contributions ?? []).map((c: any) => ({
@@ -23,7 +23,7 @@ function toApiOrder(order: any, restaurant?: any) {
     txSignature: c.txSignature,
     timestamp: c.createdAt,
   }));
-  const rest = restaurant ?? order.restaurant;
+  const rest = merchant ?? order.merchant;
   return {
     ...order,
     items,
@@ -31,7 +31,7 @@ function toApiOrder(order: any, restaurant?: any) {
     escrowFunded: order.escrowFunded ?? 0,
     customer: { wallet: order.customerWallet },
     contributions,
-    restaurant: rest
+    merchant: rest
       ? {
           id: rest.id,
           name: rest.name,
@@ -44,8 +44,8 @@ function toApiOrder(order: any, restaurant?: any) {
 }
 
 // GET /api/orders - List orders
-// ?restaurantId=xxx  → restaurant's orders (owner auth)
-// ?role=restaurant   → same as above using the authed wallet's restaurant
+// ?merchantId=xxx  → merchant's orders (owner auth)
+// ?role=merchant   → same as above using the authed wallet's merchant
 // ?role=driver&status=ReadyForPickup → available pickup orders
 // (no params)        → authenticated customer's orders
 export async function GET(request: NextRequest) {
@@ -56,38 +56,38 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const restaurantId = searchParams.get("restaurantId");
+    const merchantId = searchParams.get("merchantId");
     const role = searchParams.get("role");
     const statusFilter = searchParams.get("status");
 
-    if (restaurantId) {
-      // Restaurant owner viewing their orders
-      const restaurant = await prisma.restaurant.findFirst({
-        where: { id: restaurantId, wallet },
+    if (merchantId) {
+      // Merchant owner viewing their orders
+      const merchant = await prisma.merchant.findFirst({
+        where: { id: merchantId, wallet },
       });
-      if (!restaurant) {
+      if (!merchant) {
         return NextResponse.json(
-          { error: "Restaurant not found or not owned by you" },
+          { error: "Merchant not found or not owned by you" },
           { status: 403 }
         );
       }
       const orders = await prisma.order.findMany({
-        where: { restaurantId },
+        where: { merchantId },
         orderBy: { createdAt: "desc" },
         include: { contributions: true },
       });
-      return NextResponse.json({ orders: orders.map((o) => toApiOrder(o, restaurant)) });
+      return NextResponse.json({ orders: orders.map((o) => toApiOrder(o, merchant)) });
     }
 
-    if (role === "restaurant") {
-      const restaurant = await prisma.restaurant.findFirst({ where: { wallet } });
-      if (!restaurant) {
+    if (role === "merchant") {
+      const merchant = await prisma.merchant.findFirst({ where: { wallet } });
+      if (!merchant) {
         return NextResponse.json({ orders: [] });
       }
       const orders = await prisma.order.findMany({
-        where: { restaurantId: restaurant.id },
+        where: { merchantId: merchant.id },
         orderBy: { createdAt: "desc" },
-        include: { contributions: true, restaurant: true },
+        include: { contributions: true, merchant: true },
       });
       return NextResponse.json(orders.map((o) => toApiOrder(o)));
     }
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
       const orders = await prisma.order.findMany({
         where,
         orderBy: { createdAt: "desc" },
-        include: { contributions: true, restaurant: true },
+        include: { contributions: true, merchant: true },
       });
       // Redact customer info for orders not yet assigned to this driver
       return NextResponse.json(orders.map((o) => {
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
     const orders = await prisma.order.findMany({
       where: { customerWallet: wallet },
       orderBy: { createdAt: "desc" },
-      include: { contributions: true, restaurant: true },
+      include: { contributions: true, merchant: true },
     });
     return NextResponse.json(orders.map((o) => toApiOrder(o)));
   } catch (error) {
@@ -141,27 +141,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { restaurantId, items, tokenMint, deliveryAddress } = body;
+    const { merchantId, items, tokenMint, deliveryAddress } = body;
 
-    if (!restaurantId || !items || !Array.isArray(items)) {
+    if (!merchantId || !items || !Array.isArray(items)) {
       return NextResponse.json(
-        { error: "restaurantId and items are required" },
+        { error: "merchantId and items are required" },
         { status: 400 }
       );
     }
 
-    const restaurant = await prisma.restaurant.findUnique({
-      where: { id: restaurantId },
+    const merchant = await prisma.merchant.findUnique({
+      where: { id: merchantId },
       include: { menuItems: true },
     });
-    if (!restaurant) {
-      return NextResponse.json({ error: "Restaurant not found" }, { status: 404 });
+    if (!merchant) {
+      return NextResponse.json({ error: "Merchant not found" }, { status: 404 });
     }
 
     let foodTotal = 0;
     const orderItems = [];
     for (const item of items) {
-      const menuItem = restaurant.menuItems.find((mi) => mi.id === item.menuItemId);
+      const menuItem = merchant.menuItems.find((mi) => mi.id === item.menuItemId);
       if (!menuItem) {
         return NextResponse.json(
           { error: `Menu item ${item.menuItemId} not found` },
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
       orderItems.push({ menuItemId: menuItem.id, name: menuItem.name, price: menuItem.price, quantity });
     }
 
-    const deliveryFee = restaurant.deliveryFee;
+    const deliveryFee = merchant.deliveryFee;
     const escrowTarget = foodTotal + deliveryFee;
     const codeA = generateCode();
     const codeB = generateCode();
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     const order = await prisma.order.create({
       data: {
-        restaurantId,
+        merchantId,
         customerWallet,
         items: JSON.stringify(orderItems),
         tokenMint: tokenMint || null,
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      toApiOrder({ ...order, contributions: [] }, restaurant),
+      toApiOrder({ ...order, contributions: [] }, merchant),
       { status: 201 }
     );
   } catch (error) {

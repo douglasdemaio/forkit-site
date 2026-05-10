@@ -28,7 +28,7 @@ export default function HomePage() {
               <Link href="/dashboard" className="btn-primary text-lg">
                 {t("buildRestaurant")}
               </Link>
-              <Link href="/restaurants" className="btn-secondary text-lg">
+              <Link href="/merchants" className="btn-secondary text-lg">
                 {t("browseRestaurants")}
               </Link>
             </div>
@@ -207,7 +207,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12">
-            <Link href="/restaurants" className="btn-primary text-lg">
+            <Link href="/merchants" className="btn-primary text-lg">
               {t("exploreRestaurants")}
             </Link>
           </div>

@@ -3,7 +3,7 @@ import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
 // GET /api/orders/[id]/funding - Funding progress for an order.
-// Auth: restaurant owner, customer, assigned driver, or an existing contributor
+// Auth: merchant owner, customer, assigned driver, or an existing contributor
 // may view. Otherwise contributor wallet addresses (PII when paired with the
 // order's items/timing) would be readable by anyone with the order UUID.
 export async function GET(
@@ -19,13 +19,13 @@ export async function GET(
       where: { id: params.id },
       include: {
         contributions: { orderBy: { createdAt: "asc" } },
-        restaurant: { select: { wallet: true } },
+        merchant: { select: { wallet: true } },
       },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    const isOwner = order.restaurant?.wallet === wallet;
+    const isOwner = order.merchant?.wallet === wallet;
     const isCustomer = order.customerWallet === wallet;
     const isDriver = order.driverWallet === wallet;
     const isContributor = order.contributions.some((c) => c.contributorWallet === wallet);

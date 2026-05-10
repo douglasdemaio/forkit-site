@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
 
-interface Restaurant {
+interface Merchant {
   id: string;
   wallet: string;
   payoutWallet: string | null;
@@ -32,8 +32,8 @@ export default function DashboardPage() {
   const { connected } = useWallet();
   const { token, authenticate, getAuthHeaders, clearToken, authError, isAuthenticating } = useWalletAuth();
   const t = useTranslations("dashboard");
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -57,11 +57,11 @@ export default function DashboardPage() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsSaveError, setSettingsSaveError] = useState<string | null>(null);
 
-  const restaurant = selectedRestaurant;
+  const merchant = selectedRestaurant;
 
-  const setRestaurant = (r: Restaurant) => {
+  const setMerchant = (r: Merchant) => {
     setSelectedRestaurant(r);
-    setRestaurants((prev) => {
+    setMerchants((prev) => {
       const idx = prev.findIndex((p) => p.id === r.id);
       if (idx >= 0) {
         const next = [...prev];
@@ -75,7 +75,7 @@ export default function DashboardPage() {
   const loadRestaurants = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch("/api/restaurants/mine", {
+      const res = await fetch("/api/merchants/mine", {
         headers: getAuthHeaders(),
       });
       if (res.status === 401) {
@@ -84,8 +84,8 @@ export default function DashboardPage() {
       }
       if (res.ok) {
         const data = await res.json();
-        const list: Restaurant[] = data.restaurants || (data.restaurant ? [data.restaurant] : []);
-        setRestaurants(list);
+        const list: Merchant[] = data.merchants || (data.merchant ? [data.merchant] : []);
+        setMerchants(list);
         if (list.length > 0) {
           setSelectedRestaurant((prev) => {
             if (prev) {
@@ -114,7 +114,7 @@ export default function DashboardPage() {
 
     setCreating(true);
     try {
-      const res = await fetch("/api/restaurants", {
+      const res = await fetch("/api/merchants", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,7 +131,7 @@ export default function DashboardPage() {
 
       if (res.ok || res.status === 201) {
         const data = await res.json();
-        setRestaurants((prev) => [...prev, data]);
+        setMerchants((prev) => [...prev, data]);
         setSelectedRestaurant(data);
         setShowCreateForm(false);
         setName("");
@@ -142,8 +142,8 @@ export default function DashboardPage() {
       } else if (res.status === 401) {
         clearToken();
       } else if (res.status === 409) {
-        const { restaurant: existing } = await res.json();
-        setRestaurant(existing);
+        const { merchant: existing } = await res.json();
+        setMerchant(existing);
         setShowCreateForm(false);
       }
     } catch (err) {
@@ -206,11 +206,11 @@ export default function DashboardPage() {
     );
   }
 
-  // No restaurants yet or showing create form
-  if (restaurants.length === 0 || showCreateForm) {
+  // No merchants yet or showing create form
+  if (merchants.length === 0 || showCreateForm) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16">
-        {restaurants.length > 0 && (
+        {merchants.length > 0 && (
           <button
             onClick={() => setShowCreateForm(false)}
             className="mb-4 text-sm text-gray-500 hover:text-forkit-orange transition-colors flex items-center gap-1"
@@ -231,13 +231,13 @@ export default function DashboardPage() {
         <form onSubmit={handleCreate} className="card p-6 space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              {t("restaurantNameLabel")}
+              {t("merchantNameLabel")}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t("restaurantNamePlaceholder")}
+              placeholder={t("merchantNamePlaceholder")}
               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
               required
             />
@@ -311,11 +311,11 @@ export default function DashboardPage() {
     );
   }
 
-  // Has restaurants — show dashboard
+  // Has merchants — show dashboard
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Restaurant selector — shown when multiple restaurants */}
-      {restaurants.length > 1 && (
+      {/* Merchant selector — shown when multiple merchants */}
+      {merchants.length > 1 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
@@ -323,7 +323,7 @@ export default function DashboardPage() {
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            {restaurants.map((r) => (
+            {merchants.map((r) => (
               <button
                 key={r.id}
                 onClick={() => {
@@ -359,14 +359,14 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {restaurant && (
+      {merchant && (
         <>
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-4">
-              {restaurant.logo ? (
+              {merchant.logo ? (
                 <Image
-                  src={restaurant.logo}
+                  src={merchant.logo}
                   alt=""
                   width={48}
                   height={48}
@@ -382,17 +382,17 @@ export default function DashboardPage() {
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
-                      if (!editName.trim() || !restaurant) return;
+                      if (!editName.trim() || !merchant) return;
                       setSaving(true);
                       try {
-                        const res = await fetch(`/api/restaurants/${restaurant.id}`, {
+                        const res = await fetch(`/api/merchants/${merchant.id}`, {
                           method: "PUT",
                           headers: { "Content-Type": "application/json", ...getAuthHeaders() },
                           body: JSON.stringify({ name: editName.trim() }),
                         });
                         if (res.ok) {
                           const updated = await res.json();
-                          setRestaurant(updated);
+                          setMerchant(updated);
                           setEditing(false);
                         }
                       } catch (err) {
@@ -428,10 +428,10 @@ export default function DashboardPage() {
                 ) : (
                   <div className="flex items-center gap-2">
                     <h1 className="text-2xl font-bold text-forkit-dark">
-                      {restaurant.name}
+                      {merchant.name}
                     </h1>
                     <button
-                      onClick={() => { setEditName(restaurant.name); setEditing(true); }}
+                      onClick={() => { setEditName(merchant.name); setEditing(true); }}
                       className="p-1 text-gray-400 hover:text-forkit-orange transition-colors"
                       title={t("rename")}
                     >
@@ -444,18 +444,18 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-2 mt-0.5">
                   <span
                     className={`inline-block w-2 h-2 rounded-full ${
-                      restaurant.published ? "bg-forkit-green" : "bg-yellow-400"
+                      merchant.published ? "bg-forkit-green" : "bg-yellow-400"
                     }`}
                   />
                   <span className="text-sm text-gray-500">
-                    {restaurant.published ? t("published") : t("draft")}
+                    {merchant.published ? t("published") : t("draft")}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3">
-              {restaurants.length <= 1 && (
+              {merchants.length <= 1 && (
                 <button
                   onClick={() => setShowCreateForm(true)}
                   className="btn-secondary text-sm"
@@ -463,9 +463,9 @@ export default function DashboardPage() {
                   + {t("createAnother")}
                 </button>
               )}
-              {restaurant.published && (
+              {merchant.published && (
                 <Link
-                  href={`/restaurants/${restaurant.slug}`}
+                  href={`/merchants/${merchant.slug}`}
                   className="btn-secondary text-sm"
                   target="_blank"
                 >
@@ -478,7 +478,7 @@ export default function DashboardPage() {
           {/* Dashboard cards */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
-              href={`/dashboard/menu?restaurantId=${restaurant.id}`}
+              href={`/dashboard/menu?merchantId=${merchant.id}`}
               className="card p-6 hover:border-forkit-orange/30 transition-colors group"
             >
               <div className="text-3xl mb-3">📋</div>
@@ -491,7 +491,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href={`/dashboard/template?restaurantId=${restaurant.id}`}
+              href={`/dashboard/template?merchantId=${merchant.id}`}
               className="card p-6 hover:border-forkit-orange/30 transition-colors group"
             >
               <div className="text-3xl mb-3">🎨</div>
@@ -504,7 +504,7 @@ export default function DashboardPage() {
             </Link>
 
             <Link
-              href={`/dashboard/orders?restaurantId=${restaurant.id}`}
+              href={`/dashboard/orders?merchantId=${merchant.id}`}
               className="card p-6 hover:border-forkit-orange/30 transition-colors group"
             >
               <div className="text-3xl mb-3">📦</div>
@@ -522,14 +522,14 @@ export default function DashboardPage() {
                 {!editingSettings && (
                   <button
                     onClick={() => {
-                      setEditCurrency(restaurant.currency);
-                      setEditDeliveryFee(restaurant.deliveryFee);
-                      setEditPayoutWallet(restaurant.payoutWallet || restaurant.wallet);
-                      setEditAutoAcknowledge(restaurant.autoAcknowledge);
-                      setEditSelfDelivery(restaurant.selfDelivery);
-                      setEditAddressStreet(restaurant.addressStreet || "");
-                      setEditAddressCity(restaurant.addressCity || "");
-                      setEditAddressCountry(restaurant.addressCountry || "");
+                      setEditCurrency(merchant.currency);
+                      setEditDeliveryFee(merchant.deliveryFee);
+                      setEditPayoutWallet(merchant.payoutWallet || merchant.wallet);
+                      setEditAutoAcknowledge(merchant.autoAcknowledge);
+                      setEditSelfDelivery(merchant.selfDelivery);
+                      setEditAddressStreet(merchant.addressStreet || "");
+                      setEditAddressCity(merchant.addressCity || "");
+                      setEditAddressCountry(merchant.addressCountry || "");
                       setSettingsSaveError(null);
                       setEditingSettings(true);
                     }}
@@ -574,7 +574,7 @@ export default function DashboardPage() {
                       type="text"
                       value={editPayoutWallet}
                       onChange={(e) => setEditPayoutWallet(e.target.value)}
-                      placeholder={restaurant.wallet}
+                      placeholder={merchant.wallet}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
                     />
                     <p className="mt-1 text-xs text-gray-400">{t("payoutWalletHint")}</p>
@@ -650,7 +650,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("slug")}</span>
-                    <span className="font-mono text-xs">{restaurant.slug}</span>
+                    <span className="font-mono text-xs">{merchant.slug}</span>
                   </div>
                   {settingsSaveError && (
                     <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -660,11 +660,11 @@ export default function DashboardPage() {
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={async () => {
-                        if (!restaurant) return;
+                        if (!merchant) return;
                         setSavingSettings(true);
                         setSettingsSaveError(null);
                         try {
-                          const res = await fetch(`/api/restaurants/${restaurant.id}`, {
+                          const res = await fetch(`/api/merchants/${merchant.id}`, {
                             method: "PUT",
                             headers: { "Content-Type": "application/json", ...getAuthHeaders() },
                             body: JSON.stringify({
@@ -680,7 +680,7 @@ export default function DashboardPage() {
                           });
                           if (res.ok) {
                             const updated = await res.json();
-                            setRestaurant(updated);
+                            setMerchant(updated);
                             setEditingSettings(false);
                           } else if (res.status === 401) {
                             clearToken();
@@ -712,43 +712,43 @@ export default function DashboardPage() {
                 <div className="mt-3 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("currency")}</span>
-                    <span className="font-medium">{restaurant.currency}</span>
+                    <span className="font-medium">{merchant.currency}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("deliveryFee")}</span>
                     <span className="font-medium">
-                      {restaurant.deliveryFee.toFixed(2)} {restaurant.currency}
+                      {merchant.deliveryFee.toFixed(2)} {merchant.currency}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("payoutWallet")}</span>
-                    <span className="font-mono text-xs truncate max-w-[140px]" title={restaurant.payoutWallet || restaurant.wallet}>
-                      {(restaurant.payoutWallet || restaurant.wallet).slice(0, 8)}...{(restaurant.payoutWallet || restaurant.wallet).slice(-4)}
+                    <span className="font-mono text-xs truncate max-w-[140px]" title={merchant.payoutWallet || merchant.wallet}>
+                      {(merchant.payoutWallet || merchant.wallet).slice(0, 8)}...{(merchant.payoutWallet || merchant.wallet).slice(-4)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("selfDeliveryLabel")}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${restaurant.selfDelivery ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"}`}>
-                      {restaurant.selfDelivery ? t("on") : t("off")}
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${merchant.selfDelivery ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"}`}>
+                      {merchant.selfDelivery ? t("on") : t("off")}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("autoAcknowledgeLabel")}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${restaurant.autoAcknowledge ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                      {restaurant.autoAcknowledge ? t("on") : t("off")}
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${merchant.autoAcknowledge ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                      {merchant.autoAcknowledge ? t("on") : t("off")}
                     </span>
                   </div>
-                  {(restaurant.addressStreet || restaurant.addressCity || restaurant.addressCountry) && (
+                  {(merchant.addressStreet || merchant.addressCity || merchant.addressCountry) && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">{t("addressLabel")}</span>
                       <span className="text-xs text-right max-w-[160px]">
-                        {[restaurant.addressStreet, restaurant.addressCity, restaurant.addressCountry].filter(Boolean).join(", ")}
+                        {[merchant.addressStreet, merchant.addressCity, merchant.addressCountry].filter(Boolean).join(", ")}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">{t("slug")}</span>
-                    <span className="font-mono text-xs">{restaurant.slug}</span>
+                    <span className="font-mono text-xs">{merchant.slug}</span>
                   </div>
                 </div>
               )}

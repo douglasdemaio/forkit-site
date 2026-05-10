@@ -3,9 +3,9 @@
 // Anyone with a share link can view this. It MUST NOT include fields that
 // grant privileges (codeA / codeB / their hashes — knowing the raw codes
 // lets you spoof pickup or settlement) or PII (deliveryAddress, raw
-// driver/restaurant wallets that aren't otherwise public on-chain).
+// driver/merchant wallets that aren't otherwise public on-chain).
 //
-// Authenticated callers (restaurant owner, customer, assigned driver) get
+// Authenticated callers (merchant owner, customer, assigned driver) get
 // the full DTO via `toApiOrder` instead.
 export function toShareableOrder(order: any) {
   const items =
@@ -14,7 +14,7 @@ export function toShareableOrder(order: any) {
   const remaining = Math.max(0, order.escrowTarget - escrowFunded);
   const percentFunded =
     order.escrowTarget > 0 ? (escrowFunded / order.escrowTarget) * 100 : 0;
-  const rest = order.restaurant;
+  const rest = order.merchant;
   return {
     id: order.id,
     onChainOrderId: order.onChainOrderId,
@@ -38,7 +38,7 @@ export function toShareableOrder(order: any) {
       txSignature: c.txSignature,
       timestamp: c.createdAt,
     })),
-    restaurant: rest
+    merchant: rest
       ? {
           id: rest.id,
           name: rest.name,

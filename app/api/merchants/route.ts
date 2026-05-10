@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
-// GET /api/restaurants - List all published restaurants
+// GET /api/merchants - List all published merchants
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
         : {}),
     };
 
-    const [restaurants, total] = await Promise.all([
-      prisma.restaurant.findMany({
+    const [merchants, total] = await Promise.all([
+      prisma.merchant.findMany({
         where,
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
           _count: { select: { menuItems: true } },
         },
       }),
-      prisma.restaurant.count({ where }),
+      prisma.merchant.count({ where }),
     ]);
 
     return NextResponse.json({
-      restaurants,
+      merchants,
       pagination: {
         page,
         limit,
@@ -45,15 +45,15 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error listing restaurants:", error);
+    console.error("Error listing merchants:", error);
     return NextResponse.json(
-      { error: "Failed to list restaurants" },
+      { error: "Failed to list merchants" },
       { status: 500 }
     );
   }
 }
 
-// POST /api/restaurants - Create a new restaurant
+// POST /api/merchants - Create a new merchant
 export async function POST(request: NextRequest) {
   try {
     const wallet = await getWalletFromRequest(request);
@@ -61,14 +61,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // A wallet can own multiple restaurants
+    // A wallet can own multiple merchants
 
     const body = await request.json();
     const { name, description, addressStreet, addressCity, addressCountry, template, currency } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
-        { error: "Restaurant name is required" },
+        { error: "Merchant name is required" },
         { status: 400 }
       );
     }
@@ -80,12 +80,12 @@ export async function POST(request: NextRequest) {
       .replace(/^-|-$/g, "");
 
     // Ensure unique slug
-    const slugExists = await prisma.restaurant.findUnique({ where: { slug } });
+    const slugExists = await prisma.merchant.findUnique({ where: { slug } });
     if (slugExists) {
       slug = `${slug}-${Date.now().toString(36)}`;
     }
 
-    const restaurant = await prisma.restaurant.create({
+    const merchant = await prisma.merchant.create({
       data: {
         wallet,
         name: name.trim(),
@@ -99,11 +99,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(restaurant, { status: 201 });
+    return NextResponse.json(merchant, { status: 201 });
   } catch (error) {
-    console.error("Error creating restaurant:", error);
+    console.error("Error creating merchant:", error);
     return NextResponse.json(
-      { error: "Failed to create restaurant" },
+      { error: "Failed to create merchant" },
       { status: 500 }
     );
   }

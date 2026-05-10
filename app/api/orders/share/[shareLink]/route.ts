@@ -15,7 +15,7 @@ export async function GET(
       where: { shareLink: { contains: params.shareLink } },
       include: {
         contributions: { orderBy: { createdAt: "asc" } },
-        restaurant: { select: { id: true, name: true, slug: true, currency: true } },
+        merchant: { select: { id: true, name: true, slug: true, currency: true } },
       },
     });
     if (!order) {

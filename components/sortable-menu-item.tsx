@@ -7,9 +7,9 @@ import MenuItemCard from "./menu-item-card";
 
 interface Props {
   item: MenuItemData;
-  restaurantId: string;
-  restaurantSlug: string;
-  restaurantName: string;
+  merchantId: string;
+  merchantSlug: string;
+  merchantName: string;
   currency: string;
   expanded: boolean;
   onToggle: () => void;
@@ -19,9 +19,9 @@ interface Props {
 
 export default function SortableMenuItem({
   item,
-  restaurantId,
-  restaurantSlug,
-  restaurantName,
+  merchantId,
+  merchantSlug,
+  merchantName,
   currency,
   expanded,
   onToggle,
@@ -78,9 +78,9 @@ export default function SortableMenuItem({
     <div ref={setNodeRef} style={style}>
       <MenuItemCard
         item={item}
-        restaurantId={restaurantId}
-        restaurantSlug={restaurantSlug}
-        restaurantName={restaurantName}
+        merchantId={merchantId}
+        merchantSlug={merchantSlug}
+        merchantName={merchantName}
         currency={currency}
         editable
         expanded={expanded}

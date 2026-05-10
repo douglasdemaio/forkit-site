@@ -8,7 +8,7 @@ interface KioskOrder {
   id: string;
   status: string;
   items: { name: string; quantity: number }[];
-  restaurant: { name: string; slug: string };
+  merchant: { name: string; slug: string };
 }
 
 export default function KioskPage() {
@@ -66,7 +66,7 @@ export default function KioskPage() {
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-8 text-white select-none">
       <p className="text-yellow-400 text-lg font-semibold tracking-wide uppercase mb-2">
-        {order.restaurant.name}
+        {order.merchant?.name}
       </p>
 
       <h1 className="text-2xl font-bold mb-1">Pickup Order</h1>

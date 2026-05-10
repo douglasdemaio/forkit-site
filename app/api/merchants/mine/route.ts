@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
-// GET /api/restaurants/mine - Get all restaurants owned by the authenticated wallet
+// GET /api/merchants/mine - Get all merchants owned by the authenticated wallet
 export async function GET(request: NextRequest) {
   try {
     const wallet = await getWalletFromRequest(request);
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const restaurants = await prisma.restaurant.findMany({
+    const merchants = await prisma.merchant.findMany({
       where: { wallet },
       orderBy: { createdAt: "desc" },
       include: {
@@ -19,15 +19,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Backward compat: also return first as `restaurant` for existing dashboard code
     return NextResponse.json({
-      restaurants,
-      restaurant: restaurants.length > 0 ? restaurants[0] : null,
+      merchants,
+      merchant: merchants.length > 0 ? merchants[0] : null,
     });
   } catch (error) {
-    console.error("Error fetching restaurants:", error);
+    console.error("Error fetching merchants:", error);
     return NextResponse.json(
-      { error: "Failed to fetch restaurants" },
+      { error: "Failed to fetch merchants" },
       { status: 500 }
     );
   }

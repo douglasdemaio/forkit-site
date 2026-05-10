@@ -10,7 +10,7 @@ function isNewcomer(profile: { completedDeliveries: number; avgRating: number } 
   return profile.completedDeliveries < NEWCOMER_DELIVERY_THRESHOLD || profile.avgRating < NEWCOMER_RATING_THRESHOLD;
 }
 
-// GET /api/orders/[id]/bids — restaurant sees all bids for this order
+// GET /api/orders/[id]/bids — merchant sees all bids for this order
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -23,12 +23,12 @@ export async function GET(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: { select: { wallet: true } } },
+      include: { merchant: { select: { wallet: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    if (order.restaurant?.wallet !== wallet) {
+    if (order.merchant?.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

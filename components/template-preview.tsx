@@ -37,7 +37,7 @@ export default function TemplatePreview({
             style={{ backgroundColor: template.colors.primary }}
           />
           <h3 className="text-lg font-bold" style={{ color: template.colors.text }}>
-            Restaurant Name
+            Merchant Name
           </h3>
           <p className="text-xs mt-1 opacity-60">Fresh flavors, served daily</p>
         </div>

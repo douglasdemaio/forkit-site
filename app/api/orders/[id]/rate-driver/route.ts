@@ -4,7 +4,7 @@ import { getWalletFromRequest } from "@/lib/auth";
 
 // POST /api/orders/[id]/rate-driver
 // Body: { rating: 1-5, comment?: string }
-// Allowed callers: restaurant owner (raterRole = "restaurant") or customer (raterRole = "customer")
+// Allowed callers: merchant owner (raterRole = "merchant") or customer (raterRole = "customer")
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -17,7 +17,7 @@ export async function POST(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: { select: { wallet: true } } },
+      include: { merchant: { select: { wallet: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -29,9 +29,9 @@ export async function POST(
       return NextResponse.json({ error: "Order must be settled before rating" }, { status: 400 });
     }
 
-    let raterRole: "restaurant" | "customer";
-    if (order.restaurant?.wallet === wallet) {
-      raterRole = "restaurant";
+    let raterRole: "merchant" | "customer";
+    if (order.merchant?.wallet === wallet) {
+      raterRole = "merchant";
     } else if (order.customerWallet === wallet) {
       raterRole = "customer";
     } else {

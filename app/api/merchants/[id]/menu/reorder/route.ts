@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
-// POST /api/restaurants/[id]/menu/reorder
+// POST /api/merchants/[id]/menu/reorder
 // Body: { orderedIds: string[] }
 // Sets sortOrder on each item in the order provided.
 export async function POST(
@@ -15,11 +15,11 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const restaurant = await prisma.restaurant.findUnique({
+    const merchant = await prisma.merchant.findUnique({
       where: { id: params.id },
     });
 
-    if (!restaurant || restaurant.wallet !== wallet) {
+    if (!merchant || merchant.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -37,7 +37,7 @@ export async function POST(
     await prisma.$transaction(
       orderedIds.map((id: string, index: number) =>
         prisma.menuItem.updateMany({
-          where: { id, restaurantId: params.id },
+          where: { id, merchantId: params.id },
           data: { sortOrder: index },
         })
       )

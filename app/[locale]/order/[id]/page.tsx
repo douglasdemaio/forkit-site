@@ -42,7 +42,7 @@ export default function OrderPage() {
         orderId: order.id,
         escrowPda: order.onChainOrderId || "",
         amount,
-        currency: order.restaurant?.currency || "USDC",
+        currency: order.merchant?.currency || "USDC",
       });
 
       // Record contribution with auth
@@ -96,7 +96,7 @@ export default function OrderPage() {
     0
   );
   const remaining = Math.max(0, order.escrowTarget - totalContributed);
-  const currency = order.restaurant?.currency || "USDC";
+  const currency = order.merchant?.currency || "USDC";
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -107,7 +107,7 @@ export default function OrderPage() {
             Order #{order.id.slice(0, 8)}
           </h1>
           <p className="text-sm text-gray-500">
-            {order.restaurant?.name} ·{" "}
+            {order.merchant?.name} ·{" "}
             {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>

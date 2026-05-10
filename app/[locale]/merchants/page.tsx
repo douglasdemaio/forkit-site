@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { RestaurantData } from "@/lib/types";
+import { MerchantData } from "@/lib/types";
 import { getTemplate } from "@/lib/templates";
 
-export default function RestaurantsPage() {
-  const [restaurants, setRestaurants] = useState<(RestaurantData & { _count?: { menuItems: number } })[]>([]);
+export default function MerchantsPage() {
+  const [merchants, setMerchants] = useState<(MerchantData & { _count?: { menuItems: number } })[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -16,11 +16,11 @@ export default function RestaurantsPage() {
       try {
         const params = new URLSearchParams();
         if (search) params.set("search", search);
-        const res = await fetch(`/api/restaurants?${params}`);
+        const res = await fetch(`/api/merchants?${params}`);
         const data = await res.json();
-        setRestaurants(data.restaurants || []);
+        setMerchants(data.merchants || []);
       } catch (err) {
-        console.error("Failed to load restaurants:", err);
+        console.error("Failed to load merchants:", err);
       } finally {
         setLoading(false);
       }
@@ -33,9 +33,9 @@ export default function RestaurantsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-forkit-dark">Restaurants</h1>
+          <h1 className="text-3xl font-bold text-forkit-dark">Merchants</h1>
           <p className="text-gray-500 mt-1">
-            Browse restaurants accepting crypto payments
+            Browse merchants accepting crypto payments
           </p>
         </div>
 
@@ -56,7 +56,7 @@ export default function RestaurantsPage() {
           </svg>
           <input
             type="text"
-            placeholder="Search restaurants..."
+            placeholder="Search merchants..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
@@ -77,27 +77,27 @@ export default function RestaurantsPage() {
             </div>
           ))}
         </div>
-      ) : restaurants.length === 0 ? (
+      ) : merchants.length === 0 ? (
         <div className="text-center py-24">
           <span className="text-6xl">🍽️</span>
           <h2 className="mt-6 text-2xl font-bold text-gray-900">
-            No restaurants yet
+            No merchants yet
           </h2>
           <p className="mt-2 text-gray-500">
-            Be the first to set up your restaurant on ForkIt!
+            Be the first to set up your merchant on ForkIt!
           </p>
           <Link href="/dashboard" className="btn-primary mt-6 inline-block">
-            Create Your Restaurant
+            Create Your Merchant
           </Link>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {restaurants.map((restaurant) => {
-            const template = getTemplate(restaurant.template);
+          {merchants.map((merchant) => {
+            const template = getTemplate(merchant.template);
             return (
               <Link
-                key={restaurant.id}
-                href={`/restaurants/${restaurant.slug}`}
+                key={merchant.id}
+                href={`/merchants/${merchant.slug}`}
                 className="card overflow-hidden group"
               >
                 {/* Banner */}
@@ -105,10 +105,10 @@ export default function RestaurantsPage() {
                   className="h-48 relative overflow-hidden"
                   style={{ backgroundColor: template.colors.background }}
                 >
-                  {restaurant.banner ? (
+                  {merchant.banner ? (
                     <Image
-                      src={restaurant.banner}
-                      alt={restaurant.name}
+                      src={merchant.banner}
+                      alt={merchant.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -124,10 +124,10 @@ export default function RestaurantsPage() {
                   )}
 
                   {/* Logo overlay */}
-                  {restaurant.logo && (
+                  {merchant.logo && (
                     <div className="absolute bottom-3 left-3 w-12 h-12 rounded-xl overflow-hidden border-2 border-white shadow-md">
                       <Image
-                        src={restaurant.logo}
+                        src={merchant.logo}
                         alt=""
                         fill
                         className="object-cover"
@@ -139,19 +139,19 @@ export default function RestaurantsPage() {
                 {/* Info */}
                 <div className="p-5">
                   <h3 className="text-lg font-bold text-gray-900 group-hover:text-forkit-orange transition-colors">
-                    {restaurant.name}
+                    {merchant.name}
                   </h3>
-                  {restaurant.description && (
+                  {merchant.description && (
                     <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                      {restaurant.description}
+                      {merchant.description}
                     </p>
                   )}
                   <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
                     <span className="flex items-center gap-1">
-                      🍽️ {restaurant._count?.menuItems || 0} items
+                      🍽️ {merchant._count?.menuItems || 0} items
                     </span>
                     <span className="flex items-center gap-1">
-                      💰 {restaurant.currency}
+                      💰 {merchant.currency}
                     </span>
                     <span
                       className="px-2 py-0.5 rounded-full text-[10px] font-medium"

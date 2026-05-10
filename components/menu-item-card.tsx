@@ -6,9 +6,9 @@ import { useCartStore } from "@/store/cart-store";
 
 interface MenuItemCardProps {
   item: MenuItemData;
-  restaurantId: string;
-  restaurantSlug: string;
-  restaurantName: string;
+  merchantId: string;
+  merchantSlug: string;
+  merchantName: string;
   currency?: string;
   editable?: boolean;
   onEdit?: (item: MenuItemData) => void;
@@ -20,9 +20,9 @@ interface MenuItemCardProps {
 
 export default function MenuItemCard({
   item,
-  restaurantId,
-  restaurantSlug,
-  restaurantName,
+  merchantId,
+  merchantSlug,
+  merchantName,
   currency = "USDC",
   editable = false,
   onEdit,
@@ -35,7 +35,7 @@ export default function MenuItemCard({
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addItem(item, restaurantId, restaurantSlug, restaurantName);
+    addItem(item, merchantId, merchantSlug, merchantName);
   };
 
   const handleRowKeyDown = (e: React.KeyboardEvent) => {
@@ -175,7 +175,7 @@ export default function MenuItemCard({
                   type="button"
                   disabled={!item.available}
                   onClick={() =>
-                    addItem(item, restaurantId, restaurantSlug, restaurantName)
+                    addItem(item, merchantId, merchantSlug, merchantName)
                   }
                   className="w-full py-2.5 px-4 bg-forkit-orange text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
                 >

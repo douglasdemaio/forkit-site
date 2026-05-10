@@ -7,9 +7,9 @@ export function useCart() {
   const store = useCartStore();
   return {
     items: store.items,
-    restaurantId: store.restaurantId,
-    restaurantSlug: store.restaurantSlug,
-    restaurantName: store.restaurantName,
+    merchantId: store.merchantId,
+    merchantSlug: store.merchantSlug,
+    merchantName: store.merchantName,
     addItem: store.addItem,
     removeItem: store.removeItem,
     updateQuantity: store.updateQuantity,

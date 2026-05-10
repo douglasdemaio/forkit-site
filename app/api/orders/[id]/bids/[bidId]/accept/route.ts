@@ -27,7 +27,7 @@ function deriveOrderPda(orderId: string): PublicKey {
 /**
  * Verifies that the given on-chain signature contains a valid
  * `update_delivery_amount` instruction targeting this order with the expected
- * amount and signed by the expected restaurant wallet.
+ * amount and signed by the expected merchant wallet.
  */
 async function verifyUpdateSignature(args: {
   signature: string;
@@ -70,7 +70,7 @@ async function verifyUpdateSignature(args: {
       };
     }
 
-    // Account order from update_delivery_amount: [order, protocol_config, restaurant]
+    // Account order from update_delivery_amount: [order, protocol_config, merchant]
     const orderKey = allKeys[ix.accountKeyIndexes[0]];
     const signerKey = allKeys[ix.accountKeyIndexes[2]];
     if (!orderKey?.equals(args.expectedOrderPda)) {
@@ -79,7 +79,7 @@ async function verifyUpdateSignature(args: {
     if (!signerKey?.equals(args.expectedSigner)) {
       return { ok: false, reason: "signer mismatch" };
     }
-    // Confirm the restaurant signed the tx
+    // Confirm the merchant signed the tx
     const numSigners = message.header.numRequiredSignatures;
     const signers = staticKeys.slice(0, numSigners);
     if (!signers.some((s) => s.equals(args.expectedSigner))) {
@@ -93,14 +93,14 @@ async function verifyUpdateSignature(args: {
   };
 }
 
-// POST /api/orders/[id]/bids/[bidId]/accept — restaurant accepts a bid.
+// POST /api/orders/[id]/bids/[bidId]/accept — merchant accepts a bid.
 //
 // Two-phase commit:
 //   Phase 1: client calls without `updateSignature`. If bid.amount === order.deliveryFee,
 //            the server assigns the driver and returns success. Otherwise the server
 //            returns { requiresOnChainUpdate: true, newDeliveryAmount } and makes
 //            no DB changes — the client is expected to sign update_delivery_amount
-//            with the restaurant wallet, then re-call this endpoint with the signature.
+//            with the merchant wallet, then re-call this endpoint with the signature.
 //   Phase 2: client re-calls with `updateSignature`. Server verifies the signature
 //            on devnet (Step 11), then commits the assignment.
 export async function POST(
@@ -118,12 +118,12 @@ export async function POST(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: { select: { wallet: true } } },
+      include: { merchant: { select: { wallet: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    if (order.restaurant?.wallet !== wallet) {
+    if (order.merchant?.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     if (order.status !== "Preparing") {

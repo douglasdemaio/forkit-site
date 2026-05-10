@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const orders = await prisma.order.findMany({
       where: { status: "Preparing", driverWallet: null, bidOpenAt: { not: null } },
       orderBy: { bidOpenAt: "asc" },
-      include: { restaurant: true, contributions: true },
+      include: { merchant: true, contributions: true },
     });
 
     // Check if this driver already bid on each order
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       orders: orders.map((o) => {
         const items = typeof o.items === "string" ? JSON.parse(o.items) : o.items;
-        const rest = o.restaurant;
+        const rest = o.merchant;
         return {
           ...o,
           items,
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
             timestamp: c.createdAt,
           })),
           myBidStatus: myBidMap[o.id] ?? null,
-          restaurant: rest
+          merchant: rest
             ? { id: rest.id, name: rest.name, slug: rest.slug, wallet: rest.wallet, currency: rest.currency }
             : undefined,
         };

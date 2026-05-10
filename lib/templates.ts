@@ -5,7 +5,7 @@ export const templates: TemplateDefinition[] = [
     id: "classic-bistro",
     name: "Classic Bistro",
     description:
-      "Warm, traditional look with earthy tones. Perfect for family restaurants, trattorias, and cozy bistros.",
+      "Warm, traditional look with earthy tones. Perfect for family merchants, trattorias, and cozy bistros.",
     preview: "/templates/classic-bistro.svg",
     colors: {
       primary: "#8B4513",
@@ -50,7 +50,7 @@ export const templates: TemplateDefinition[] = [
     id: "fine-dining",
     name: "Fine Dining",
     description:
-      "Elegant dark theme with refined typography. Suited for upscale restaurants, wine bars, and tasting menus.",
+      "Elegant dark theme with refined typography. Suited for upscale merchants, wine bars, and tasting menus.",
     preview: "/templates/fine-dining.svg",
     colors: {
       primary: "#C9A96E",

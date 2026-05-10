@@ -48,8 +48,8 @@ export default function OrdersPage() {
   const { markReadyForPickup, updateDeliveryAmount } = useEscrow();
   const t = useTranslations("orders");
   const tDash = useTranslations("dashboard");
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
-  const [restaurantSelfDelivery, setRestaurantSelfDelivery] = useState(false);
+  const [merchantId, setMerchantId] = useState<string | null>(null);
+  const [merchantSelfDelivery, setRestaurantSelfDelivery] = useState(false);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -76,8 +76,8 @@ export default function OrdersPage() {
     Funded:         null, // handled separately with Confirm Order UI
     Preparing:      { label: t("markReady"), next: "ReadyForPickup" },
     DriverAssigned: { label: t("markReady"), next: "ReadyForPickup" },
-    ReadyForPickup: restaurantSelfDelivery ? { label: t("startDelivery"), next: "PickedUp" } : null,
-    PickedUp:       restaurantSelfDelivery ? { label: t("markDelivered"), next: "Delivered" } : null,
+    ReadyForPickup: merchantSelfDelivery ? { label: t("startDelivery"), next: "PickedUp" } : null,
+    PickedUp:       merchantSelfDelivery ? { label: t("markDelivered"), next: "Delivered" } : null,
     Delivered:      null,
     Settled:        null,
     Disputed:       null,
@@ -88,10 +88,10 @@ export default function OrdersPage() {
   const newOrderCount = orders.filter((o) => o.status === "Funded").length;
 
   const loadOrders = useCallback(async (silent = false) => {
-    if (!token || !restaurantId) return;
+    if (!token || !merchantId) return;
     if (!silent) setRefreshing(true);
     try {
-      const res = await fetch(`/api/orders?restaurantId=${restaurantId}`, {
+      const res = await fetch(`/api/orders?merchantId=${merchantId}`, {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
@@ -120,7 +120,7 @@ export default function OrdersPage() {
     } finally {
       if (!silent) setRefreshing(false);
     }
-  }, [token, restaurantId, getAuthHeaders]);
+  }, [token, merchantId, getAuthHeaders]);
 
   const acceptBid = async (
     orderId: string,
@@ -132,7 +132,7 @@ export default function OrdersPage() {
     try {
       // Phase 1: ask the server. Equal-amount bids assign immediately;
       // lower-amount bids need an on-chain update_delivery_amount signed
-      // by the restaurant first.
+      // by the merchant first.
       const intentRes = await fetch(`/api/orders/${orderId}/bids/${bidId}/accept`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
@@ -173,32 +173,32 @@ export default function OrdersPage() {
   };
 
   const searchParams = useSearchParams();
-  const restaurantIdParam = searchParams.get("restaurantId");
+  const merchantIdParam = searchParams.get("merchantId");
 
   const loadData = useCallback(async () => {
     if (!token) return;
     try {
-      if (restaurantIdParam) {
-        // Fetch the specific restaurant to get selfDelivery flag
-        const res = await fetch(`/api/restaurants/${restaurantIdParam}`, {
+      if (merchantIdParam) {
+        // Fetch the specific merchant to get selfDelivery flag
+        const res = await fetch(`/api/merchants/${merchantIdParam}`, {
           headers: getAuthHeaders(),
         });
         if (res.ok) {
           const data = await res.json();
-          setRestaurantId(restaurantIdParam);
+          setMerchantId(merchantIdParam);
           setRestaurantSelfDelivery(data.selfDelivery ?? false);
         } else {
-          setRestaurantId(restaurantIdParam);
+          setMerchantId(merchantIdParam);
         }
       } else {
-        const res = await fetch("/api/restaurants/mine", {
+        const res = await fetch("/api/merchants/mine", {
           headers: getAuthHeaders(),
         });
         if (res.ok) {
           const data = await res.json();
-          const r = data.restaurant || data.restaurants?.[0];
+          const r = data.merchant || data.merchants?.[0];
           if (r) {
-            setRestaurantId(r.id);
+            setMerchantId(r.id);
             setRestaurantSelfDelivery(r.selfDelivery ?? false);
           }
         }
@@ -208,23 +208,23 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders, restaurantIdParam]);
+  }, [token, getAuthHeaders, merchantIdParam]);
 
   useEffect(() => {
     if (token) loadData();
     else setLoading(false);
   }, [token, loadData]);
 
-  // Load orders when restaurantId is set
+  // Load orders when merchantId is set
   useEffect(() => {
-    if (restaurantId && token) {
+    if (merchantId && token) {
       loadOrders();
     }
-  }, [restaurantId, token, loadOrders]);
+  }, [merchantId, token, loadOrders]);
 
   // Poll for new orders every 15 seconds
   useEffect(() => {
-    if (!restaurantId || !token) return;
+    if (!merchantId || !token) return;
 
     pollRef.current = setInterval(() => {
       loadOrders(true);
@@ -236,11 +236,11 @@ export default function OrdersPage() {
         pollRef.current = null;
       }
     };
-  }, [restaurantId, token, loadOrders]);
+  }, [merchantId, token, loadOrders]);
 
   const updateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
-      // For the Preparing → ReadyForPickup transition, the restaurant must
+      // For the Preparing → ReadyForPickup transition, the merchant must
       // sign mark_ready_for_pickup on-chain — without it, the customer's
       // later confirm_delivery will fail (chain status would still be
       // Preparing, but confirm_delivery requires PickedUp). Sign first, then
@@ -494,7 +494,7 @@ export default function OrdersPage() {
                     <div>
                       <p className="text-sm font-semibold text-blue-900">{t("confirmOrder")}</p>
                       <p className="text-xs text-blue-600 mt-0.5">
-                        {restaurantSelfDelivery ? t("confirmOrderSelfHint") : t("confirmOrderDriverHint")}
+                        {merchantSelfDelivery ? t("confirmOrderSelfHint") : t("confirmOrderDriverHint")}
                       </p>
                     </div>
                     <button
@@ -507,7 +507,7 @@ export default function OrdersPage() {
                 )}
 
                 {/* Driver bids panel — shown for Preparing orders awaiting driver assignment, not for self-delivery */}
-                {order.status === "Preparing" && !restaurantSelfDelivery && (
+                {order.status === "Preparing" && !merchantSelfDelivery && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <p className="text-sm font-semibold text-gray-700 mb-2">
                       🚴 {t("driverBids")} {bidsMap[order.id]?.length > 0 ? `(${bidsMap[order.id].length})` : ""}
@@ -567,7 +567,7 @@ export default function OrdersPage() {
                 )}
 
                 {/* Code verification: close out order once customer confirms delivery/pickup */}
-                {(order.status === "ReadyForPickup" || order.status === "Preparing" || (restaurantSelfDelivery && order.status === "Delivered")) && (order.codeA || order.codeB) && (
+                {(order.status === "ReadyForPickup" || order.status === "Preparing" || (merchantSelfDelivery && order.status === "Delivered")) && (order.codeA || order.codeB) && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-sm font-semibold text-gray-700">

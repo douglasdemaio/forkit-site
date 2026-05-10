@@ -25,8 +25,8 @@ export default function TemplatePage() {
   const { connected } = useWallet();
   const { token, getAuthHeaders, authenticate } = useWalletAuth();
   const searchParams = useSearchParams();
-  const restaurantIdParam = searchParams.get("restaurantId");
-  const [restaurantId, setRestaurantId] = useState<string | null>(restaurantIdParam);
+  const merchantIdParam = searchParams.get("merchantId");
+  const [merchantId, setMerchantId] = useState<string | null>(merchantIdParam);
   const [selectedTemplate, setSelectedTemplate] = useState("classic-bistro");
   const [logo, setLogo] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
@@ -41,25 +41,25 @@ export default function TemplatePage() {
   const loadData = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch("/api/restaurants/mine", {
+      const res = await fetch("/api/merchants/mine", {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
-        const restaurants = data.restaurants || (data.restaurant ? [data.restaurant] : []);
-        const restaurant = restaurantIdParam
-          ? restaurants.find((r: any) => r.id === restaurantIdParam) || restaurants[0]
-          : restaurants[0];
-        if (restaurant) {
-          setRestaurantId(restaurant.id);
-          setSelectedTemplate(restaurant.template);
-          setLogo(restaurant.logo);
-          setBanner(restaurant.banner);
-          setPublished(restaurant.published);
-          if (restaurant.colorPrimary) setColorPrimary(restaurant.colorPrimary);
-          if (restaurant.colorSecondary) setColorSecondary(restaurant.colorSecondary);
-          if (restaurant.colorAccent) setColorAccent(restaurant.colorAccent);
-          if (restaurant.fontFamily) setFontFamily(restaurant.fontFamily);
+        const merchants = data.merchants || (data.merchant ? [data.merchant] : []);
+        const merchant = merchantIdParam
+          ? merchants.find((r: any) => r.id === merchantIdParam) || merchants[0]
+          : merchants[0];
+        if (merchant) {
+          setMerchantId(merchant.id);
+          setSelectedTemplate(merchant.template);
+          setLogo(merchant.logo);
+          setBanner(merchant.banner);
+          setPublished(merchant.published);
+          if (merchant.colorPrimary) setColorPrimary(merchant.colorPrimary);
+          if (merchant.colorSecondary) setColorSecondary(merchant.colorSecondary);
+          if (merchant.colorAccent) setColorAccent(merchant.colorAccent);
+          if (merchant.fontFamily) setFontFamily(merchant.fontFamily);
         }
       }
     } catch (err) {
@@ -67,7 +67,7 @@ export default function TemplatePage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders, restaurantIdParam]);
+  }, [token, getAuthHeaders, merchantIdParam]);
 
   useEffect(() => {
     if (token) loadData();
@@ -75,10 +75,10 @@ export default function TemplatePage() {
   }, [token, loadData]);
 
   const handleSave = async () => {
-    if (!restaurantId) return;
+    if (!merchantId) return;
     setSaving(true);
     try {
-      await fetch(`/api/restaurants/${restaurantId}`, {
+      await fetch(`/api/merchants/${merchantId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
@@ -130,7 +130,7 @@ export default function TemplatePage() {
             Template & Branding
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            Customize how your restaurant page looks
+            Customize how your merchant page looks
           </p>
         </div>
         <button
@@ -281,7 +281,7 @@ export default function TemplatePage() {
               }}
             >
               <h3 className="text-2xl font-bold mb-2" style={{ color: colorPrimary }}>
-                Your Restaurant Name
+                Your Merchant Name
               </h3>
               <p className="mb-4 opacity-80">
                 Fresh, locally-sourced dishes delivered with care.
@@ -303,7 +303,7 @@ export default function TemplatePage() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Font</h2>
         <div className="card p-6">
           <p className="text-sm text-gray-500 mb-4">
-            Choose a typeface for your restaurant page. All fonts are open-source (Google Fonts).
+            Choose a typeface for your merchant page. All fonts are open-source (Google Fonts).
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {FONTS.map((f) => {
@@ -337,10 +337,10 @@ export default function TemplatePage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Publish your restaurant
+              Publish your merchant
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              When published, your restaurant will appear in the directory and
+              When published, your merchant will appear in the directory and
               customers can place orders.
             </p>
           </div>

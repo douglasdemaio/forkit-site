@@ -86,7 +86,7 @@ export function useEscrow() {
   const createOrder = useCallback(
     async (params: {
       orderId: string;
-      restaurantWallet: string;
+      merchantWallet: string;
       foodAmount: number;
       deliveryAmount: number;
       currency: string;
@@ -98,7 +98,7 @@ export function useEscrow() {
 
       const mint = getMintForCurrency(params.currency);
       const tokenProgram = await resolveTokenProgram(connection, mint);
-      const restaurantPubkey = new PublicKey(params.restaurantWallet);
+      const merchantPubkey = new PublicKey(params.merchantWallet);
       const orderIdBuf = orderIdToLeBytes(params.orderId);
       const orderIdNum = uuidToOrderId(params.orderId);
 
@@ -147,7 +147,7 @@ export function useEscrow() {
           { pubkey: orderPda,            isSigner: false, isWritable: true  }, // order (init)
           { pubkey: contributionPda,     isSigner: false, isWritable: true  }, // contribution (init)
           { pubkey: protocolConfigPda,   isSigner: false, isWritable: false }, // protocol_config
-          { pubkey: restaurantPubkey,    isSigner: false, isWritable: false }, // restaurant
+          { pubkey: merchantPubkey,    isSigner: false, isWritable: false }, // merchant
           { pubkey: mint,                isSigner: false, isWritable: false }, // token_mint
           { pubkey: escrowVaultPda,      isSigner: false, isWritable: true  }, // escrow_vault (init)
           { pubkey: customerTokenAccount,isSigner: false, isWritable: true  }, // customer_token_account
@@ -240,7 +240,7 @@ export function useEscrow() {
       const data = Buffer.alloc(8);
       MARK_READY_FOR_PICKUP_DISCRIMINATOR.copy(data, 0);
 
-      // MarkReadyForPickup struct: order (mut), restaurant (signer)
+      // MarkReadyForPickup struct: order (mut), merchant (signer)
       const ix = new TransactionInstruction({
         keys: [
           { pubkey: orderPda,  isSigner: false, isWritable: true },
@@ -262,7 +262,7 @@ export function useEscrow() {
   const confirmDelivery = useCallback(
     async (params: {
       orderId: string;
-      restaurantWallet: string;
+      merchantWallet: string;
       driverWallet: string;
       codeB: string; // raw delivery code (NOT the hash) — contract verifies against stored hash
       currency: string;
@@ -278,10 +278,10 @@ export function useEscrow() {
       const escrowVaultPda = deriveEscrowVaultPda(orderIdBuf);
       const protocolConfigPda = deriveProtocolConfigPda();
 
-      const restaurantPubkey = new PublicKey(params.restaurantWallet);
+      const merchantPubkey = new PublicKey(params.merchantWallet);
       const driverPubkey = new PublicKey(params.driverWallet);
 
-      const restaurantTokenAccount = await getAssociatedTokenAddress(mint, restaurantPubkey, false, tokenProgram);
+      const merchantTokenAccount = await getAssociatedTokenAddress(mint, merchantPubkey, false, tokenProgram);
       const driverTokenAccount = await getAssociatedTokenAddress(mint, driverPubkey, false, tokenProgram);
       const treasuryTokenAccount = await getAssociatedTokenAddress(mint, TREASURY_WALLET, false, tokenProgram);
       // Customer's ATA — receives any escrow surplus (when the accepted bid was
@@ -302,7 +302,7 @@ export function useEscrow() {
           { pubkey: escrowVaultPda,         isSigner: false, isWritable: true  }, // escrow_vault (mut)
           { pubkey: protocolConfigPda,      isSigner: false, isWritable: false }, // protocol_config
           { pubkey: mint,                   isSigner: false, isWritable: false }, // token_mint
-          { pubkey: restaurantTokenAccount, isSigner: false, isWritable: true  }, // restaurant_token_account
+          { pubkey: merchantTokenAccount, isSigner: false, isWritable: true  }, // merchant_token_account
           { pubkey: driverTokenAccount,     isSigner: false, isWritable: true  }, // driver_token_account
           { pubkey: treasuryTokenAccount,   isSigner: false, isWritable: true  }, // treasury_token_account
           { pubkey: customerTokenAccount,   isSigner: false, isWritable: true  }, // customer_token_account (refund target)
@@ -322,7 +322,7 @@ export function useEscrow() {
     [publicKey, sendTransaction, connection]
   );
 
-  // Restaurant-side: lower the on-chain delivery_amount on an order after
+  // Merchant-side: lower the on-chain delivery_amount on an order after
   // accepting a low driver bid. Surplus is refunded to the customer at
   // confirm_delivery.
   const updateDeliveryAmount = useCallback(
@@ -347,7 +347,7 @@ export function useEscrow() {
         keys: [
           { pubkey: orderPda,          isSigner: false, isWritable: true  }, // order (mut)
           { pubkey: protocolConfigPda, isSigner: false, isWritable: false }, // protocol_config
-          { pubkey: publicKey,         isSigner: true,  isWritable: false }, // restaurant
+          { pubkey: publicKey,         isSigner: true,  isWritable: false }, // merchant
         ],
         programId: ESCROW_PROGRAM_ID,
         data,

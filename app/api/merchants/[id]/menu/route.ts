@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getWalletFromRequest } from "@/lib/auth";
 
-// GET /api/restaurants/[id]/menu - Get menu items
+// GET /api/merchants/[id]/menu - Get menu items
 // Public: returns only available items.
 // Authenticated owner: returns all items including unavailable.
 export async function GET(
@@ -14,13 +14,13 @@ export async function GET(
 
     let isOwner = false;
     if (wallet) {
-      const restaurant = await prisma.restaurant.findUnique({ where: { id: params.id } });
-      isOwner = restaurant?.wallet === wallet;
+      const merchant = await prisma.merchant.findUnique({ where: { id: params.id } });
+      isOwner = merchant?.wallet === wallet;
     }
 
     const items = await prisma.menuItem.findMany({
       where: {
-        restaurantId: params.id,
+        merchantId: params.id,
         ...(isOwner ? {} : { available: true }),
       },
       orderBy: [{ category: "asc" }, { sortOrder: "asc" }, { name: "asc" }],
@@ -36,7 +36,7 @@ export async function GET(
   }
 }
 
-// POST /api/restaurants/[id]/menu - Add/update menu item
+// POST /api/merchants/[id]/menu - Add/update menu item
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -48,11 +48,11 @@ export async function POST(
     }
 
     // Verify ownership
-    const restaurant = await prisma.restaurant.findUnique({
+    const merchant = await prisma.merchant.findUnique({
       where: { id: params.id },
     });
 
-    if (!restaurant || restaurant.wallet !== wallet) {
+    if (!merchant || merchant.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -70,7 +70,7 @@ export async function POST(
     // If id is provided, update existing item
     if (id) {
       const existing = await prisma.menuItem.findFirst({
-        where: { id, restaurantId: params.id },
+        where: { id, merchantId: params.id },
       });
       if (!existing) {
         return NextResponse.json(
@@ -97,7 +97,7 @@ export async function POST(
     // Create new item
     const item = await prisma.menuItem.create({
       data: {
-        restaurantId: params.id,
+        merchantId: params.id,
         name,
         description: description || "",
         price,
@@ -118,7 +118,7 @@ export async function POST(
   }
 }
 
-// DELETE /api/restaurants/[id]/menu - Delete menu item
+// DELETE /api/merchants/[id]/menu - Delete menu item
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -129,11 +129,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const restaurant = await prisma.restaurant.findUnique({
+    const merchant = await prisma.merchant.findUnique({
       where: { id: params.id },
     });
 
-    if (!restaurant || restaurant.wallet !== wallet) {
+    if (!merchant || merchant.wallet !== wallet) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

@@ -9,7 +9,7 @@ interface CartProps {
 }
 
 export default function Cart({ isOpen, onClose }: CartProps) {
-  const { items, total, restaurantName, updateQuantity, removeItem, clearCart } =
+  const { items, total, merchantName, updateQuantity, removeItem, clearCart } =
     useCart();
 
   if (!isOpen) return null;
@@ -28,8 +28,8 @@ export default function Cart({ isOpen, onClose }: CartProps) {
         <div className="flex items-center justify-between p-4 border-b">
           <div>
             <h2 className="text-lg font-bold">Your Cart</h2>
-            {restaurantName && (
-              <p className="text-sm text-gray-500">from {restaurantName}</p>
+            {merchantName && (
+              <p className="text-sm text-gray-500">from {merchantName}</p>
             )}
           </div>
           <button
@@ -49,11 +49,11 @@ export default function Cart({ isOpen, onClose }: CartProps) {
               <span className="text-4xl">🛒</span>
               <p className="mt-4 text-gray-500">Your cart is empty</p>
               <Link
-                href="/restaurants"
+                href="/merchants"
                 className="mt-4 inline-block text-forkit-orange hover:underline"
                 onClick={onClose}
               >
-                Browse restaurants
+                Browse merchants
               </Link>
             </div>
           ) : (

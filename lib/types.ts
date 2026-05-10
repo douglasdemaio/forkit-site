@@ -1,4 +1,4 @@
-export interface RestaurantData {
+export interface MerchantData {
   id: string;
   wallet: string;
   payoutWallet: string | null;
@@ -24,7 +24,7 @@ export interface RestaurantData {
 
 export interface MenuItemData {
   id: string;
-  restaurantId: string;
+  merchantId: string;
   name: string;
   description: string;
   price: number;
@@ -40,7 +40,7 @@ export interface CartItem extends MenuItemData {
 
 export interface OrderData {
   id: string;
-  restaurantId: string;
+  merchantId: string;
   // Nested to match forkme's Order.customer shape
   customer: { wallet: string };
   items: OrderItem[];
@@ -64,7 +64,7 @@ export interface OrderData {
   createdAt: string;
   updatedAt: string;
   contributions: ContributionData[];
-  restaurant?: {
+  merchant?: {
     id: string;
     name: string;
     slug: string;
@@ -131,7 +131,7 @@ export interface DeliveryRating {
   orderId: string;
   driverWallet: string;
   raterWallet: string;
-  raterRole: "restaurant" | "customer";
+  raterRole: "merchant" | "customer";
   rating: number;
   comment: string | null;
   createdAt: string;

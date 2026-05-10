@@ -46,10 +46,10 @@ export default function MenuEditorPage() {
   const { connected } = useWallet();
   const { token, getAuthHeaders, authenticate } = useWalletAuth();
   const searchParams = useSearchParams();
-  const restaurantIdParam = searchParams.get("restaurantId");
-  const [restaurantId, setRestaurantId] = useState<string | null>(restaurantIdParam);
-  const [restaurantSlug, setRestaurantSlug] = useState<string>("");
-  const [restaurantName, setRestaurantName] = useState<string>("");
+  const merchantIdParam = searchParams.get("merchantId");
+  const [merchantId, setMerchantId] = useState<string | null>(merchantIdParam);
+  const [merchantSlug, setRestaurantSlug] = useState<string>("");
+  const [merchantName, setRestaurantName] = useState<string>("");
   const [currency, setCurrency] = useState("USDC");
   const [items, setItems] = useState<MenuItemData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +68,7 @@ export default function MenuEditorPage() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setExpandedId(null);
-    if (!over || active.id === over.id || !restaurantId) return;
+    if (!over || active.id === over.id || !merchantId) return;
 
     const oldIndex = items.findIndex((i) => i.id === active.id);
     const newIndex = items.findIndex((i) => i.id === over.id);
@@ -80,10 +80,10 @@ export default function MenuEditorPage() {
   };
 
   const saveOrder = async () => {
-    if (!restaurantId) return;
+    if (!merchantId) return;
     setSavingOrder(true);
     try {
-      const res = await fetch(`/api/restaurants/${restaurantId}/menu/reorder`, {
+      const res = await fetch(`/api/merchants/${merchantId}/menu/reorder`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ orderedIds: items.map((i) => i.id) }),
@@ -104,23 +104,23 @@ export default function MenuEditorPage() {
   const loadData = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch("/api/restaurants/mine", {
+      const res = await fetch("/api/merchants/mine", {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
-        const restaurants = data.restaurants || (data.restaurant ? [data.restaurant] : []);
-        // Use URL param restaurant, or fall back to first
-        const restaurant = restaurantIdParam
-          ? restaurants.find((r: any) => r.id === restaurantIdParam) || restaurants[0]
-          : restaurants[0];
-        if (restaurant) {
-          setRestaurantId(restaurant.id);
-          setRestaurantSlug(restaurant.slug);
-          setRestaurantName(restaurant.name);
-          setCurrency(restaurant.currency);
+        const merchants = data.merchants || (data.merchant ? [data.merchant] : []);
+        // Use URL param merchant, or fall back to first
+        const merchant = merchantIdParam
+          ? merchants.find((r: any) => r.id === merchantIdParam) || merchants[0]
+          : merchants[0];
+        if (merchant) {
+          setMerchantId(merchant.id);
+          setRestaurantSlug(merchant.slug);
+          setRestaurantName(merchant.name);
+          setCurrency(merchant.currency);
 
-          const menuRes = await fetch(`/api/restaurants/${restaurant.id}/menu`);
+          const menuRes = await fetch(`/api/merchants/${merchant.id}/menu`);
           if (menuRes.ok) {
             const menuData = await menuRes.json();
             setItems(menuData);
@@ -132,7 +132,7 @@ export default function MenuEditorPage() {
     } finally {
       setLoading(false);
     }
-  }, [token, getAuthHeaders, restaurantIdParam]);
+  }, [token, getAuthHeaders, merchantIdParam]);
 
   useEffect(() => {
     if (token) loadData();
@@ -141,11 +141,11 @@ export default function MenuEditorPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!restaurantId || !form.name || !form.price) return;
+    if (!merchantId || !form.name || !form.price) return;
 
     setSaving(true);
     try {
-      const res = await fetch(`/api/restaurants/${restaurantId}/menu`, {
+      const res = await fetch(`/api/merchants/${merchantId}/menu`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
@@ -185,10 +185,10 @@ export default function MenuEditorPage() {
   };
 
   const handleDelete = async (itemId: string) => {
-    if (!restaurantId || !confirm("Delete this menu item?")) return;
+    if (!merchantId || !confirm("Delete this menu item?")) return;
 
     try {
-      await fetch(`/api/restaurants/${restaurantId}/menu?itemId=${itemId}`, {
+      await fetch(`/api/merchants/${merchantId}/menu?itemId=${itemId}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
@@ -397,9 +397,9 @@ export default function MenuEditorPage() {
                   <SortableMenuItem
                     key={item.id}
                     item={item}
-                    restaurantId={restaurantId!}
-                    restaurantSlug={restaurantSlug}
-                    restaurantName={restaurantName}
+                    merchantId={merchantId!}
+                    merchantSlug={merchantSlug}
+                    merchantName={merchantName}
                     currency={currency}
                     expanded={expandedId === item.id}
                     onToggle={() =>

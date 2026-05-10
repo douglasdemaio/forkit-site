@@ -26,7 +26,7 @@ export default function ConnectPage() {
           Welcome to ForkIt
         </h1>
         <p className="mt-3 text-gray-500">
-          Connect your Solana wallet to get started. Create your restaurant page
+          Connect your Solana wallet to get started. Create your merchant page
           or order food from existing ones.
         </p>
 
@@ -85,7 +85,7 @@ export default function ConnectPage() {
         <div className="mt-16 grid grid-cols-2 gap-4 text-left">
           <div className="p-4 bg-gray-50 rounded-xl">
             <h3 className="font-semibold text-sm text-gray-900">
-              🏪 Restaurant Owner?
+              🏪 Merchant Owner?
             </h3>
             <p className="mt-1 text-xs text-gray-500">
               Set up your page, upload menu items, and start receiving orders.
@@ -96,7 +96,7 @@ export default function ConnectPage() {
               🍕 Hungry Customer?
             </h3>
             <p className="mt-1 text-xs text-gray-500">
-              Browse restaurants, order food, and pay with USDC on Solana.
+              Browse merchants, order food, and pay with USDC on Solana.
             </p>
           </div>
         </div>

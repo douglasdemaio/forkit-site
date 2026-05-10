@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
 // POST /api/orders/[id]/scan-confirm
-// Public endpoint — code itself is authorization. Used by restaurant kiosk QR scans.
+// Public endpoint — code itself is authorization. Used by merchant kiosk QR scans.
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,7 +16,7 @@ export async function POST(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: { select: { name: true, slug: true } } },
+      include: { merchant: { select: { name: true, slug: true } } },
     });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -27,7 +27,7 @@ export async function POST(
         success: true,
         alreadyClosed: true,
         status: order.status,
-        order: { id: order.id, status: order.status, restaurant: order.restaurant },
+        order: { id: order.id, status: order.status, merchant: order.merchant },
       });
     }
 
@@ -44,14 +44,14 @@ export async function POST(
     const updated = await prisma.order.update({
       where: { id: params.id },
       data: { status: newStatus },
-      include: { restaurant: { select: { name: true, slug: true } } },
+      include: { merchant: { select: { name: true, slug: true } } },
     });
 
     const items = typeof updated.items === "string" ? JSON.parse(updated.items) : updated.items;
     return NextResponse.json({
       success: true,
       matched: true,
-      order: { id: updated.id, status: updated.status, restaurant: updated.restaurant, items },
+      order: { id: updated.id, status: updated.status, merchant: updated.merchant, items },
     });
   } catch (error) {
     console.error("scan-confirm error:", error);
@@ -73,7 +73,7 @@ export async function GET(
 
     const order = await prisma.order.findUnique({
       where: { id: params.id },
-      include: { restaurant: { select: { name: true, slug: true } } },
+      include: { merchant: { select: { name: true, slug: true } } },
     });
 
     if (!order || !order.codeA || order.codeA.toUpperCase() !== key.trim().toUpperCase()) {
@@ -81,7 +81,7 @@ export async function GET(
     }
 
     const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
-    return NextResponse.json({ id: order.id, status: order.status, items, restaurant: order.restaurant });
+    return NextResponse.json({ id: order.id, status: order.status, items, merchant: order.merchant });
   } catch (error) {
     console.error("kiosk GET error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

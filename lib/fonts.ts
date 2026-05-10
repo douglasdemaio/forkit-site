@@ -1,4 +1,4 @@
-// Curated list of open-source Google Fonts suitable for restaurant branding.
+// Curated list of open-source Google Fonts suitable for merchant branding.
 // All fonts listed are SIL Open Font License (OFL) or Apache 2.0.
 export interface FontOption {
   name: string;
