@@ -649,3 +649,62 @@ footer {
     box-shadow: 0 0 16px rgba($sol, 0.15);
   }
 }
+
+// ── Use Cases ─────────────────────────────────────────────────────
+.use-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: $border;
+  border: 1px solid $border;
+  margin-top: 64px;
+}
+
+.use-case {
+  background: $bg;
+  padding: 28px 24px;
+  transition: background 0.3s, transform 0.3s;
+  cursor: none;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+
+  &:hover::before { opacity: 1; }
+  &:hover {
+    background: #0f0f0f;
+    transform: translateY(-3px);
+  }
+}
+
+.use-case-emoji {
+  font-size: 1.7rem;
+  margin-bottom: 12px;
+  display: block;
+  transition: transform 0.3s;
+
+  .use-case:hover & {
+    transform: scale(1.15) rotate(-5deg);
+  }
+}
+
+.use-case-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.use-case-desc {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: $muted;
+}

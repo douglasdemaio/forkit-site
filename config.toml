@@ -1,7 +1,7 @@
 # Zola configuration
 base_url = "https://douglasdemaio.github.io/forkit-site"
 title = "ForkIt"
-description = "Decentralized Food Delivery Protocol on Solana"
+description = "Open protocol for local commerce on Solana — restaurants, home kitchens, and any local merchant. Escrowed payments, split bills, no 30% middlemen."
 compile_sass = true
 build_search_index = false
 generate_feeds = false

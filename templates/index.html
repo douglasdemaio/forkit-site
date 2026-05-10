@@ -10,12 +10,12 @@
   <div class="hero-left">
     <div class="hero-tag">Live on Solana Devnet</div>
     <h1>
-      Food Delivery,
+      Local Commerce,
       <em>Unchained.</em>
       <span class="sol-word">On-Chain.</span>
     </h1>
     <p class="hero-desc">
-      ForkIt replaces centralized delivery platforms with an open protocol. Payments held in Solana escrow, verified with delivery codes, settled automatically — no middleman taking 30%.
+      ForkIt is an open protocol for any local merchant — restaurants, home kitchens, bookshops, hardware stores, florists. Payments held in Solana escrow, verified with delivery codes, settled automatically. No middleman taking 30%.
     </p>
     <div class="hero-actions">
       <a href="#how" class="btn-primary">
@@ -58,35 +58,43 @@
 
             <div class="app-search">
               <span>🔍</span>
-              <span>Search restaurants...</span>
+              <span>Search nearby...</span>
             </div>
 
-            <div class="app-section-label">Nearby Restaurants</div>
+            <div class="app-section-label">Nearby Merchants</div>
 
             <div class="app-restaurant-list">
               <div class="app-restaurant-card">
                 <div class="app-rest-icon" style="background:#1a1a0a">🍕</div>
                 <div>
                   <div class="app-rest-name">Solana Slice</div>
-                  <div class="app-rest-meta">0.3 km · Pizza · 20 min</div>
+                  <div class="app-rest-meta">0.3 km · Restaurant · 20 min</div>
                 </div>
                 <div class="app-rest-price">12 USDC</div>
               </div>
               <div class="app-restaurant-card" style="border-color:#2a1a0a">
-                <div class="app-rest-icon" style="background:#1a0a0a">🍜</div>
+                <div class="app-rest-icon" style="background:#1a0a0a">🥐</div>
                 <div>
-                  <div class="app-rest-name">Web3 Ramen</div>
-                  <div class="app-rest-meta">0.8 km · Ramen · 30 min</div>
+                  <div class="app-rest-name">Sunday Sourdough</div>
+                  <div class="app-rest-meta">0.8 km · Home kitchen · pickup</div>
                 </div>
                 <div class="app-rest-price">9 USDC</div>
               </div>
               <div class="app-restaurant-card">
-                <div class="app-rest-icon" style="background:#0a0a1a">🌮</div>
+                <div class="app-rest-icon" style="background:#0a0a1a">📚</div>
                 <div>
-                  <div class="app-rest-name">DeFi Tacos</div>
-                  <div class="app-rest-meta">1.1 km · Mexican · 25 min</div>
+                  <div class="app-rest-name">Corner Books</div>
+                  <div class="app-rest-meta">1.1 km · Books &amp; media · 35 min</div>
                 </div>
                 <div class="app-rest-price">8 USDC</div>
+              </div>
+              <div class="app-restaurant-card" style="border-color:#0a1a0a">
+                <div class="app-rest-icon" style="background:#0a1a0a">🌷</div>
+                <div>
+                  <div class="app-rest-name">Petal &amp; Stem</div>
+                  <div class="app-rest-meta">1.4 km · Florist · same-day</div>
+                </div>
+                <div class="app-rest-price">15 USDC</div>
               </div>
             </div>
 
@@ -152,8 +160,8 @@
         <div class="step">
           <div class="step-num">02</div>
           <div class="step-body">
-            <div class="step-title">Restaurant Accepts &amp; Prepares</div>
-            <div class="step-desc">Restaurant sees the funded order, accepts, and marks food ready for pickup. Driver gets notified automatically.</div>
+            <div class="step-title">Merchant Accepts &amp; Prepares</div>
+            <div class="step-desc">Restaurant, home cook, or shop sees the funded order, accepts, and marks the goods ready for pickup. Driver gets notified automatically.</div>
           </div>
         </div>
         <div class="step">
@@ -167,7 +175,7 @@
           <div class="step-num">04</div>
           <div class="step-body">
             <div class="step-title">Customer Confirms (Code B)</div>
-            <div class="step-desc">Customer enters Code B on delivery. Atomic settlement: restaurant paid, driver paid, 0.02% fee to treasury, deposit refunded.</div>
+            <div class="step-desc">Customer enters Code B on delivery. Atomic settlement: merchant paid, driver paid, 0.02% fee to treasury, deposit refunded.</div>
           </div>
         </div>
       </div>
@@ -197,7 +205,7 @@
         </div>
 
         <span class="ev-comment">// On confirm_delivery, atomically:</span><br/>
-        <span class="ev-key">restaurant</span> ← <span class="ev-accent">18.00 USDC</span><br/>
+        <span class="ev-key">merchant</span>&nbsp;&nbsp; ← <span class="ev-accent">18.00 USDC</span><br/>
         <span class="ev-key">driver</span>&nbsp;&nbsp;&nbsp;&nbsp; ← <span class="ev-accent">&nbsp;2.00 USDC</span><br/>
         <span class="ev-key">treasury</span>&nbsp;&nbsp; ← <span class="ev-sol">0.02% fee</span><br/>
         <span class="ev-key">deposit</span>&nbsp;&nbsp;&nbsp; ← <span class="ev-num">0.40 USDC</span> <span class="ev-comment">(proportional)</span>
@@ -206,19 +214,78 @@
   </div>
 </section>
 
+<!-- USE CASES -->
+<section id="use-cases">
+  <span class="section-tag reveal">What You Can Build</span>
+  <h2 class="reveal">More Than <em>Pizza.</em></h2>
+  <p class="section-desc reveal">ForkIt started as a food-delivery protocol but the escrow primitives don't care what's in the box. If a local merchant takes orders and someone hands a customer a thing, ForkIt can settle it on-chain.</p>
+
+  <div class="use-cases-grid reveal">
+    <div class="use-case">
+      <span class="use-case-emoji">🍽️</span>
+      <div class="use-case-name">Restaurants &amp; fast food</div>
+      <p class="use-case-desc">The original use case. Driver bidding, scheduled deliveries, surge pricing, split bills with up to 10 friends.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">👨‍🍳</span>
+      <div class="use-case-name">Home kitchens</div>
+      <p class="use-case-desc">Sunday supper clubs, weekend bakers, neighborhood cooks. Pickup-only by default; smaller fixed menus; no driver fleet required.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">🛒</span>
+      <div class="use-case-name">Grocery &amp; corner stores</div>
+      <p class="use-case-desc">Bodegas, convenience stores, neighborhood grocers. Same-day delivery without surrendering 30% to a third-party app.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">🥐</span>
+      <div class="use-case-name">Bakeries &amp; coffee</div>
+      <p class="use-case-desc">Croissants by 8am, beans roasted yesterday. Pre-orders + scheduled pickup means no queue.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">📚</span>
+      <div class="use-case-name">Books &amp; media</div>
+      <p class="use-case-desc">Indie bookshops, record stores, comic shops. Browse, order, get it the same day from a human who actually reads them.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">🌷</span>
+      <div class="use-case-name">Florists</div>
+      <p class="use-case-desc">Arrangements built today, delivered today. Seasonal listings; pickup or delivery; on-chain receipt for the apology.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">🔨</span>
+      <div class="use-case-name">Hardware &amp; tools</div>
+      <p class="use-case-desc">DIY emergencies don't wait for next-day shipping. Local hardware store stock, delivered while you keep working on the leak.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">🎁</span>
+      <div class="use-case-name">Gift &amp; subscription</div>
+      <p class="use-case-desc">Independent makers, monthly boxes, custom hampers. Recurring or one-off — escrow handles either with the same primitives.</p>
+    </div>
+    <div class="use-case">
+      <span class="use-case-emoji">💄</span>
+      <div class="use-case-name">Beauty &amp; personal care</div>
+      <p class="use-case-desc">Small-batch cosmetics, salon retail, fragrances. Customers split a 4-person gift basket; the escrow refunds proportionally if anyone backs out.</p>
+    </div>
+  </div>
+
+  <p class="section-desc reveal" style="margin-top:48px;font-size:0.85rem">
+    Out of scope: anything that needs age verification or regional licensing — alcohol, tobacco, cannabis, prescription pharmacy. Those will land in a future compliance spec.
+  </p>
+</section>
+
 <!-- ROLES -->
 <section id="roles">
   <span class="section-tag reveal">Three Roles</span>
   <h2 class="reveal">One App. <em>Every Role.</em></h2>
-  <p class="section-desc reveal">ForkMe — the mobile companion — serves customers, drivers, and restaurants from a single codebase on iOS, Android, and Solana Seeker.</p>
+  <p class="section-desc reveal">ForkMe — the mobile companion — serves customers, drivers, and merchants from a single codebase on iOS, Android, and Solana Seeker.</p>
 
   <div class="roles-grid reveal">
     <div class="role-card" style="--card-color: rgba(255,107,53,0.08)">
       <span class="role-emoji">🛒</span>
       <div class="role-name">Customer</div>
-      <p class="role-desc">Order food, split costs with friends, track your delivery live. Your funds never leave escrow until the food arrives.</p>
+      <p class="role-desc">Order from any local merchant, split costs with friends, track delivery live. Your funds never leave escrow until the goods arrive.</p>
       <ul class="role-features">
-        <li>Browse restaurants &amp; menus</li>
+        <li>Browse merchants &amp; menus</li>
         <li>Place orders with USDC or EURC</li>
         <li>Share contribution links to split payment</li>
         <li>Live map tracking via Socket.IO</li>
@@ -232,7 +299,7 @@
       <p class="role-desc">Find available funded orders, claim deliveries, and get paid atomically on-chain. No platform taking your cut.</p>
       <ul class="role-features">
         <li>Browse available funded orders</li>
-        <li>Claim deliveries in your zone</li>
+        <li>Bid on delivery fee — restaurant picks the winner</li>
         <li>Verify pickup with Code A (QR or text)</li>
         <li>AI-routed orders earn +50% bonus points</li>
         <li>On-chain reputation badge</li>
@@ -240,16 +307,16 @@
       </ul>
     </div>
     <div class="role-card" style="--card-color: rgba(153,69,255,0.07)">
-      <span class="role-emoji">🍽️</span>
-      <div class="role-name">Restaurant</div>
-      <p class="role-desc">Manage incoming orders, set your own delivery zones and pricing, accept the tokens you want. No monthly fees.</p>
+      <span class="role-emoji">🏪</span>
+      <div class="role-name">Merchant</div>
+      <p class="role-desc">Restaurant, home cook, or retail. Manage incoming orders, set your own delivery zones and pricing, accept the tokens you want. No monthly fees.</p>
       <ul class="role-features">
+        <li>Pick a vendor type — restaurant, home cook, retail</li>
+        <li>Place yourself on the map with a draggable pin</li>
         <li>Dashboard for incoming funded orders</li>
-        <li>IPFS-hosted menu with images</li>
-        <li>Accept USDC, EURC, or both</li>
+        <li>Accept USDC, EURC, or PYUSD</li>
         <li>Whitelist mints via on-chain config</li>
-        <li>Mark ready for pickup</li>
-        <li>Rate drivers post-delivery</li>
+        <li>Self-deliver or open the order to driver bidding</li>
       </ul>
     </div>
   </div>
@@ -324,7 +391,7 @@
       </div>
       <div class="arch-item">
         <div class="arch-item-name">forkit_registry</div>
-        <div class="arch-item-desc">On-chain identity PDAs for restaurants, drivers, customers. Star ratings.</div>
+        <div class="arch-item-desc">On-chain identity PDAs for merchants, drivers, customers. Star ratings, trust scores.</div>
         <span class="arch-tag tag-rust">Anchor / Rust</span>
       </div>
       <div class="arch-item">
