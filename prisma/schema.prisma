@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Restaurant {
+model Merchant {
   id          String     @id @default(uuid())
   wallet      String
   payoutWallet String?
@@ -22,9 +22,15 @@ model Restaurant {
   published   Boolean    @default(false)
   autoAcknowledge Boolean @default(false)
   selfDelivery    Boolean @default(false)
+  vendorType      String  @default("restaurant")
+  pickupOnly      Boolean @default(false)
+  category        String  @default("Food & Beverage")
+  subcategory     String  @default("Restaurants & fast food")
   addressStreet   String?
   addressCity     String?
   addressCountry  String?
+  latitude        Float?
+  longitude       Float?
   colorPrimary    String?
   colorSecondary  String?
   colorAccent     String?
@@ -35,12 +41,14 @@ model Restaurant {
   orders      Order[]
 
   @@index([wallet])
+  @@index([category, subcategory])
+  @@index([latitude, longitude])
 }
 
 model MenuItem {
   id           String     @id @default(uuid())
-  restaurantId String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  merchantId   String
+  merchant     Merchant   @relation(fields: [merchantId], references: [id], onDelete: Cascade)
   name         String
   description  String     @default("")
   price        Float
@@ -51,13 +59,13 @@ model MenuItem {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  @@index([restaurantId])
+  @@index([merchantId])
 }
 
 model Order {
   id              String         @id @default(uuid())
-  restaurantId    String
-  restaurant      Restaurant     @relation(fields: [restaurantId], references: [id])
+  merchantId      String
+  merchant        Merchant       @relation(fields: [merchantId], references: [id])
   customerWallet  String
   items           String
   tokenMint       String?
@@ -84,7 +92,7 @@ model Order {
   driverBids             DriverBid[]
   driverRatings          DeliveryRating[]
 
-  @@index([restaurantId])
+  @@index([merchantId])
   @@index([customerWallet])
   @@index([driverWallet])
   @@index([status])
@@ -139,7 +147,7 @@ model DeliveryRating {
   order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   driverWallet String
   raterWallet  String
-  raterRole    String   // "restaurant" | "customer"
+  raterRole    String   // "merchant" | "customer"
   rating       Int      // 1–5
   comment      String?
   createdAt    DateTime @default(now())
