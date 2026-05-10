@@ -43,7 +43,7 @@ export default function DashboardPage() {
   const { token, authenticate, getAuthHeaders, clearToken, authError, isAuthenticating } = useWalletAuth();
   const t = useTranslations("dashboard");
   const [merchants, setMerchants] = useState<Merchant[]>([]);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<Merchant | null>(null);
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -197,10 +197,10 @@ export default function DashboardPage() {
     setEditLongitude(nLng);
   }
 
-  const merchant = selectedRestaurant;
+  const merchant = selectedMerchant;
 
   const setMerchant = (r: Merchant) => {
-    setSelectedRestaurant(r);
+    setSelectedMerchant(r);
     setMerchants((prev) => {
       const idx = prev.findIndex((p) => p.id === r.id);
       if (idx >= 0) {
@@ -212,7 +212,7 @@ export default function DashboardPage() {
     });
   };
 
-  const loadRestaurants = useCallback(async () => {
+  const loadMerchants = useCallback(async () => {
     if (!token) return;
     try {
       const res = await fetch("/api/merchants/mine", {
@@ -227,7 +227,7 @@ export default function DashboardPage() {
         const list: Merchant[] = data.merchants || (data.merchant ? [data.merchant] : []);
         setMerchants(list);
         if (list.length > 0) {
-          setSelectedRestaurant((prev) => {
+          setSelectedMerchant((prev) => {
             if (prev) {
               const stillExists = list.find((r) => r.id === prev.id);
               return stillExists || list[0];
@@ -244,9 +244,9 @@ export default function DashboardPage() {
   }, [token, getAuthHeaders, clearToken]);
 
   useEffect(() => {
-    if (token) loadRestaurants();
+    if (token) loadMerchants();
     else setLoading(false);
-  }, [token, loadRestaurants]);
+  }, [token, loadMerchants]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,7 +278,7 @@ export default function DashboardPage() {
       if (res.ok || res.status === 201) {
         const data = await res.json();
         setMerchants((prev) => [...prev, data]);
-        setSelectedRestaurant(data);
+        setSelectedMerchant(data);
         setShowCreateForm(false);
         setName("");
         setDescription("");
@@ -367,10 +367,10 @@ export default function DashboardPage() {
         <div className="text-center mb-8">
           <span className="text-5xl">🍴</span>
           <h1 className="mt-4 text-3xl font-bold text-forkit-dark">
-            {t("createRestaurant")}
+            {t("createMerchant")}
           </h1>
           <p className="mt-2 text-gray-500">
-            {t("createRestaurantDesc")}
+            {t("createMerchantDesc")}
           </p>
         </div>
 
@@ -500,7 +500,7 @@ export default function DashboardPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-              {t("yourRestaurants")}
+              {t("yourMerchants")}
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -508,12 +508,12 @@ export default function DashboardPage() {
               <button
                 key={r.id}
                 onClick={() => {
-                  setSelectedRestaurant(r);
+                  setSelectedMerchant(r);
                   setEditing(false);
                   setEditingSettings(false);
                 }}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  selectedRestaurant?.id === r.id
+                  selectedMerchant?.id === r.id
                     ? "bg-forkit-orange text-white shadow-sm"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}

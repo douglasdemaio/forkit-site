@@ -48,8 +48,8 @@ export default function MenuEditorPage() {
   const searchParams = useSearchParams();
   const merchantIdParam = searchParams.get("merchantId");
   const [merchantId, setMerchantId] = useState<string | null>(merchantIdParam);
-  const [merchantSlug, setRestaurantSlug] = useState<string>("");
-  const [merchantName, setRestaurantName] = useState<string>("");
+  const [merchantSlug, setMerchantSlug] = useState<string>("");
+  const [merchantName, setMerchantName] = useState<string>("");
   const [currency, setCurrency] = useState("USDC");
   const [items, setItems] = useState<MenuItemData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,8 +116,8 @@ export default function MenuEditorPage() {
           : merchants[0];
         if (merchant) {
           setMerchantId(merchant.id);
-          setRestaurantSlug(merchant.slug);
-          setRestaurantName(merchant.name);
+          setMerchantSlug(merchant.slug);
+          setMerchantName(merchant.name);
           setCurrency(merchant.currency);
 
           const menuRes = await fetch(`/api/merchants/${merchant.id}/menu`);

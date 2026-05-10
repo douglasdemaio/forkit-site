@@ -26,10 +26,10 @@ export default function HomePage() {
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Link href="/dashboard" className="btn-primary text-lg">
-                {t("buildRestaurant")}
+                {t("buildMerchant")}
               </Link>
               <Link href="/merchants" className="btn-secondary text-lg">
-                {t("browseRestaurants")}
+                {t("browseMerchants")}
               </Link>
             </div>
           </div>
@@ -208,7 +208,7 @@ export default function HomePage() {
 
           <div className="mt-12">
             <Link href="/merchants" className="btn-primary text-lg">
-              {t("exploreRestaurants")}
+              {t("exploreMerchants")}
             </Link>
           </div>
         </div>

@@ -229,7 +229,7 @@ export default function CartPage() {
         </h1>
         <p className="mt-2 text-gray-500">{t("emptyCartDesc")}</p>
         <Link href="/merchants" className="mt-6 btn-primary">
-          {t("browseRestaurants")}
+          {t("browseMerchants")}
         </Link>
       </div>
     );

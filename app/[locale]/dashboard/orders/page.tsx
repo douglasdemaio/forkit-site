@@ -49,7 +49,7 @@ export default function OrdersPage() {
   const t = useTranslations("orders");
   const tDash = useTranslations("dashboard");
   const [merchantId, setMerchantId] = useState<string | null>(null);
-  const [merchantSelfDelivery, setRestaurantSelfDelivery] = useState(false);
+  const [merchantSelfDelivery, setMerchantSelfDelivery] = useState(false);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -186,7 +186,7 @@ export default function OrdersPage() {
         if (res.ok) {
           const data = await res.json();
           setMerchantId(merchantIdParam);
-          setRestaurantSelfDelivery(data.selfDelivery ?? false);
+          setMerchantSelfDelivery(data.selfDelivery ?? false);
         } else {
           setMerchantId(merchantIdParam);
         }
@@ -199,7 +199,7 @@ export default function OrdersPage() {
           const r = data.merchant || data.merchants?.[0];
           if (r) {
             setMerchantId(r.id);
-            setRestaurantSelfDelivery(r.selfDelivery ?? false);
+            setMerchantSelfDelivery(r.selfDelivery ?? false);
           }
         }
       }
