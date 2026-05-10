@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "@/hooks/useWallet";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
+import { VendorTypeRadios } from "@/components/dashboard/vendor-type-radios";
+import { CategoryCascade } from "@/components/dashboard/category-cascade";
+import { LocationMap } from "@/components/dashboard/location-map";
+import type { VendorType } from "@/lib/taxonomy";
 
 interface Merchant {
   id: string;
@@ -15,9 +19,15 @@ interface Merchant {
   name: string;
   slug: string;
   description: string;
+  vendorType: VendorType;
+  pickupOnly: boolean;
+  category: string;
+  subcategory: string;
   addressStreet: string | null;
   addressCity: string | null;
   addressCountry: string | null;
+  latitude: number | null;
+  longitude: number | null;
   template: string;
   logo: string | null;
   banner: string | null;
@@ -39,9 +49,79 @@ export default function DashboardPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [vendorType, setVendorType] = useState<VendorType>("restaurant");
+  const [pickupOnly, setPickupOnly] = useState(false);
+  const [pickupOnlyManuallySet, setPickupOnlyManuallySet] = useState(false);
+  const [category, setCategory] = useState("Food & Beverage");
+  const [subcategory, setSubcategory] = useState("Restaurants & fast food");
   const [addressStreet, setAddressStreet] = useState("");
   const [addressCity, setAddressCity] = useState("");
   const [addressCountry, setAddressCountry] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+
+  function handleVendorTypeChange(next: VendorType) {
+    setVendorType(next);
+    if (next === "home_cook" && !pickupOnlyManuallySet) {
+      setPickupOnly(true);
+    }
+  }
+
+  const geocodeAbortRef = useRef<AbortController | null>(null);
+  const geocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
+
+  const triggerGeocode = useCallback(() => {
+    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current);
+    geocodeTimerRef.current = setTimeout(async () => {
+      const parts = [addressStreet, addressCity, addressCountry]
+        .map((p) => p.trim())
+        .filter((p) => p !== "");
+      if (parts.length < 2) return;
+      const q = parts.join(", ");
+
+      geocodeAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      geocodeAbortRef.current = ctrl;
+
+      setGeocodeError(null);
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`, { signal: ctrl.signal });
+        if (ctrl.signal.aborted) return;
+        if (res.status === 404) {
+          setGeocodeError("We couldn't find that address — drop a pin manually.");
+          return;
+        }
+        if (!res.ok) {
+          setGeocodeError("Geocoding is busy — drop a pin manually or try again in a minute.");
+          return;
+        }
+        const data = (await res.json()) as { lat: number; lng: number };
+        if (!ctrl.signal.aborted) {
+          setLatitude(data.lat);
+          setLongitude(data.lng);
+        }
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          setGeocodeError("Geocoding failed — drop a pin manually.");
+        }
+      }
+    }, 600);
+  }, [addressStreet, addressCity, addressCountry]);
+
+  function handlePinDrag(nLat: number, nLng: number) {
+    geocodeAbortRef.current?.abort();
+    if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current);
+    setLatitude(nLat);
+    setLongitude(nLng);
+  }
+
+  const canCreate =
+    name.trim().length > 0 &&
+    !!category &&
+    !!subcategory &&
+    latitude != null &&
+    longitude != null;
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -123,9 +203,15 @@ export default function DashboardPage() {
         body: JSON.stringify({
           name: name.trim(),
           description: description.trim(),
+          vendorType,
+          pickupOnly,
+          category,
+          subcategory,
           addressStreet: addressStreet.trim() || null,
           addressCity: addressCity.trim() || null,
           addressCountry: addressCountry.trim() || null,
+          latitude,
+          longitude,
         }),
       });
 
@@ -258,6 +344,25 @@ export default function DashboardPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Vendor type
+            </label>
+            <VendorTypeRadios value={vendorType} onChange={handleVendorTypeChange} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
+            <CategoryCascade
+              category={category}
+              subcategory={subcategory}
+              onChange={({ category: c, subcategory: s }) => {
+                setCategory(c);
+                setSubcategory(s);
+              }}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               {t("streetAddressLabel")}
             </label>
             <input
@@ -292,6 +397,7 @@ export default function DashboardPage() {
                 type="text"
                 value={addressCountry}
                 onChange={(e) => setAddressCountry(e.target.value)}
+                onBlur={triggerGeocode}
                 placeholder={t("countryPlaceholder")}
                 autoComplete="country-name"
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
@@ -299,9 +405,24 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Pickup location
+            </label>
+            <LocationMap lat={latitude} lng={longitude} onChange={handlePinDrag} />
+            <div className="mt-2 flex items-center justify-between text-xs">
+              <span className="text-gray-500">
+                {latitude != null && longitude != null
+                  ? `lat ${latitude.toFixed(5)}, lng ${longitude.toFixed(5)}`
+                  : "Click on the map or fill the address fields to drop a pin."}
+              </span>
+              {geocodeError && <span className="text-red-600">{geocodeError}</span>}
+            </div>
+          </div>
+
           <button
             type="submit"
-            disabled={creating || !name.trim()}
+            disabled={creating || !canCreate}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {creating ? t("creating") : t("createButton")}
