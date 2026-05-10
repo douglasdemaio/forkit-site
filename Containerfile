@@ -12,6 +12,9 @@ COPY prisma ./prisma
 # --ignore-scripts:   skip native USB/Ledger builds; prisma generate is run
 #                     explicitly in the builder stage.
 RUN npm install --no-audit --no-fund --legacy-peer-deps --ignore-scripts
+# Sharp's install script needs to run so its platform-specific native binary
+# is downloaded — required by Next.js image optimisation in standalone mode.
+RUN npm rebuild sharp
 
 # --- builder ------------------------------------------------------------
 FROM node:20-alpine AS builder
