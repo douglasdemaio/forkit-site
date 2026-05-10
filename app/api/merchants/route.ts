@@ -64,13 +64,31 @@ export async function POST(request: NextRequest) {
     // A wallet can own multiple merchants
 
     const body = await request.json();
-    const { name, description, addressStreet, addressCity, addressCountry, template, currency } = body;
+    const {
+      name,
+      description,
+      addressStreet,
+      addressCity,
+      addressCountry,
+      template,
+      currency,
+      vendorType,
+      pickupOnly,
+      category,
+      subcategory,
+      latitude,
+      longitude,
+    } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
         { error: "Merchant name is required" },
         { status: 400 }
       );
+    }
+
+    if (vendorType !== undefined && !["restaurant", "home_cook", "retail"].includes(vendorType)) {
+      return NextResponse.json({ error: "Invalid vendorType" }, { status: 400 });
     }
 
     // Generate slug from name
@@ -96,6 +114,12 @@ export async function POST(request: NextRequest) {
         addressCountry: addressCountry?.trim() || null,
         template: template || "classic-bistro",
         currency: currency || "USDC",
+        ...(vendorType && { vendorType }),
+        ...(pickupOnly !== undefined && { pickupOnly: Boolean(pickupOnly) }),
+        ...(category && { category }),
+        ...(subcategory && { subcategory }),
+        ...(latitude !== undefined && latitude !== null && { latitude: Number(latitude) }),
+        ...(longitude !== undefined && longitude !== null && { longitude: Number(longitude) }),
       },
     });
 

@@ -86,7 +86,29 @@ export async function PUT(
       colorSecondary,
       colorAccent,
       fontFamily,
+      vendorType,
+      pickupOnly,
+      category,
+      subcategory,
+      latitude,
+      longitude,
     } = body;
+
+    if (vendorType !== undefined && !["restaurant", "home_cook", "retail"].includes(vendorType)) {
+      return NextResponse.json({ error: "Invalid vendorType" }, { status: 400 });
+    }
+    if (latitude !== undefined && latitude !== null) {
+      const lat = Number(latitude);
+      if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+        return NextResponse.json({ error: "Invalid latitude" }, { status: 400 });
+      }
+    }
+    if (longitude !== undefined && longitude !== null) {
+      const lng = Number(longitude);
+      if (!Number.isFinite(lng) || lng < -180 || lng > 180) {
+        return NextResponse.json({ error: "Invalid longitude" }, { status: 400 });
+      }
+    }
 
     // Validate hex colors if provided
     const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
@@ -136,6 +158,12 @@ export async function PUT(
         ...(colorSecondary !== undefined && { colorSecondary: colorSecondary || null }),
         ...(colorAccent !== undefined && { colorAccent: colorAccent || null }),
         ...(fontFamily !== undefined && { fontFamily: fontFamily || null }),
+        ...(vendorType !== undefined && { vendorType }),
+        ...(pickupOnly !== undefined && { pickupOnly: Boolean(pickupOnly) }),
+        ...(category !== undefined && { category }),
+        ...(subcategory !== undefined && { subcategory }),
+        ...(latitude !== undefined && { latitude: latitude === null ? null : Number(latitude) }),
+        ...(longitude !== undefined && { longitude: longitude === null ? null : Number(longitude) }),
       },
     });
 

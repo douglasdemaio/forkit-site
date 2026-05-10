@@ -134,8 +134,68 @@ export default function DashboardPage() {
   const [editAddressStreet, setEditAddressStreet] = useState("");
   const [editAddressCity, setEditAddressCity] = useState("");
   const [editAddressCountry, setEditAddressCountry] = useState("");
+  const [editVendorType, setEditVendorType] = useState<VendorType>("restaurant");
+  const [editPickupOnly, setEditPickupOnly] = useState(false);
+  const [editPickupOnlyTouched, setEditPickupOnlyTouched] = useState(false);
+  const [editCategory, setEditCategory] = useState("Food & Beverage");
+  const [editSubcategory, setEditSubcategory] = useState("Restaurants & fast food");
+  const [editLatitude, setEditLatitude] = useState<number | null>(null);
+  const [editLongitude, setEditLongitude] = useState<number | null>(null);
+  const [editGeocodeError, setEditGeocodeError] = useState<string | null>(null);
+  const editGeocodeAbortRef = useRef<AbortController | null>(null);
+  const editGeocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsSaveError, setSettingsSaveError] = useState<string | null>(null);
+
+  function handleEditVendorTypeChange(next: VendorType) {
+    setEditVendorType(next);
+    if (next === "home_cook" && !editPickupOnlyTouched) {
+      setEditPickupOnly(true);
+    }
+  }
+
+  function triggerEditGeocode() {
+    if (editGeocodeTimerRef.current) clearTimeout(editGeocodeTimerRef.current);
+    editGeocodeTimerRef.current = setTimeout(async () => {
+      const parts = [editAddressStreet, editAddressCity, editAddressCountry]
+        .map((p) => p.trim())
+        .filter((p) => p !== "");
+      if (parts.length < 2) return;
+      const q = parts.join(", ");
+      editGeocodeAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      editGeocodeAbortRef.current = ctrl;
+      setEditGeocodeError(null);
+      try {
+        const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`, { signal: ctrl.signal });
+        if (ctrl.signal.aborted) return;
+        if (res.status === 404) {
+          setEditGeocodeError("We couldn't find that address — drop a pin manually.");
+          return;
+        }
+        if (!res.ok) {
+          setEditGeocodeError("Geocoding is busy — drop a pin manually or try again in a minute.");
+          return;
+        }
+        const data = (await res.json()) as { lat: number; lng: number };
+        if (!ctrl.signal.aborted) {
+          setEditLatitude(data.lat);
+          setEditLongitude(data.lng);
+        }
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          setEditGeocodeError("Geocoding failed — drop a pin manually.");
+        }
+      }
+    }, 600);
+  }
+
+  function handleEditPinDrag(nLat: number, nLng: number) {
+    editGeocodeAbortRef.current?.abort();
+    if (editGeocodeTimerRef.current) clearTimeout(editGeocodeTimerRef.current);
+    setEditLatitude(nLat);
+    setEditLongitude(nLng);
+  }
 
   const merchant = selectedRestaurant;
 
@@ -651,6 +711,14 @@ export default function DashboardPage() {
                       setEditAddressStreet(merchant.addressStreet || "");
                       setEditAddressCity(merchant.addressCity || "");
                       setEditAddressCountry(merchant.addressCountry || "");
+                      setEditVendorType((merchant.vendorType as VendorType) || "restaurant");
+                      setEditPickupOnly(merchant.pickupOnly ?? false);
+                      setEditPickupOnlyTouched(true);
+                      setEditCategory(merchant.category || "Food & Beverage");
+                      setEditSubcategory(merchant.subcategory || "Restaurants & fast food");
+                      setEditLatitude(merchant.latitude);
+                      setEditLongitude(merchant.longitude);
+                      setEditGeocodeError(null);
                       setSettingsSaveError(null);
                       setEditingSettings(true);
                     }}
@@ -663,6 +731,38 @@ export default function DashboardPage() {
               <h3 className="font-bold text-gray-900">{t("settings")}</h3>
               {editingSettings ? (
                 <div className="mt-3 space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-700 font-medium mb-2">Vendor type</label>
+                    <VendorTypeRadios value={editVendorType} onChange={handleEditVendorTypeChange} />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 font-medium mb-2">Category</label>
+                    <CategoryCascade
+                      category={editCategory}
+                      subcategory={editSubcategory}
+                      onChange={({ category: c, subcategory: s }) => {
+                        setEditCategory(c);
+                        setEditSubcategory(s);
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="block text-sm text-gray-700 font-medium">Pickup only</label>
+                      <p className="text-xs text-gray-400 mt-0.5">Disables delivery; customers must pick up.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setEditPickupOnly((v) => !v); setEditPickupOnlyTouched(true); }}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        editPickupOnly ? "bg-forkit-orange" : "bg-gray-200"
+                      }`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        editPickupOnly ? "translate-x-6" : "translate-x-1"
+                      }`} />
+                    </button>
+                  </div>
                   <div>
                     <label className="block text-sm text-gray-500 mb-1">{t("currency")}</label>
                     <select
@@ -763,10 +863,23 @@ export default function DashboardPage() {
                         type="text"
                         value={editAddressCountry}
                         onChange={(e) => setEditAddressCountry(e.target.value)}
+                        onBlur={triggerEditGeocode}
                         placeholder={t("countryPlaceholder")}
                         autoComplete="country-name"
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-forkit-orange/20 focus:border-forkit-orange"
                       />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 font-medium mb-2">Pickup location</label>
+                    <LocationMap lat={editLatitude} lng={editLongitude} onChange={handleEditPinDrag} />
+                    <div className="mt-2 flex items-center justify-between text-xs">
+                      <span className="text-gray-500">
+                        {editLatitude != null && editLongitude != null
+                          ? `lat ${editLatitude.toFixed(5)}, lng ${editLongitude.toFixed(5)}`
+                          : "Click on the map or fill the address fields to drop a pin."}
+                      </span>
+                      {editGeocodeError && <span className="text-red-600">{editGeocodeError}</span>}
                     </div>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -797,6 +910,12 @@ export default function DashboardPage() {
                               addressStreet: editAddressStreet || null,
                               addressCity: editAddressCity || null,
                               addressCountry: editAddressCountry || null,
+                              vendorType: editVendorType,
+                              pickupOnly: editPickupOnly,
+                              category: editCategory,
+                              subcategory: editSubcategory,
+                              latitude: editLatitude,
+                              longitude: editLongitude,
                             }),
                           });
                           if (res.ok) {
