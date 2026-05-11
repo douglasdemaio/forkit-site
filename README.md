@@ -1,39 +1,47 @@
-# ForkIt Site — Restaurant Builder + Ordering Platform on Solana
+# ForkIt Site — Merchant Storefront + On-Chain Ordering on Solana
 
-A **template-style restaurant website builder** with integrated ordering and **Solana payments**. Restaurant owners build beautiful pages in minutes. Customers order food and pay with USDC/EURC through on-chain escrow — with built-in bill splitting.
+A **template-style storefront builder** for any local merchant — restaurants, home kitchens, bakeries, bookshops, florists, hardware stores — with integrated ordering and **Solana payments**. Merchants build a branded page in minutes, place themselves on the map, and start taking USDC/EURC orders through on-chain escrow with built-in bill splitting.
 
-**Part of the ForkIt Protocol** — decentralized food delivery on Solana.
+**Part of the ForkIt Protocol** — an open protocol for local commerce on Solana. Customers, merchants, and drivers transact directly; the protocol takes 0.02%, not 30%.
 
 ---
 
 ## What Is This?
 
-ForkIt Site lets anyone create a professional restaurant page and start accepting crypto orders:
+ForkIt Site is the **merchant-facing** half of the platform. Anyone can sign in with a Solana wallet, pick a vendor type, drop themselves on a map, and start accepting crypto orders.
 
-### For Restaurant Owners
+### For Merchants
 
 1. **Connect** your Solana wallet (Phantom, Solflare)
-2. **Choose a template** — Classic Bistro, Modern Minimal, Street Food, or Fine Dining
-3. **Customize your brand** — pick 3 hex colors (primary, secondary, accent) and choose from 26 open-source Google Fonts; 8 preset palettes provided
-4. **Upload** food photos, set menu items with names, descriptions, and prices (USDC/EURC)
-5. **Reorder menu items** — drag-and-drop to arrange your menu in any order you like
-6. **Run multiple restaurants** from a single wallet — independent menus, branding, and publish state per location
-7. **Publish** your page — it's live and accepting orders instantly
-8. **Manage orders** — see incoming orders in real-time (15-second polling with notification banner)
-9. **Close out orders with verification** — ask the customer for their pickup/delivery code and enter it to mark the order as delivered
-10. **Separate payout wallet** (optional) — direct earnings to a different address from your login wallet; every change is recorded on-chain for auditability
+2. **Pick your vendor type** — `restaurant`, `home_cook`, or `retail` — and the storefront tunes its defaults accordingly (e.g. home kitchens default to pickup-only)
+3. **Pick your category & subcategory** — seven top-level groups (Food & Beverage, Retail & Shopping, Health & Wellness, Home & Living, Beauty & Personal Care, Specialty/Niche, Business & Professional) with subcategory cascade
+4. **Place yourself on the map** — draggable pin with reverse-geocode + forward-geocode (Nominatim) so customers can find you
+5. **Choose a template** — Classic Bistro, Modern Minimal, Street Food, Fine Dining, or fully Custom
+6. **Customize your brand** — pick 3 hex colors (primary / secondary / accent) and choose from 26 open-source Google Fonts; 8 preset palettes provided
+7. **Upload** product photos, set menu/catalog items with names, descriptions, and prices in your accepted token (USDC, EURC, PYUSD)
+8. **Drag-to-reorder** menu items — arrange your catalog in any order; saves automatically
+9. **Run multiple storefronts** from a single wallet — independent menus, branding, location, and publish state per location
+10. **Publish** your page — live and accepting orders instantly at `/merchants/<slug>`
+11. **Manage orders** — incoming-order dashboard with 15-second polling and a notification banner; toggle **auto-acknowledge** to skip the manual accept step
+12. **Open delivery to driver bidding, or self-deliver** — let the driver pool bid down the delivery fee and pick the lowest, or fulfill in-house
+13. **Close out with code verification** — scan the customer's QR or enter their code by hand to release escrow
+14. **Separate payout wallet** (optional) — direct earnings to a different address from your login wallet; every change is recorded on-chain via the `PayoutWalletChanged` event for auditability
 
 ### For Customers
 
-1. **Browse** restaurant pages
-2. **Add items** to your shopping cart
-3. **Checkout** via the ForkIt smart contract (escrow-based payment on Solana)
-4. **Choose Delivery or Pickup** — toggle at checkout; pickup waives the delivery fee
-5. **Enter delivery address** — separate fields for Street, Apt, City, ZIP, State/Province, and Country; country auto-detected from your timezone (fully independent of UI language)
-5. **Split orders** with friends — share a link and up to 10 people can contribute (friends can chip in even after funding to reimburse the original payer)
-6. **Schedule delivery/pickup** — choose a preferred time or order for ASAP
-7. **Track** your order status in real-time
-8. **Receive a verification code** — show your delivery/pickup code to the restaurant to close out the order
+1. **Browse nearby merchants** — restaurants, home cooks, bookshops, florists, and anything else local that takes orders
+2. **Add items** to your cart
+3. **Checkout** through the ForkIt smart contract (Solana escrow)
+4. **Delivery or Pickup** — toggle at checkout; pickup waives the delivery fee
+5. **Enter delivery address** — separate fields for Street, Apt, City, ZIP, State/Province, Country; country auto-detected from your timezone (independent of UI language)
+6. **Split orders with friends** — share a link and up to 10 people can contribute; friends can even chip in after the order is funded to reimburse the original payer
+7. **Schedule** the delivery or pickup time, or leave it ASAP
+8. **Track** order status in real time
+9. **Receive a verification code** — show your delivery/pickup code to the merchant to close out the order
+
+### For Drivers (via the [forkme](https://github.com/douglasdemaio/forkme) mobile app)
+
+Drivers see funded orders in `Preparing` status, **bid an amount** they'd accept for the delivery, and the merchant picks the winner. The losing bidders are released and the customer is refunded the difference between their initial delivery fee deposit and the accepted bid via the on-chain `update_delivery_amount` instruction.
 
 ---
 
@@ -49,28 +57,31 @@ ForkIt Site lets anyone create a professional restaurant page and start acceptin
 | Wallet | **Solana Wallet Adapter** (Phantom, Solflare) |
 | Auth | Nonce-signing → **JWT** (wallet-based, no passwords) |
 | State | **Zustand** (cart) |
+| Maps | **MapLibre GL** + Nominatim proxy at `/api/geocode` |
+| Images | **sharp** for server-side resize (native binary rebuilt at container build) |
 | i18n | **next-intl** (10 languages, RTL support) |
-| Deployment | **Vercel** |
+| Deployment | **Vercel** (also Docker / Podman / Kubernetes) |
 
 ---
 
 ## Smart Contract Details
 
-ForkIt uses three on-chain programs:
+ForkIt uses three on-chain programs (see [forkit](https://github.com/douglasdemaio/forkit) for the Anchor source):
 
-| Program | ID |
+| Program | ID (devnet) |
 |---------|----|
 | Escrow | `FNZXjjq2oceq15jVsnHT8gYJQUZ9NLCXCpYak2pXsqGB` |
 | Registry | `2riHMdVB6eFgeQjqvnqq2Mrpqea7hrMv5ZNRh7gZgB9S` |
 | Loyalty | `6DaFmi7haz2Ci9sXaHRviz3biwbmTwipvwc9L9cdeugR` |
 
 - **Protocol fee:** 0.02% (2 basis points)
-- **Customer deposit:** None — escrow target is food + delivery only; post-funding contributions are proportionally reimbursed via `claim_deposit` after settlement
+- **Customer deposit:** None — escrow target is goods + delivery only; post-funding contributions are proportionally reimbursed via `claim_deposit` after settlement
+- **Driver bidding refund:** when the merchant accepts a bid lower than the initial delivery fee, the surplus is refunded to the customer via `update_delivery_amount` before pickup
 - **Delivery timeout:** 3 hours
 - **Pickup timeout:** 45 minutes
 - **Max contributors per order:** 10
 - **Treasury:** `BiP5PJuUiXPYCFx98RMCGCnRhdUVrkxSke9C6y2ZohQ9`
-- **Payout wallet changes** are recorded on-chain via the `PayoutWalletChanged` event for auditability
+- **Payout-wallet changes** are recorded on-chain via the `PayoutWalletChanged` event
 
 Token mints (devnet):
 - USDC: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
@@ -120,6 +131,9 @@ JWT_SECRET=your-jwt-secret-change-me
 # Base URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
+# CORS allow-list for the customer front-end (forkme)
+FORKME_URL=https://forkme.example.com
+
 # Database (Postgres). DIRECT_URL is the unpooled connection used by
 # `prisma db push` / `prisma migrate`; DATABASE_URL is the pooled one.
 # Both are auto-set when you attach Neon via Vercel Storage.
@@ -143,6 +157,9 @@ npx prisma studio
 
 # Generate client after schema changes
 npx prisma generate
+
+# Backfill lat/lng for legacy merchants (one-shot)
+npx tsx scripts/backfill-merchant-coords.ts
 ```
 
 ---
@@ -151,40 +168,90 @@ npx prisma generate
 
 ```
 forkit-site/
-├── app/                          # Next.js App Router pages
-│   ├── [locale]/                 # Locale-prefixed routes (de, es, fr, ja, ...)
-│   │   ├── page.tsx              # Landing page
-│   │   ├── dashboard/            # Owner dashboard (menu, template, orders)
-│   │   ├── kiosk/[orderId]/      # Restaurant kiosk QR display for drivers
-│   │   ├── restaurants/          # Public restaurant browsing
-│   │   ├── order/                # Cart + order tracking
-│   │   └── connect/              # Wallet connection page
-│   └── api/                      # API routes (locale-agnostic)
-│       ├── auth/                 # Wallet auth (nonce + verify)
-│       ├── restaurants/          # CRUD restaurants + menus
-│       │   └── [id]/menu/reorder # Drag-and-drop persistence
+├── app/                              # Next.js App Router
+│   ├── [locale]/                     # Locale-prefixed routes (de, es, fr, ja, ...)
+│   │   ├── page.tsx                  # Landing page
+│   │   ├── dashboard/                # Merchant dashboard
+│   │   │   ├── page.tsx              #   • Settings, branding, vendor type, map pin
+│   │   │   ├── menu/                 #   • Menu editor (drag-to-reorder)
+│   │   │   ├── orders/               #   • Incoming-order queue + bid review
+│   │   │   └── template/             #   • Template + custom branding
+│   │   ├── kiosk/[orderId]/          # Full-screen QR display for driver pickup
+│   │   ├── merchants/                # Public merchant browsing
+│   │   │   └── [slug]/menu/          #   • Storefront + menu
+│   │   ├── restaurants/[slug]/       # Permanent alias → /merchants/[slug]
+│   │   ├── order/                    # Cart + order tracking
+│   │   ├── delivery/                 # Driver landing + bidding UI
+│   │   └── connect/                  # Wallet connection
+│   └── api/                          # API routes (locale-agnostic)
+│       ├── auth/{nonce,verify}       # Wallet nonce + JWT verify
+│       ├── geocode/                  # Nominatim proxy (server-side cache)
+│       ├── merchants/                # CRUD merchants + menus
+│       │   ├── mine/                 #   • Merchants owned by the signed-in wallet
+│       │   └── [id]/menu/reorder/    #   • Drag-and-drop persistence
 │       ├── orders/
-│       │   ├── [id]/contribute       # Record on-chain contributions
-│       │   ├── [id]/funding          # Funding progress
-│       │   ├── [id]/receipt          # Settlement receipt (post-Settled)
-│       │   ├── [id]/scan-confirm     # Public kiosk QR scan endpoint
-│       │   ├── [id]/share            # Generate contribution share link
-│       │   ├── [id]/status           # Status transitions (mobile app)
-│       │   ├── [id]/verify           # Web dashboard code verification
-│       │   ├── [id]/verify-delivery  # Customer confirms Code B → Settled
-│       │   ├── [id]/verify-pickup    # Driver verifies Code A → PickedUp
-│       │   └── share/[shareLink]     # Resolve share link to order
-│       └── upload/               # Image upload
-├── components/                   # React components (incl. language-switcher, sortable-menu-item)
-├── hooks/                        # Custom hooks (wallet, escrow, cart, orders)
-├── lib/                          # Utilities (constants, db, auth, types, templates, fonts)
-├── messages/                     # i18n translation JSON files (en, de, es, fr, ja, zh, pt, ko, ar, tr)
-├── i18n.ts                       # next-intl configuration
-├── middleware.ts                 # Locale routing middleware
-├── store/                        # Zustand state management
-├── prisma/                       # Database schema
-└── public/                       # Static assets + uploads
+│       │   ├── available/            #   • Drivers: open orders accepting bids
+│       │   └── [id]/
+│       │       ├── bids/             #     • Driver bidding (POST + GET)
+│       │       │   └── [bidId]/accept #     • Merchant accepts a bid
+│       │       ├── contribute/       #     • Record on-chain contributions
+│       │       ├── funding/          #     • Funding progress
+│       │       ├── rate-driver/      #     • Post-delivery driver rating
+│       │       ├── receipt/          #     • Settlement receipt (post-Settled)
+│       │       ├── scan-confirm/     #     • Public kiosk QR scan endpoint
+│       │       ├── share/            #     • Generate contribution share link
+│       │       ├── status/           #     • Status transitions (mobile app)
+│       │       ├── verify/           #     • Web dashboard code verification
+│       │       ├── verify-delivery/  #     • Customer confirms Code B → Settled
+│       │       └── verify-pickup/    #     • Driver verifies Code A → PickedUp
+│       ├── drivers/[wallet]/         # Driver profile + rating
+│       ├── profile/customer/         # Customer profile
+│       ├── upload/ + uploads/        # Image upload + serve (Blob on Vercel, disk locally)
+│       └── debug/env/                # Build-time env dump (dev only)
+├── components/                       # React components
+│   ├── merchant-label.tsx            #   • "Restaurant" / "Home kitchen" / "Shop" pill
+│   ├── sortable-menu-item.tsx        #   • @dnd-kit menu reordering
+│   ├── language-switcher.tsx
+│   ├── wallet-button.tsx + wallet-provider.tsx
+│   ├── cart.tsx + funding-bar.tsx + order-tracker.tsx
+│   ├── qr-scanner.tsx                #   • Kiosk + dashboard code verification
+│   └── dashboard/                    #   • Map pin editor, taxonomy cascade, etc.
+├── hooks/                            # Custom hooks (wallet, escrow, cart, orders)
+├── lib/
+│   ├── taxonomy.ts                   #   • VENDOR_TYPES + VENDOR_CATEGORIES cascade
+│   ├── templates.ts                  #   • Template definitions
+│   ├── fonts.ts                      #   • 26 Google Font options
+│   ├── auth.ts + db.ts + types.ts
+├── messages/                         # i18n JSON (en, de, es, fr, ja, zh, pt, ko, ar, tr)
+├── i18n.ts                           # next-intl configuration
+├── middleware.ts                     # Locale routing middleware
+├── store/                            # Zustand state
+├── prisma/                           # Database schema (Merchant, MenuItem, Order, DriverBid, …)
+├── scripts/                          # backfill-merchant-coords.ts, migrations/
+├── k8s/                              # Kubernetes manifests
+├── mcp-server/                       # Rust MCP server (separate OCI pipeline)
+├── compose.yaml                      # Docker / Podman compose
+├── Dockerfile + Containerfile        # Identical multi-stage build (Docker / Podman)
+└── public/                           # Static assets + uploads
 ```
+
+---
+
+## Data Model (high level)
+
+The Prisma schema centers on a single `Merchant` model that replaces the previous `Restaurant` model. Key fields:
+
+| Field | Notes |
+|---|---|
+| `vendorType` | `restaurant` \| `home_cook` \| `retail` (defaults to `restaurant`) |
+| `category` + `subcategory` | Cascading taxonomy, validated against `lib/taxonomy.ts` |
+| `latitude` + `longitude` | Set via the dashboard map pin (drag, or geocode an address) |
+| `addressStreet` / `addressCity` / `addressCountry` | Optional, used for the geocode-from-address flow |
+| `pickupOnly`, `selfDelivery`, `autoAcknowledge` | Operational flags |
+| `payoutWallet` | Optional separate payout address (recorded on-chain) |
+| `colorPrimary` / `colorSecondary` / `colorAccent` / `fontFamily` | Custom branding |
+
+Orders have a `DriverBid` child table (`amount`, `status`) and a `DeliveryRating` table that captures post-delivery ratings from both the merchant and the customer.
 
 ---
 
@@ -197,8 +264,8 @@ Pick the target that matches your infrastructure.
 1. Push to GitHub
 2. Import the project in [Vercel](https://vercel.com)
 3. **Attach storage** in the Vercel dashboard → *Storage*:
-   - Create a **Neon Postgres** database — this auto-populates `DATABASE_URL` and `DIRECT_URL`
-   - Create a **Blob** store — this auto-populates `BLOB_READ_WRITE_TOKEN`
+   - Create a **Neon Postgres** database — auto-populates `DATABASE_URL` and `DIRECT_URL`
+   - Create a **Blob** store — auto-populates `BLOB_READ_WRITE_TOKEN`
 4. Add the remaining env vars under *Settings → Environment Variables*:
    - `JWT_SECRET` (generate with `openssl rand -hex 32`)
    - `NEXT_PUBLIC_SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_NETWORK`
@@ -219,9 +286,9 @@ The included GitHub Actions workflow automates deployment on push to `main`.
 
 ### 2. Docker / Podman
 
-A multi-stage `Dockerfile` (with identical `Containerfile`) produces a small, non-root Next.js image. Prisma schema, client, and query engine are bundled into the final image so migrations can run on startup.
+A multi-stage `Dockerfile` (with identical `Containerfile`) produces a small, non-root Next.js image. Prisma schema, client, and query engine are bundled into the final image so migrations can run on startup, and `sharp`'s native binary is rebuilt in the build stage so server-side image resize works on Alpine.
 
-> **Note:** the schema is now PostgreSQL-only. The compose / k8s manifests below were originally written for SQLite — point `DATABASE_URL` at a Postgres instance before bringing the stack up, and ignore the SQLite-specific volume/replicas notes.
+The schema is **PostgreSQL-only** — point `DATABASE_URL` at a Postgres instance before bringing the stack up.
 
 ```bash
 # Build
@@ -231,10 +298,11 @@ docker build -t forkit-site:latest \
   --build-arg NEXT_PUBLIC_BASE_URL=https://your-host.example \
   .
 
-# Run — SQLite at /data (volume) and uploads at /app/public/uploads (volume)
+# Run — point DATABASE_URL at any Postgres, mount uploads volume
 docker run --rm -p 3000:3000 \
   -e JWT_SECRET=$(openssl rand -hex 32) \
-  -v forkit-db:/data \
+  -e DATABASE_URL=postgresql://user:pass@host/db?sslmode=require \
+  -e DIRECT_URL=postgresql://user:pass@host/db?sslmode=require \
   -v forkit-uploads:/app/public/uploads \
   forkit-site:latest
 ```
@@ -243,11 +311,15 @@ Podman works identically — swap `docker` for `podman`.
 
 #### docker compose / podman compose
 
-The top-level `compose.yaml` wires up forkit-site with named volumes for the database and uploads. It also includes the Rust `forkme-mcp` server behind the `mcp` profile so you can bring the whole stack up with one command.
+`compose.yaml` wires up forkit-site and includes the Rust `forkme-mcp` server behind the `mcp` profile so you can bring the whole stack up with one command.
 
 ```bash
-# Set at minimum JWT_SECRET in a local .env next to compose.yaml
-echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
+# At minimum, JWT_SECRET + DATABASE_URL in a local .env next to compose.yaml
+cat > .env <<EOF
+JWT_SECRET=$(openssl rand -hex 32)
+DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
+DIRECT_URL=postgresql://user:pass@host/db?sslmode=require
+EOF
 
 # forkit-site only
 docker compose up --build
@@ -256,21 +328,21 @@ docker compose up --build
 docker compose --profile mcp up --build
 ```
 
-The default image uses SQLite inside a volume so it works out of the box. For production, set `DATABASE_URL` to a Postgres URL and change `prisma/schema.prisma` `provider` to `postgresql`.
-
 ### 3. Kubernetes
 
-Manifests in `k8s/` cover Namespace, ConfigMap, Secret (template), PVCs for DB + uploads, Deployment, Services (ClusterIP + LoadBalancer), and an optional Ingress. Everything lives in the shared `forkit` namespace so it can sit next to `forkme` and `forkme-mcp`.
+Manifests in `k8s/` cover Namespace, ConfigMap, Secret (template), PVC for uploads, Deployment, Services (ClusterIP + LoadBalancer), and an optional Ingress. Everything lives in the shared `forkit` namespace so it can sit next to `forkme` and `forkme-mcp`.
 
 ```bash
 # Build and push to your registry
 docker build -t registry.example.com/forkit-site:v1.0.0 .
 docker push registry.example.com/forkit-site:v1.0.0
 
-# Create the JWT secret (do not commit the value)
+# Create the JWT secret + DB URL (do not commit values)
 kubectl create namespace forkit
 kubectl create secret generic forkit-site-secret \
   --from-literal=JWT_SECRET=$(openssl rand -hex 32) \
+  --from-literal=DATABASE_URL=postgresql://user:pass@host/db?sslmode=require \
+  --from-literal=DIRECT_URL=postgresql://user:pass@host/db?sslmode=require \
   -n forkit
 
 # Apply the bundle
@@ -279,8 +351,8 @@ kubectl apply -k k8s/
 
 Notes:
 
-- **Replicas** — the bundled Deployment pins `replicas: 1` with `strategy: Recreate` because SQLite is single-writer. Scale out only after swapping to Postgres.
-- **Persistent storage** — `forkit-site-db` (RWO, 1 Gi) for SQLite, `forkit-site-uploads` (RWX, 10 Gi) for user-uploaded images. On managed clusters without RWX, point uploads at S3-compatible object storage instead.
+- **Replicas** — Next.js is stateless and the database is external Postgres, so the Deployment can be scaled horizontally. Uploads on a ReadWriteMany volume (or S3-compatible Blob) keep replicas consistent.
+- **Persistent storage** — `forkit-site-uploads` (RWX, 10 Gi) for user-uploaded images. On managed clusters without RWX, point uploads at S3-compatible object storage instead.
 - **Ingress** — nginx-ingress example; uncomment `ingress.yaml` in `kustomization.yaml` and set your host + TLS secret.
 
 ### 4. MCP Server (Rust, optional)
@@ -316,7 +388,7 @@ ForkIt supports **10 languages** out of the box via [next-intl](https://next-int
 - Arabic has full RTL layout support
 - Translation files live in `messages/` as JSON, organized by page/component
 - A language switcher dropdown is available in the navbar
-- Only UI chrome is translated — restaurant-created content (menu items, descriptions) stays in the owner's language
+- Only UI chrome is translated — merchant-created content (menu/catalog items, descriptions) stays in the owner's language
 
 To add a new language:
 1. Create `messages/<code>.json` with all translation keys
@@ -326,18 +398,19 @@ To add a new language:
 
 ## Templates & Custom Branding
 
-Four built-in templates, each providing a different CSS theme/layout:
+Five storefront options, each providing a different theme/layout:
 
 | Template | Vibe |
 |----------|------|
-| **Classic Bistro** | Warm, earthy tones. Family restaurants, trattorias |
-| **Modern Minimal** | Clean white space. Cafés, health food, juice bars |
-| **Street Food** | Vibrant, colorful. Food trucks, taco joints |
-| **Fine Dining** | Dark, elegant. Upscale restaurants, wine bars |
+| **Classic Bistro** | Warm, earthy tones. Family eateries, trattorias, neighborhood bakers |
+| **Modern Minimal** | Clean white space. Cafés, juice bars, indie boutiques |
+| **Street Food** | Vibrant, colorful. Food trucks, taco joints, market stalls |
+| **Fine Dining** | Dark, elegant. Upscale restaurants, wine bars, florists |
+| **Custom** | Bring-your-own — pick every color and font yourself |
 
 ### Custom Branding
 
-Restaurant owners can override template defaults with custom branding:
+Merchants can override template defaults:
 
 - **3 custom hex colors** — Primary (buttons/headings), Secondary (backgrounds), Accent (text/details)
 - **8 curated palette presets** — Warm Classic, Forest & Cream, Ocean Blue, Rose Gold, Minimal Mono, Sunset, Matcha, Midnight Wine
@@ -348,7 +421,7 @@ Restaurant owners can override template defaults with custom branding:
   - **Handwriting**: Dancing Script, Caveat, Kalam, Satisfy
   - **Monospace**: JetBrains Mono, Space Mono
 - **Live preview** updates as you pick colors and fonts
-- **Drag-to-reorder menu items** — arrange your menu in any order; changes save automatically
+- **Drag-to-reorder menu items** — arrange your catalog in any order; saves automatically
 
 All fonts are licensed under SIL Open Font License (OFL) or Apache 2.0.
 
@@ -358,21 +431,22 @@ All fonts are licensed under SIL Open Font License (OFL) or Apache 2.0.
 
 | Repo | Description |
 |------|-------------|
-| [forkit](https://github.com/douglasdemaio/forkit) | Protocol — Solana programs (escrow, registry, loyalty), Express backend, test suite |
-| [forkme](https://github.com/douglasdemaio/forkme) | Mobile companion — React Native (Expo), iOS/Android customer + seeker apps |
+| [forkit](https://github.com/douglasdemaio/forkit) | Protocol — Solana programs (escrow, registry, loyalty, token), Express backend, test suite |
+| [forkme](https://github.com/douglasdemaio/forkme) | Mobile companion — React Native (Expo), iOS/Android customer + driver apps |
+| [forkit-site (zola-site branch)](https://github.com/douglasdemaio/forkit-site/tree/zola-site) | Marketing landing page (Zola static site, served from GitHub Pages) |
 
 ---
 
 ## Order Status Values
 
-Order statuses mirror the on-chain `OrderStatus` enum exactly (used by both forkit-site and the forkme mobile app):
+Order statuses mirror the on-chain `OrderStatus` enum exactly (shared between forkit-site, the forkme mobile app, and the Anchor program):
 
 | Status | Description |
 |--------|-------------|
 | `Created` | Order placed, awaiting funding |
-| `Funded` | Escrow fully funded, ready for restaurant |
-| `Preparing` | Restaurant accepted, preparing food |
-| `ReadyForPickup` | Food ready, waiting for driver |
+| `Funded` | Escrow fully funded, ready for the merchant |
+| `Preparing` | Merchant accepted; preparing the order; drivers may bid |
+| `ReadyForPickup` | Order ready; driver assigned (bid accepted) |
 | `PickedUp` | Driver confirmed pickup (Code A verified) |
 | `Delivered` | Delivery confirmed (Code B verified) |
 | `Settled` | Funds distributed atomically on-chain |
@@ -380,30 +454,27 @@ Order statuses mirror the on-chain `OrderStatus` enum exactly (used by both fork
 | `Cancelled` | Cancelled within 60-second window |
 | `Refunded` | Timeout or dispute resolved as refund |
 
-## Feature Highlights (recent additions)
+---
 
-- 🎨 **Custom branding** — 3 hex colors + Google Fonts with live preview
+## Feature Highlights
+
+- 🏪 **Vendor-aware onboarding** — restaurant / home_cook / retail tunes defaults (e.g. home kitchens default to pickup-only)
+- 🗂 **Category cascade** — seven top-level groups with subcategories, validated against `lib/taxonomy.ts`
+- 📍 **Draggable map pin** — MapLibre + Nominatim geocode (forward from address, reverse from drag); coords persisted on `Merchant.latitude/longitude`
+- 🚗 **Driver bidding** — drivers bid an amount; merchant picks the lowest; on-chain `update_delivery_amount` refunds the customer the difference
+- 🎨 **Custom branding** — 3 hex colors + 26 Google Fonts with live preview
 - ☰ **Drag-and-drop menu reordering** — powered by @dnd-kit
-- 🔐 **Order code verification** — restaurant closes out orders via QR scan or manual code entry
-- 🏪 **Multi-restaurant support** — run multiple locations from one wallet
-- 📍 **Delivery address field** at checkout
+- 🔐 **Order code verification** — merchant closes out orders via QR scan or manual code entry
+- 🏬 **Multi-storefront support** — run multiple locations from one wallet, independent branding/menu/pin per location
+- 📍 **Expanded address form** — separate Street, Apt, City, ZIP, State/Province, Country fields; country auto-populated from timezone (independent of UI language)
 - 💎 **Separate payout wallet** — on-chain audit via `PayoutWalletChanged` event
 - ⚡ **Post-funding contributions** — friends can chip in to reimburse the original payer after the order is funded
 - ⏰ **Scheduled orders** — set a preferred delivery or pickup time, or leave blank for ASAP
 - 🌍 **10 languages** with full RTL for Arabic
+- 🖥 **Kiosk mode** — full-screen QR display for drivers to scan at pickup
+- 🚦 **Pickup vs Delivery toggle** — waives delivery fee when customer selects pickup
+- 🖼 **Server-side image resize** via `sharp` (native binary rebuilt in the container build stage)
 - 🔗 **Social preview** — og:image and twitter:card metadata for proper link previews
-- 📱 **Mobile API alignment** — all API routes aligned with forkme mobile app (status names, field names, response shapes)
-- 🖥 **Restaurant kiosk mode** — full-screen QR display for drivers to scan at pickup
-- 🚗 **Pickup vs Delivery toggle** — waives delivery fee when customer selects pickup; address fields hidden
-- 📍 **Expanded address form** — separate Street, Apt, City, ZIP, State/Province, Country fields; country auto-populated from timezone (independent of UI language)
-
-### Bug Fixes
-
-| Issue | Fix |
-|---|---|
-| `order.totalAmount` undefined crash on order page | Field renamed `foodTotal` in API alignment commit; updated `order/[id]/page.tsx` |
-| Solana payment broken — `new PublicKey("")` throws | `order.restaurant.wallet` → `order.restaurant.walletAddress` in `cart/page.tsx` |
-| React hydration mismatch — `<i>` inside `<button>` | `WalletMultiButton` wrapped in `next/dynamic` with `ssr: false` (`components/wallet-button.tsx`) |
 
 ---
 
@@ -411,9 +482,10 @@ Order statuses mirror the on-chain `OrderStatus` enum exactly (used by both fork
 
 These features are referenced in UI copy or have partial on-chain stubs but are **not yet fully implemented**:
 
-- **Loyalty tier discounts** (Bronze → Platinum, 5–20% fee reduction) — a contract stub exists in the Loyalty program, but tier logic and the `$FORK` token are pending
+- **Loyalty tier discounts** (Bronze → Platinum, 5–20% fee reduction) — contract stub in the Loyalty program; tier logic + the `$FORKIT` token are pending
 - **AI-routed delivery bonus points** (+50%) — referenced in UI copy; no routing system is implemented yet
 - **Surge pricing UI** — the `set_surge_pricing` instruction exists on-chain, but no admin UI is included in this repo yet
+- **Age-restricted goods** (alcohol, tobacco, cannabis, prescription pharmacy) — out of scope pending a future compliance spec
 
 ---
 
