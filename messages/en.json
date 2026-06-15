@@ -160,7 +160,6 @@
     "noOrders": "No deliveries available",
     "noOrdersDesc": "Check back soon — new delivery requests will appear here.",
     "authRequired": "Authentication required",
-    "merchant": "Merchant",
     "deliverTo": "Deliver to",
     "deliveryFee": "Delivery fee",
     "items": "Items",
