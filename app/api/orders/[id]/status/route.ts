@@ -5,8 +5,7 @@ import { getWalletFromRequest } from "@/lib/auth";
 const VALID_TRANSITIONS: Record<string, string[]> = {
   Created:        ["Cancelled"],
   Funded:         ["Preparing", "Cancelled"],
-  Preparing:      ["DriverAssigned", "ReadyForPickup"],
-  DriverAssigned: ["ReadyForPickup"],
+  Preparing:      ["ReadyForPickup"],
   ReadyForPickup: ["PickedUp"],
   PickedUp:       ["Delivered"],
   Delivered:      ["Settled"],

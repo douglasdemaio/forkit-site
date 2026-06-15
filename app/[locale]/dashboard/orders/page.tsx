@@ -32,7 +32,6 @@ const statusColors: Record<OrderStatus, string> = {
   Created:        "bg-yellow-100 text-yellow-800",
   Funded:         "bg-blue-100 text-blue-800",
   Preparing:      "bg-purple-100 text-purple-800",
-  DriverAssigned: "bg-violet-100 text-violet-800",
   ReadyForPickup: "bg-amber-100 text-amber-800",
   PickedUp:       "bg-indigo-100 text-indigo-800",
   Delivered:      "bg-teal-100 text-teal-800",
@@ -61,7 +60,6 @@ export default function OrdersPage() {
     Created:        t("statusPending"),
     Funded:         t("statusFunded"),
     Preparing:      t("statusPreparing"),
-    DriverAssigned: t("statusDriverAssigned"),
     ReadyForPickup: t("statusReady"),
     PickedUp:       t("statusPickedUp") ?? "Picked Up",
     Delivered:      t("statusDelivered"),
@@ -75,7 +73,6 @@ export default function OrdersPage() {
     Created:        null,
     Funded:         null, // handled separately with Confirm Order UI
     Preparing:      { label: t("markReady"), next: "ReadyForPickup" },
-    DriverAssigned: { label: t("markReady"), next: "ReadyForPickup" },
     ReadyForPickup: merchantSelfDelivery ? { label: t("startDelivery"), next: "PickedUp" } : null,
     PickedUp:       merchantSelfDelivery ? { label: t("markDelivered"), next: "Delivered" } : null,
     Delivered:      null,
@@ -246,14 +243,11 @@ export default function OrdersPage() {
       // Preparing, but confirm_delivery requires PickedUp). Sign first, then
       // update DB. If the on-chain call fails, do not advance the DB.
       if (newStatus === "ReadyForPickup") {
-        const current = orders.find((o) => o.id === orderId);
-        if (current && current.status === "Preparing") {
-          try {
-            await markReadyForPickup({ orderId });
-          } catch (e) {
-            console.error("mark_ready_for_pickup failed:", e);
-            return;
-          }
+        try {
+          await markReadyForPickup({ orderId });
+        } catch (e) {
+          console.error("mark_ready_for_pickup failed:", e);
+          return;
         }
       }
       const res = await fetch(`/api/orders/${orderId}/status`, {

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "@/hooks/useWallet";
+import { useEscrow } from "@/hooks/useEscrow";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { OrderStatus } from "@/lib/types";
@@ -32,7 +33,6 @@ interface DeliveryOrder {
 
 const statusBadge: Partial<Record<OrderStatus, string>> = {
   Preparing: "bg-purple-100 text-purple-800",
-  DriverAssigned: "bg-violet-100 text-violet-800",
   ReadyForPickup: "bg-amber-100 text-amber-800",
   PickedUp: "bg-indigo-100 text-indigo-800",
   Delivered: "bg-teal-100 text-teal-800",
@@ -56,12 +56,14 @@ export default function DeliveryPage() {
   const { wallet, token, authenticate, getAuthHeaders, isAuthenticating, authError } =
     useWalletAuth();
   const t = useTranslations("delivery");
+  const { acceptOrder, confirmPickup } = useEscrow();
 
   const [available, setAvailable] = useState<DeliveryOrder[]>([]);
   const [mine, setMine] = useState<DeliveryOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [bidding, setBidding] = useState<string | null>(null);
+  const [accepting, setAccepting] = useState<string | null>(null);
   const [verifying, setVerifying] = useState<string | null>(null);
   const [codeInput, setCodeInput] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +127,21 @@ export default function DeliveryPage() {
     }
   };
 
+  const handleAcceptOrder = async (orderId: string) => {
+    setAccepting(orderId);
+    setError(null);
+    setNotice(null);
+    try {
+      const { signature } = await acceptOrder({ orderId });
+      setNotice(`Order accepted on-chain (${signature.slice(0, 8)}…). Merchant can now mark it ready.`);
+      await fetchOrders();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to accept order on-chain");
+    } finally {
+      setAccepting(null);
+    }
+  };
+
   const verifyCode = async (orderId: string, kind: "pickup" | "delivery") => {
     const code = codeInput[orderId]?.trim();
     if (!code) {
@@ -135,6 +152,10 @@ export default function DeliveryPage() {
     setError(null);
     setNotice(null);
     try {
+      // For pickup, advance the on-chain state machine first
+      if (kind === "pickup") {
+        await confirmPickup({ orderId, codeA: code });
+      }
       const res = await fetch(`/api/orders/${orderId}/verify-${kind}`, {
         method: "POST",
         headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
@@ -324,7 +345,23 @@ export default function DeliveryPage() {
                   </div>
                 )}
 
-                {(o.status === "DriverAssigned" || o.status === "Preparing") && (
+                {o.status === "Preparing" && o.driverWallet === wallet && (
+                  <div className="pt-3 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => handleAcceptOrder(o.id)}
+                      disabled={accepting === o.id}
+                      className="w-full px-4 py-3 bg-forkit-orange text-white rounded-lg font-medium hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {accepting === o.id ? (
+                        <><span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Accepting…</>
+                      ) : (
+                        "Accept delivery"
+                      )}
+                    </button>
+                  </div>
+                )}
+                {o.status === "Preparing" && o.driverWallet !== wallet && (
                   <div className="pt-3 border-t border-gray-100 text-sm text-gray-500">
                     Waiting for the merchant to mark the order ready for pickup.
                   </div>
