@@ -70,9 +70,9 @@ ForkIt uses three on-chain programs (see [forkit](https://github.com/douglasdema
 
 | Program | ID (devnet) |
 |---------|----|
-| Escrow | `FNZXjjq2oceq15jVsnHT8gYJQUZ9NLCXCpYak2pXsqGB` |
-| Registry | `2riHMdVB6eFgeQjqvnqq2Mrpqea7hrMv5ZNRh7gZgB9S` |
-| Loyalty | `6DaFmi7haz2Ci9sXaHRviz3biwbmTwipvwc9L9cdeugR` |
+| Escrow | `CNUWqYhXPXszPuB8psqG2VSnwCXf1MWzT4Pztp4y8fgj` |
+| Registry | `EM1FgSzfS3F7cCYJWhUaqqPAK7ijZYpYRx7pzYkuyExz` |
+| Loyalty | `BnnUntqkUadZ2BsW8j675P9hJQV3aqVcmt4xG4xfeoM8` |
 
 - **Protocol fee:** 0.02% (2 basis points)
 - **Customer deposit:** None — escrow target is goods + delivery only; post-funding contributions are proportionally reimbursed via `claim_deposit` after settlement
@@ -85,7 +85,8 @@ ForkIt uses three on-chain programs (see [forkit](https://github.com/douglasdema
 
 Token mints (devnet):
 - USDC: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
-- EURC: `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM`
+- PYUSD: `CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM`
+- EURC: `HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr` (mainnet only; no devnet equivalent)
 
 ---
 
@@ -125,15 +126,19 @@ Open http://localhost:3000
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
 NEXT_PUBLIC_SOLANA_NETWORK=devnet
 
+# Smart contract program IDs (devnet)
+NEXT_PUBLIC_ESCROW_PROGRAM_ID=CNUWqYhXPXszPuB8psqG2VSnwCXf1MWzT4Pztp4y8fgj
+NEXT_PUBLIC_REGISTRY_PROGRAM_ID=EM1FgSzfS3F7cCYJWhUaqqPAK7ijZYpYRx7pzYkuyExz
+NEXT_PUBLIC_LOYALTY_PROGRAM_ID=BnnUntqkUadZ2BsW8j675P9hJQV3aqVcmt4xG4xfeoM8
+
 # JWT secret for wallet auth
 JWT_SECRET=your-jwt-secret-change-me
 
 # Base URL
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
-# CORS allow-list for the customer front-end (forkme)
-FORKME_URL=https://forkme.example.com
-
+# CORS allow-list for the customer front-end (forkme, port 3001)
+FORKME_URL=http://localhost:3001
 # Database (Postgres). DIRECT_URL is the unpooled connection used by
 # `prisma db push` / `prisma migrate`; DATABASE_URL is the pooled one.
 # Both are auto-set when you attach Neon via Vercel Storage.
