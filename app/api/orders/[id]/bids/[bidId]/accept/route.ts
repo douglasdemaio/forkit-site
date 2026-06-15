@@ -174,7 +174,7 @@ export async function POST(
     await prisma.$transaction([
       prisma.order.update({
         where: { id: params.id },
-        data: { status: "DriverAssigned", driverWallet: bid.driverWallet },
+        data: { status: "Preparing", driverWallet: bid.driverWallet },
       }),
       prisma.driverBid.update({
         where: { id: params.bidId },

@@ -93,7 +93,6 @@ export type OrderStatus =
   | "Created"
   | "Funded"
   | "Preparing"
-  | "DriverAssigned"
   | "ReadyForPickup"
   | "PickedUp"
   | "Delivered"

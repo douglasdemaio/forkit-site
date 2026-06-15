@@ -11,6 +11,7 @@ import {
 } from "@solana/web3.js";
 import {
   ESCROW_PROGRAM_ID,
+  REGISTRY_PROGRAM_ID,
   TREASURY_WALLET,
   TOKEN_DECIMALS,
   getMintForCurrency,
@@ -37,6 +38,8 @@ const CONTRIBUTE_DISCRIMINATOR            = Buffer.from([206,   3, 153, 116, 116
 const MARK_READY_FOR_PICKUP_DISCRIMINATOR = Buffer.from([136,  90, 147,   6, 135,  88,  15, 125]);
 const CONFIRM_DELIVERY_DISCRIMINATOR      = Buffer.from([ 11, 109, 227,  53, 179, 190,  88, 155]);
 const UPDATE_DELIVERY_AMOUNT_DISCRIMINATOR = Buffer.from([107, 103, 251,  81,  74, 101, 222, 210]);
+const ACCEPT_ORDER_DISCRIMINATOR          = Buffer.from([118, 157,  62,  39, 239, 234, 231, 193]);
+const CONFIRM_PICKUP_DISCRIMINATOR        = Buffer.from([ 37,   5, 149, 215,  41,  79, 248,  82]);
 
 // Convert a DB UUID string to a deterministic u64 for on-chain order_id.
 // Takes the first 8 bytes of the UUID hex (without hyphens) as a big-endian u64,
@@ -76,6 +79,14 @@ function deriveContributionPda(orderIdBuf: Buffer, contributor: PublicKey): Publ
   return PublicKey.findProgramAddressSync(
     [Buffer.from("contribution"), orderIdBuf, contributor.toBuffer()],
     ESCROW_PROGRAM_ID
+  )[0];
+}
+
+function deriveProfilePda(wallet: PublicKey): PublicKey {
+  const PROFILE_SEED = Buffer.from("profile");
+  return PublicKey.findProgramAddressSync(
+    [PROFILE_SEED, wallet.toBuffer(), Buffer.from([1])], // 1 = Driver role
+    REGISTRY_PROGRAM_ID
   )[0];
 }
 
@@ -362,5 +373,66 @@ export function useEscrow() {
     [publicKey, sendTransaction, connection]
   );
 
-  return { createOrder, contributeToOrder, markReadyForPickup, confirmDelivery, updateDeliveryAmount };
+  const acceptOrder = useCallback(
+    async (params: { orderId: string }) => {
+      if (!publicKey || !sendTransaction) throw new Error("Wallet not connected");
+
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+      const orderPda = deriveOrderPda(orderIdBuf);
+      const driverProfilePda = deriveProfilePda(publicKey);
+
+      const data = Buffer.alloc(8);
+      ACCEPT_ORDER_DISCRIMINATOR.copy(data, 0);
+
+      const ix = new TransactionInstruction({
+        keys: [
+          { pubkey: orderPda,         isSigner: false, isWritable: true },
+          { pubkey: driverProfilePda, isSigner: false, isWritable: false },
+          { pubkey: publicKey,        isSigner: true,  isWritable: false },
+        ],
+        programId: ESCROW_PROGRAM_ID,
+        data,
+      });
+
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey }).add(ix);
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+      return { signature };
+    },
+    [publicKey, sendTransaction, connection]
+  );
+
+  const confirmPickup = useCallback(
+    async (params: { orderId: string; codeA: string }) => {
+      if (!publicKey || !sendTransaction) throw new Error("Wallet not connected");
+
+      const orderIdBuf = orderIdToLeBytes(params.orderId);
+      const orderPda = deriveOrderPda(orderIdBuf);
+
+      const codeABytes = Buffer.from(params.codeA, "utf8");
+      const data = Buffer.alloc(8 + 4 + codeABytes.length);
+      CONFIRM_PICKUP_DISCRIMINATOR.copy(data, 0);
+      data.writeUInt32LE(codeABytes.length, 8);
+      codeABytes.copy(data, 12);
+
+      const ix = new TransactionInstruction({
+        keys: [
+          { pubkey: orderPda,  isSigner: false, isWritable: true },
+          { pubkey: publicKey, isSigner: true,  isWritable: false },
+        ],
+        programId: ESCROW_PROGRAM_ID,
+        data,
+      });
+
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const tx = new Transaction({ recentBlockhash: blockhash, feePayer: publicKey }).add(ix);
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+      return { signature };
+    },
+    [publicKey, sendTransaction, connection]
+  );
+
+  return { createOrder, contributeToOrder, acceptOrder, confirmPickup, markReadyForPickup, confirmDelivery, updateDeliveryAmount };
 }

@@ -123,7 +123,7 @@ export async function PUT(
 
     const STATUS_MAP: Record<string, string> = {
       created: "Created", funded: "Funded", preparing: "Preparing",
-      driverassigned: "DriverAssigned", readyforpickup: "ReadyForPickup",
+      readyforpickup: "ReadyForPickup",
       pickedup: "PickedUp", delivered: "Delivered", settled: "Settled",
       disputed: "Disputed", cancelled: "Cancelled", refunded: "Refunded",
     };
