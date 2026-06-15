@@ -17,6 +17,36 @@ export const templates: TemplateDefinition[] = [
     font: "Georgia, serif",
   },
   {
+    id: "solana-vibes",
+    name: "Solana Vibes",
+    description:
+      "Inspired by the Solana ecosystem — deep indigo meets vibrant purple-green gradients. Great for modern crypto-savvy merchants.",
+    preview: "/templates/solana-vibes.svg",
+    colors: {
+      primary: "#9945FF",
+      secondary: "#14F195",
+      background: "#0F0B24",
+      text: "#FFFFFF",
+      accent: "#19FB9B",
+    },
+    font: "Inter, system-ui, sans-serif",
+  },
+  {
+    id: "cyber-snack",
+    name: "Cyber Snack",
+    description:
+      "Neon accents on dark canvas with teal and cyan highlights. Ideal for bubble tea shops, ramen bars, and late-night spots.",
+    preview: "/templates/cyber-snack.svg",
+    colors: {
+      primary: "#00D4AA",
+      secondary: "#0D1B2A",
+      background: "#0A0A0A",
+      text: "#E0E0E0",
+      accent: "#80FFDB",
+    },
+    font: "'Space Grotesk', sans-serif",
+  },
+  {
     id: "modern-minimal",
     name: "Modern Minimal",
     description:

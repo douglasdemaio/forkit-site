@@ -167,10 +167,10 @@ export default function MerchantPage() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 activeCategory === cat
-                  ? "text-white"
-                  : "opacity-60 hover:opacity-100"
+                  ? "text-white shadow-sm"
+                  : "hover:opacity-100"
               }`}
               style={{
                 backgroundColor:
@@ -179,6 +179,7 @@ export default function MerchantPage() {
                     : colors.primary + "15",
                 color:
                   activeCategory === cat ? "#fff" : colors.primary,
+                opacity: activeCategory === cat ? 1 : 0.65,
               }}
             >
               {cat}
@@ -189,16 +190,27 @@ export default function MerchantPage() {
         {/* Delivery fee info */}
         {merchant.deliveryFee > 0 && (
           <div
-            className="mb-6 p-3 rounded-xl text-sm flex items-center gap-2"
+            className="mb-6 p-3 rounded-xl text-sm flex items-center gap-2 border"
             style={{
               backgroundColor: colors.primary + "10",
               color: colors.text,
+              borderColor: colors.primary + "20",
             }}
           >
+            <span
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ backgroundColor: colors.primary }}
+            />
             🚚 Delivery fee: {merchant.deliveryFee.toFixed(2)}{" "}
             {merchant.currency}
           </div>
         )}
+
+        {/* Accent divider */}
+        <div
+          className="w-16 h-0.5 rounded-full mb-6"
+          style={{ backgroundColor: colors.primary + "40" }}
+        />
 
         {/* Menu grid */}
         {filteredItems.length === 0 ? (
@@ -216,6 +228,8 @@ export default function MerchantPage() {
                 merchantSlug={merchant.slug}
                 merchantName={merchant.name}
                 currency={merchant.currency}
+                themePrimary={colors.primary}
+                themeAccent={colors.text}
                 expanded={expandedId === item.id}
                 onToggle={() =>
                   setExpandedId((prev) => (prev === item.id ? null : item.id))

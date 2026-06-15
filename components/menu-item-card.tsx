@@ -10,6 +10,8 @@ interface MenuItemCardProps {
   merchantSlug: string;
   merchantName: string;
   currency?: string;
+  themePrimary?: string;
+  themeAccent?: string;
   editable?: boolean;
   onEdit?: (item: MenuItemData) => void;
   onDelete?: (itemId: string) => void;
@@ -24,6 +26,8 @@ export default function MenuItemCard({
   merchantSlug,
   merchantName,
   currency = "USDC",
+  themePrimary,
+  themeAccent,
   editable = false,
   onEdit,
   onDelete,
@@ -85,7 +89,10 @@ export default function MenuItemCard({
           )}
         </div>
 
-        <span className="text-forkit-orange font-bold whitespace-nowrap text-sm">
+        <span
+          className="font-bold whitespace-nowrap text-sm"
+          style={themePrimary ? { color: themePrimary } : undefined}
+        >
           {item.price.toFixed(2)} {currency}
         </span>
 
@@ -94,7 +101,10 @@ export default function MenuItemCard({
             type="button"
             onClick={handleQuickAdd}
             aria-label={`Add ${item.name} to cart`}
-            className="w-8 h-8 rounded-full bg-forkit-orange text-white flex items-center justify-center text-lg font-bold leading-none hover:bg-orange-600 transition-colors flex-shrink-0"
+            className={`w-8 h-8 rounded-full text-white flex items-center justify-center text-lg font-bold leading-none transition-all flex-shrink-0 ${
+              themePrimary ? "" : "bg-forkit-orange hover:bg-orange-600"
+            }`}
+            style={themePrimary ? { backgroundColor: themePrimary } : undefined}
           >
             +
           </button>
@@ -141,7 +151,13 @@ export default function MenuItemCard({
             </div>
 
             {item.category && (
-              <span className="inline-block mt-3 px-2.5 py-1 bg-orange-50 text-forkit-orange text-xs font-semibold rounded-full">
+              <span
+                className="inline-block mt-3 px-2.5 py-1 text-xs font-semibold rounded-full"
+                style={themePrimary ? {
+                  backgroundColor: themePrimary + "18",
+                  color: themePrimary,
+                } : undefined}
+              >
                 {item.category}
               </span>
             )}
@@ -177,7 +193,10 @@ export default function MenuItemCard({
                   onClick={() =>
                     addItem(item, merchantId, merchantSlug, merchantName)
                   }
-                  className="w-full py-2.5 px-4 bg-forkit-orange text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
+                  className={`w-full py-2.5 px-4 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-semibold ${
+                    themePrimary ? "" : "bg-forkit-orange hover:bg-orange-600"
+                  }`}
+                  style={themePrimary ? { backgroundColor: themePrimary } : undefined}
                 >
                   {item.available
                     ? `Add to cart · ${item.price.toFixed(2)} ${currency}`

@@ -23,6 +23,19 @@
   .card {
     @apply bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow;
   }
+
+  .gradient-solana {
+    background: linear-gradient(135deg, #9945FF, #14F195);
+  }
+  .gradient-solana-subtle {
+    background: linear-gradient(135deg, rgba(153, 69, 255, 0.08), rgba(20, 241, 149, 0.08));
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, #FF6B35, #f9a825);
+  }
+  .gradient-cool {
+    background: linear-gradient(135deg, #6C63FF, #00D4AA);
+  }
 }
 
 /* Wallet adapter overrides */

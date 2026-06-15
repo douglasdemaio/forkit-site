@@ -15,6 +15,13 @@ const config: Config = {
           green: "#2ECC71",
           cream: "#FFF8F0",
         },
+        solana: {
+          purple: "#9945FF",
+          green: "#14F195",
+          dark: "#0F0B24",
+          magenta: "#E33EFF",
+          teal: "#00D4AA",
+        },
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

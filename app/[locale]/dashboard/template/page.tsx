@@ -11,14 +11,26 @@ import { FONTS, getFont } from "@/lib/fonts";
 
 // Preset palettes to help owners pick good-looking combinations
 const PALETTE_PRESETS = [
-  { name: "Warm Classic", primary: "#f9a825", secondary: "#0d1421", accent: "#ffffff" },
-  { name: "Forest & Cream", primary: "#2d5016", secondary: "#f5efe0", accent: "#c9a96e" },
-  { name: "Ocean Blue", primary: "#1e6091", secondary: "#ffffff", accent: "#f4a261" },
-  { name: "Rose Gold", primary: "#c9184a", secondary: "#fff0f3", accent: "#590d22" },
-  { name: "Minimal Mono", primary: "#111111", secondary: "#ffffff", accent: "#dddddd" },
-  { name: "Sunset", primary: "#f77f00", secondary: "#003049", accent: "#fcbf49" },
-  { name: "Matcha", primary: "#6a994e", secondary: "#f2e8cf", accent: "#386641" },
-  { name: "Midnight Wine", primary: "#8e001c", secondary: "#1a1a1a", accent: "#c99999" },
+  // Solana & Crypto
+  { name: "Solana Vibes", primary: "#9945FF", secondary: "#0F0B24", accent: "#19FB9B", category: "Solana & Crypto" },
+  { name: "Phantom Purple", primary: "#AB9FF2", secondary: "#1A153A", accent: "#FFFFFF", category: "Solana & Crypto" },
+  { name: "Solar Flare", primary: "#E33EFF", secondary: "#0D0D0D", accent: "#FFE600", category: "Solana & Crypto" },
+  { name: "Cyber Teal", primary: "#00D4AA", secondary: "#0D1B2A", accent: "#80FFDB", category: "Solana & Crypto" },
+  // Warm & Cozy
+  { name: "Warm Classic", primary: "#f9a825", secondary: "#0d1421", accent: "#ffffff", category: "Warm & Cozy" },
+  { name: "Sunset", primary: "#f77f00", secondary: "#003049", accent: "#fcbf49", category: "Warm & Cozy" },
+  { name: "Rose Gold", primary: "#c9184a", secondary: "#fff0f3", accent: "#590d22", category: "Warm & Cozy" },
+  { name: "Terracotta", primary: "#E07A5F", secondary: "#F4F1DE", accent: "#3D405B", category: "Warm & Cozy" },
+  // Nature & Earth
+  { name: "Forest & Cream", primary: "#2d5016", secondary: "#f5efe0", accent: "#c9a96e", category: "Nature & Earth" },
+  { name: "Matcha", primary: "#6a994e", secondary: "#f2e8cf", accent: "#386641", category: "Nature & Earth" },
+  { name: "Ocean Blue", primary: "#1e6091", secondary: "#ffffff", accent: "#f4a261", category: "Nature & Earth" },
+  { name: "Nordic", primary: "#4A6FA5", secondary: "#F0F4F8", accent: "#2D3748", category: "Nature & Earth" },
+  // Dark & Bold
+  { name: "Midnight Wine", primary: "#8e001c", secondary: "#1a1a1a", accent: "#c99999", category: "Dark & Bold" },
+  { name: "Minimal Mono", primary: "#111111", secondary: "#ffffff", accent: "#dddddd", category: "Dark & Bold" },
+  { name: "Obsidian", primary: "#FF6B35", secondary: "#0A0A0A", accent: "#FFFFFF", category: "Dark & Bold" },
+  { name: "Royal Night", primary: "#6C63FF", secondary: "#12102A", accent: "#F5E6FF", category: "Dark & Bold" },
 ];
 
 export default function TemplatePage() {
@@ -190,46 +202,59 @@ export default function TemplatePage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Quick palette
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {PALETTE_PRESETS.map((p) => {
-                const active =
-                  p.primary.toLowerCase() === colorPrimary.toLowerCase() &&
-                  p.secondary.toLowerCase() === colorSecondary.toLowerCase() &&
-                  p.accent.toLowerCase() === colorAccent.toLowerCase();
-                return (
-                  <button
-                    key={p.name}
-                    type="button"
-                    onClick={() => {
-                      setColorPrimary(p.primary);
-                      setColorSecondary(p.secondary);
-                      setColorAccent(p.accent);
-                    }}
-                    className={`p-3 rounded-xl border-2 text-left transition-colors ${
-                      active
-                        ? "border-forkit-orange bg-orange-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="flex gap-1 mb-2">
-                      <div
-                        className="w-6 h-6 rounded-full border border-gray-200"
-                        style={{ backgroundColor: p.primary }}
-                      />
-                      <div
-                        className="w-6 h-6 rounded-full border border-gray-200"
-                        style={{ backgroundColor: p.secondary }}
-                      />
-                      <div
-                        className="w-6 h-6 rounded-full border border-gray-200"
-                        style={{ backgroundColor: p.accent }}
-                      />
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {(() => {
+              const groups = PALETTE_PRESETS.reduce<Record<string, typeof PALETTE_PRESETS>>((acc, p) => {
+                const cat = p.category || "Other";
+                if (!acc[cat]) acc[cat] = [];
+                acc[cat].push(p);
+                return acc;
+              }, {});
+              return Object.entries(groups).map(([category, palettes]) => (
+                <div key={category} className="mb-4 last:mb-0">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{category}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {palettes.map((p) => {
+                      const active =
+                        p.primary.toLowerCase() === colorPrimary.toLowerCase() &&
+                        p.secondary.toLowerCase() === colorSecondary.toLowerCase() &&
+                        p.accent.toLowerCase() === colorAccent.toLowerCase();
+                      return (
+                        <button
+                          key={p.name}
+                          type="button"
+                          onClick={() => {
+                            setColorPrimary(p.primary);
+                            setColorSecondary(p.secondary);
+                            setColorAccent(p.accent);
+                          }}
+                          className={`p-3 rounded-xl border-2 text-left transition-all ${
+                            active
+                              ? "border-solana-purple bg-purple-50 ring-1 ring-solana-purple/20"
+                              : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                          }`}
+                        >
+                          <div className="flex gap-1 mb-2">
+                            <div
+                              className="w-6 h-6 rounded-full border border-gray-200"
+                              style={{ backgroundColor: p.primary }}
+                            />
+                            <div
+                              className="w-6 h-6 rounded-full border border-gray-200"
+                              style={{ backgroundColor: p.secondary }}
+                            />
+                            <div
+                              className="w-6 h-6 rounded-full border border-gray-200"
+                              style={{ backgroundColor: p.accent }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-gray-700">{p.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ));
+            })()}
           </div>
 
           {/* Individual color pickers */}

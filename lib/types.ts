@@ -141,7 +141,9 @@ export type TemplateName =
   | "modern-minimal"
   | "street-food"
   | "fine-dining"
-  | "custom";
+  | "custom"
+  | "solana-vibes"
+  | "cyber-snack";
 
 export interface TemplateDefinition {
   id: TemplateName;

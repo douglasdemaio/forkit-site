@@ -94,6 +94,8 @@ export default function MerchantsPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {merchants.map((merchant) => {
             const template = getTemplate(merchant.template);
+            const mPrimary = merchant.colorPrimary || template.colors.primary;
+            const mSecondary = merchant.colorSecondary || template.colors.secondary;
             return (
               <Link
                 key={merchant.id}
@@ -116,7 +118,7 @@ export default function MerchantsPage() {
                     <div
                       className="h-full flex items-center justify-center"
                       style={{
-                        background: `linear-gradient(135deg, ${template.colors.primary}40, ${template.colors.secondary}40)`,
+                        background: `linear-gradient(135deg, ${mPrimary}40, ${mSecondary}40)`,
                       }}
                     >
                       <span className="text-5xl opacity-50">🍴</span>
@@ -138,7 +140,9 @@ export default function MerchantsPage() {
 
                 {/* Info */}
                 <div className="p-5">
-                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-forkit-orange transition-colors">
+                  <h3 className="text-lg font-bold text-gray-900 transition-colors"
+                    style={{ color: merchant.colorPrimary ? mPrimary : undefined }}
+                  >
                     {merchant.name}
                   </h3>
                   {merchant.description && (
@@ -156,8 +160,8 @@ export default function MerchantsPage() {
                     <span
                       className="px-2 py-0.5 rounded-full text-[10px] font-medium"
                       style={{
-                        backgroundColor: template.colors.primary + "15",
-                        color: template.colors.primary,
+                        backgroundColor: mPrimary + "15",
+                        color: mPrimary,
                       }}
                     >
                       {template.name}
